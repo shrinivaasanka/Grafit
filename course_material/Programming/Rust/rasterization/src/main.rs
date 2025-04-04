@@ -3,6 +3,10 @@ use std::io::*;
 use std::time::*;
 use rayon::prelude::*;
 use foreach::*;
+use std::collections::HashSet;
+use std::iter::FromIterator;
+
+static mut factors: Vec<i64> = Vec::new();
 
 fn main() {
     let args: Vec<String>=env::args().collect();
@@ -10,6 +14,11 @@ fn main() {
     let range: i64=args[2].parse().unwrap();
     let rasterization: String=args[3].clone();
     factorize_multipleintegers(number_to_factorize,range,rasterization);
+    unsafe {
+        //println!("main():Factors of {number_to_factorize} are {:#?} ",factors);
+        let factorsset: HashSet<i64> = HashSet::from_iter(factors.clone());
+        println!("main():Set of Factors of {number_to_factorize} are {:#?} ",factorsset);
+    }
     stdout().flush().unwrap();
     //pariter64bits();
 }
@@ -89,14 +98,15 @@ fn rasterize_hyperbolic_arc(num_fact: i64,rasterization: String) -> i64
 }
 
 #[inline]
-fn binary_search(num_fact:i64,xl:i64,yl:i64,xr:i64,yr:i64) -> Vec<i64> 
+//fn binary_search(num_fact:i64,xl:i64,yl:i64,xr:i64,yr:i64) -> Vec<i64> 
+fn binary_search(num_fact:i64,xl:i64,yl:i64,xr:i64,yr:i64)
 {
     //println!("binary seach of rasterized hyperbolic arc bow tilesegment xy = {num_fact}: {xl},{yl},{xr},{yr}");
     let mut xl_clone = xl.clone();
     let mut yl_clone = yl.clone();
     let mut xr_clone = xr.clone();
     let mut yr_clone = yr.clone();
-    let mut factors = Vec::new();
+    //let mut factors = Vec::new();
     while xl_clone <= xr_clone
     {
         let mut midpoint = (xl_clone + xr_clone) / 2;
@@ -107,32 +117,40 @@ fn binary_search(num_fact:i64,xl:i64,yl:i64,xr:i64,yr:i64) -> Vec<i64>
         if xl_clone==xr_clone
         {
              //std::process::exit(1);
-             //println!("1.Factors of {num_fact} are {:#?} ",factors);
-             return factors;
+             unsafe {
+                //println!("1.Factors of {num_fact} are {:#?} ",factors);
+                //return factors;
+             }
         }
         if factorcandidate==num_fact
         {
              let systemtimenow = SystemTime::now();
              println!("Factor point located : {midpoint} , {yl_clone} at {:#?} nanoseconds",systemtimenow);
-             factors.push(factorcandidate);
-             println!("2.Factors of {num_fact} are {:#?} ",factors);
+             unsafe {
+                factors.push(factorcandidate);
+                //println!("2.Factors of {num_fact} are {:#?} ",factors);
+             }
         }
         if xl_clone*yl_clone==num_fact
         {
              let systemtimenow = SystemTime::now();
              println!("Factor point located : {xl_clone} , {yl_clone} at {:#?} nanoseconds",systemtimenow);
-             factors.push(xl_clone);
-             factors.push(yl_clone);
-             println!("3.Factors of {num_fact} are {:#?} ",factors);
+             unsafe {
+                factors.push(xl_clone);
+                factors.push(yl_clone);
+                //println!("3.Factors of {num_fact} are {:#?} ",factors);
+             }
         }
         if xr_clone*yr_clone==num_fact
         {
 
              let systemtimenow = SystemTime::now();
              println!("Factor point located : {xr_clone} , {yr_clone} at {:#?} nanoseconds",systemtimenow);
-             factors.push(xr_clone);
-             factors.push(yr_clone);
-             println!("4.Factors of {num_fact} are {:#?} ",factors);
+             unsafe {
+                factors.push(xr_clone);
+                factors.push(yr_clone);
+                //println!("4.Factors of {num_fact} are {:#?} ",factors);
+             }
         }
         if factorcandidate > num_fact
         {
@@ -147,6 +165,8 @@ fn binary_search(num_fact:i64,xl:i64,yl:i64,xr:i64,yr:i64) -> Vec<i64>
         //println!("===============================================================");
     }
     stdout().flush().unwrap();
-    //println!("5.Factors of {num_fact} are {:#?} ",factors);
-    return factors;
+    unsafe {
+        //println!("5.Factors of {num_fact} are {:#?} ",factors);
+        //return factors;
+    }
 }
