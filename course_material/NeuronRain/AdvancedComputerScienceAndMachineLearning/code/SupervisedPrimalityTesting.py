@@ -1,15 +1,27 @@
+import math
+import sys
+
 def test_primality(p,k,S):
     for s in S:
          if p%s==0:
             print(str(p)+" is composite")
-            return
+            return False
     print(str(p)+" is prime")
+    return True
 
 if __name__=="__main__":
-    p=391
-    #k must be closest integer greater than square root of p - at present set manually
-    k=20
-    #Set S contains all prime numbers less than k - at present set manually
-    S=[2,3,5,7,11,13,17,19]
-    for n in range(p-60,p+60):
-        test_primality(n,k,S)
+    maxp=int(sys.argv[1])
+    p=2
+    #k must be closest integer greater than square root of p - Newton-Raphson square root algorithm is invoked 
+    k=int(math.sqrt(p) + 1)
+    #Set S contains all prime numbers less than or equal to k
+    S=[2]
+    while p < maxp:
+        isprime=test_primality(p,k,S)
+        if isprime:
+            S.append(p)
+            print("List of primes S updated to:",S)
+        print("Verification of Prime Number Theorem estimate :",p/math.log(p)," and actual size of S:",len(S))
+        p+=1
+        k=int(math.sqrt(p) + 1)
+
