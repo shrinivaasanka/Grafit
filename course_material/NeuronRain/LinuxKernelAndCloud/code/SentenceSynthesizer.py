@@ -13,12 +13,11 @@ from collections import defaultdict
 import csv
 from QuestionAnswering import create_sentence_PoS_dict_from_treebank
 import itertools
-from RecursiveGlossOverlap_Classifier import RecursiveGlossOverlapGraph, RecursiveGlossOverlap_Classify
 import numpy as np
 import operator
 import WordNetPath
 
-def synthesize_chomsky_sentences(sentence_template=[], corpus="../../../../../asfer-github-code/python-src/NeuronRainApps/QuestionAnswering/words_pos.csv",treebankdatasets=["wsj_0002.mrg","wsj_0003.mrg","wsj_0004.mrg","wsj_0005.mrg"],max_templates=2,max_sentences=20,threshold_wordnet_distance=100,dictionary_template=False):
+def synthesize_chomsky_sentences(sentence_template=[], corpus="../../../../../asfer-github-code/python-src/NeuronRainApps/QuestionAnswering/words_pos.csv",treebankdatasets=["wsj_0002.mrg","wsj_0003.mrg","wsj_0004.mrg","wsj_0005.mrg"],max_templates=2,max_sentences=20,threshold_wordnet_distance=100,dictionary_template=False,perplexity_algorithm="None"):
     PennTreebankPoS={"CC":"Coordinating conjunction",
             "CD":"Cardinal number",
             "DT":"Determiner",
@@ -56,6 +55,7 @@ def synthesize_chomsky_sentences(sentence_template=[], corpus="../../../../../as
             "WP$":"Possessive wh-pronoun",
             "WRB":"Wh-adverb"}
     number_of_sentences=0
+    listofsentences=[]
     corpus_PoS2Vocabulary_dict=defaultdict(list)
     merit2sentence_dict=defaultdict(list)
     with open(corpus, newline='') as wordsposcsv:
@@ -70,60 +70,72 @@ def synthesize_chomsky_sentences(sentence_template=[], corpus="../../../../../as
         list_of_sentence_PoS_iterables=create_sentence_PoS_dict_from_treebank(datasets=treebankdatasets)
     else:
         list_of_sentence_PoS_iterables=create_sentence_PoS_dict_from_treebank(datasets=treebankdatasets,returnasarray=True)
-    for template in np.random.permutation(list_of_sentence_PoS_iterables[:max_templates]):
+    #for template in np.random.permutation(list_of_sentence_PoS_iterables[:max_templates]):
+    for template in list_of_sentence_PoS_iterables[:max_templates]:
+        templaterepr=str(template)
         print("----------------------------------------------------------------")
-        print("template :",template)
+        print("template :",templaterepr)
         print("----------------------------------------------------------------")
         if dictionary_template:
+            templatecopy=template.copy()
             for PoS in corpus_PoS2Vocabulary_dict.keys():
-                 template[PoS]=np.random.permutation(corpus_PoS2Vocabulary_dict[PoS])
-            #print("filled template:",template)
+                 templatecopy[PoS]=np.random.permutation(corpus_PoS2Vocabulary_dict[PoS]).tolist()
             templatevalues=[]
             templatekeys=[]
-            template.pop('pos_tag',None)
-            for PoS,words in template.items():
+            templatecopy.pop('pos_tag',None)
+            for PoS,words in templatecopy.items():
                 if words==[]:
-                    template[PoS]=["<blank>"]
-                if words==[]:
-                    templatevalues.append(["<blank>"])
+                    templatecopy[PoS]=["<"+PoS+">"]
+                    templatevalues.append(["<"+PoS+">"])
                 else:
                     templatevalues.append(words)
                     templatekeys.append(PoS)
+            print("filled template:",templatecopy)
             print("templatekeys (inorder traversed (flattened) PoS grammar tree dict template):",templatekeys)
             print("dict templatevalues:",templatevalues)
         else:
-            for PoS in corpus_PoS2Vocabulary_dict.keys():
-                for pos_words in template:
+            templatecopy=template.copy()
+            for pos_words in templatecopy:
+                for PoS in corpus_PoS2Vocabulary_dict.keys():
                     if pos_words[0] == PoS:
-                        pos_words[1]=np.random.permutation(corpus_PoS2Vocabulary_dict[PoS])
+                        pos_words[1]=np.random.permutation(corpus_PoS2Vocabulary_dict[PoS]).tolist()
             templatevalues=[]
             templatekeys=[]
-            for pos_words in template:
+            for pos_words in templatecopy:
                 if pos_words[1]==[]:
-                    pos_words[1]=["<blank>"]
-                if pos_words[1]==[]:
-                    templatevalues.append(["<blank>"])
+                    pos_words[1]=["<"+pos_words[0]+">"]
+                    templatevalues.append(["<"+pos_words[0]+">"])
                 else:
                     templatevalues.append(pos_words[1])
                     templatekeys.append(pos_words[0])
             print("templatekeys (inorder traversed (flattened) PoS grammar tree array template):",templatekeys)
             print("array templatevalues:",templatevalues)
         for product in itertools.product(*templatevalues):
-            wordnet_distance=find_wordnet_distance(product)
-            if wordnet_distance[0] < threshold_wordnet_distance:
+            if perplexity_algorithm=="WordNet":
+                from RecursiveGlossOverlap_Classifier import RecursiveGlossOverlapGraph, RecursiveGlossOverlap_Classify
+                wordnet_distance=find_wordnet_distance(product)
+                if wordnet_distance[0] < threshold_wordnet_distance:
+                    sentence=" ".join(product)
+                    print("Sentence ",number_of_sentences,":",sentence," for PoS template ",templaterepr)
+                    print("Part-of-speech mapping of Sentence ",number_of_sentences," printed for validation:",part_of_speech_mapping(templatekeys,product))
+                    rgograph=RecursiveGlossOverlapGraph(sentence)
+                    rgographcomplexity=RecursiveGlossOverlap_Classify(sentence)
+                    print("Sentence intrinsic merit:",rgograph[1])
+                    print("Sentence RGO Graph complexity:",rgographcomplexity)
+                    merit2sentence_dict[rgograph[1]].append(sentence)
+            else:
                 sentence=" ".join(product)
-                print("Sentence ",number_of_sentences,":",sentence," for PoS template ",templatekeys)
-                print("Part-of-speech mapping of Sentence ",number_of_sentences," printed for validation:",part_of_speech_mapping(templatekeys,product))
-                rgograph=RecursiveGlossOverlapGraph(sentence)
-                rgographcomplexity=RecursiveGlossOverlap_Classify(sentence)
-                print("Sentence intrinsic merit:",rgograph[1])
-                print("Sentence RGO Graph complexity:",rgographcomplexity)
-                merit2sentence_dict[rgograph[1]].append(sentence)
-                number_of_sentences += 1
-                if number_of_sentences >= max_sentences:
+                print("Sentence ",number_of_sentences,":",sentence," for PoS template ",templaterepr)
+                listofsentences.append(sentence)
+            number_of_sentences += 1
+            if number_of_sentences >= max_sentences:
                      break
-    sorted_by_merit = sorted(list(merit2sentence_dict.items()), key=operator.itemgetter(1), reverse=True)
-    print("Chomsky Sentences synthesized - Sorted by merit:",sorted_by_merit)
+        if perplexity_algorithm=="WordNet":
+            sorted_by_merit = sorted(list(merit2sentence_dict.items()), key=operator.itemgetter(1), reverse=True)
+            print("Chomsky Sentences synthesized - Sorted by merit:",sorted_by_merit)
+        else:
+            print("Chomsky Sentences synthesized :",listofsentences)
+
 
 def part_of_speech_mapping(pos,words):
     pos_words_dict={}
@@ -144,4 +156,7 @@ def find_wordnet_distance(sentencetoks):
     return (totaldistance, averagedistance) 
 
 if __name__=="__main__":
-    synthesize_chomsky_sentences()
+    print("------------Array Templates-------------------")
+    synthesize_chomsky_sentences(max_sentences=5,threshold_wordnet_distance=10,dictionary_template=False)
+    print("------------Dictionary Templates-------------------")
+    synthesize_chomsky_sentences(max_sentences=5,threshold_wordnet_distance=10,dictionary_template=True)
