@@ -155,3 +155,18 @@ References:
 1593.5 RUST CUDA - https://github.com/rust-gpu/rust-cuda - NVIDIA GPU computing framework in Rust - Rust Rayon crate ParallelIterator and ParallelBridge primitives in earlier Rust implementation might have to be replaced by NVIDIA CUDA primitives for optimized execution on supercomputers 
 1593.6 GPU model and NC-PRAM model comparison - The GPU Hardware and Software Model: The GPU is not a PRAM (but it’s not far off) - https://www.cs.ucdavis.edu/~amenta/f15/amenta-cuda.pdf - 5 points from slide on Wikipedia PRAM definition and GPU Truths
 1593.7 Rust - unsafe blocks - https://doc.rust-lang.org/std/keyword.unsafe.html - Unsafe blocks relax stringent type safety and are necessary to make static variables mutable.
+
+----------------------------------------------------------------------------------------------------------------------------
+1622. (THEORY and FEATURE) Computational Geometric Factorization - High Performance Computing implementation for Supercomputers - factors of multiple consecutive integers and Greastest Common Divisor computation from intersection of HashSets of factors in a Vector - related to 668,1383,1384,1385,1519,1593 and all sections on Integer Factorization,Computational Geometry,Set Partitions-to-Tile Cover reduction by Lagranges Four Square Theorem and ILP,Primality Testing,RSA Semiprimes,Almost-Square Bounding Boxes in Large Scale Visual Recognition,Pell's Equation,Brahmagupta's Chakravala,Approximate Factoring by Newton-Raphson Rayshooting queries,Algebraic Geometry of Computational Geometric Factorization,Quantum computation and Derandomization of BQP Factorization by Condorcet Jury Theorem Majority-BQPVoterSAT boolean composition - 24 June 2025 
+----------------------------------------------------------------------------------------------------------------------------
+1622.1 course_material/Programming/Rust/rasterization/src/main.rs has been updated to use HashMap and to instantiate a static mutable global variable number2factors for storing HashSet of factors of all integers in a range.
+1622.2 New function greatest_common_divisor() computes Greatest Common Divisor(GCD) from sorted intersection of factors of all integers factorized so far and cached within vector of hashsets "number2factors" in function rasterize_hyperbolic_arc(). 
+1622.3 Lot of unsafe blocks have been introduced due to Rust compiler limitations in handling static mutable globals.
+1622.4 Two additional commandline arguments have been introduced to obtain 2 integers for GCD computation (independent of earlier consecutive range factorization). Repetitive invocation of rasterize_hyperbolic_arc() populates global static mutable vector number2factors both within factorize_multipleintegers() and outside for GCD of arguments 4 and 5.  
+1622.5 Five consecutive integers from 19292312 are factorized and GCD of 2 integers 20102912 and 1212008 is computed by commandline: cargo run 19292312 5 parallel 20102912 1212008 - Factors and GCD logged to logs/rasterization.log.GCD.24June2025
+
+References:
+----------
+1622.6 Rust for GPUs - https://rust-gpu.github.io/ 
+1622.7 CUDA toolkit interview - https://www.oho.us/blog/behind-the-code-an-interview-with-nicholas-wilt-cuda/
+1622.8 CUML zero code change GPU acceleration for scikit-learn - https://developer.nvidia.com/blog/nvidia-cuml-brings-zero-code-change-acceleration-to-scikit-learn/
