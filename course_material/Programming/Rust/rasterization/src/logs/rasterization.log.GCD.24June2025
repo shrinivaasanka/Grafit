@@ -1,0 +1,1196 @@
+Factorization of 19292312 began in (nanoseconds): SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 716901933,
+} 
+Size of integer to be factorized (in bits): 24
+Factor point located : 19292312 , 1 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 718283870,
+} nanoseconds
+Factor point located : 9646156 , 2 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 718353689,
+} nanoseconds
+Factor point located : 4823078 , 4 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 718386281,
+} nanoseconds
+Factor point located : 2411539 , 8 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 718407229,
+} nanoseconds
+Factor point located : 1484024 , 13 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 718426810,
+} nanoseconds
+Factor point located : 742012 , 26 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 718452884,
+} nanoseconds
+Factor point located : 371006 , 52 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 718475589,
+} nanoseconds
+Factor point located : 187304 , 103 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 718499587,
+} nanoseconds
+Factor point located : 185503 , 104 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 718516497,
+} nanoseconds
+Factor point located : 93652 , 206 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 718599991,
+} nanoseconds
+Factor point located : 2 , 9646156 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 718359248,
+} nanoseconds
+Factor point located : 2 , 9646156 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 718651452,
+} nanoseconds
+Factor point located : 2 , 9646156 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 718671729,
+} nanoseconds
+Factor point located : 2 , 9646156 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 718689870,
+} nanoseconds
+Factor point located : 46826 , 412 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 720722859,
+} nanoseconds
+Factor point located : 23413 , 824 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 720876783,
+} nanoseconds
+Factor point located : 14408 , 1339 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 721144150,
+} nanoseconds
+Factor point located : 10712 , 1801 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 721269089,
+} nanoseconds
+Factor point located : 7204 , 2678 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 721475314,
+} nanoseconds
+Factor point located : 5356 , 3602 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 721911096,
+} nanoseconds
+Factor point located : 3602 , 5356 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 722689459,
+} nanoseconds
+Factor point located : 2678 , 7204 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 723561125,
+} nanoseconds
+Factor point located : 1801 , 10712 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 725144939,
+} nanoseconds
+Factor point located : 1339 , 14408 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 725891015,
+} nanoseconds
+Factor point located : 824 , 23413 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 729072689,
+} nanoseconds
+Factor point located : 412 , 46826 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 732619699,
+} nanoseconds
+Factor point located : 206 , 93652 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 761770765,
+} nanoseconds
+Factor point located : 104 , 185503 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 821883909,
+} nanoseconds
+Factor point located : 103 , 187304 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 823231812,
+} nanoseconds
+Factor point located : 52 , 371006 at SystemTime {
+    tv_sec: 1750780910,
+    tv_nsec: 946161216,
+} nanoseconds
+Factor point located : 26 , 742012 at SystemTime {
+    tv_sec: 1750780911,
+    tv_nsec: 233782320,
+} nanoseconds
+Factor point located : 13 , 1484024 at SystemTime {
+    tv_sec: 1750780911,
+    tv_nsec: 722879192,
+} nanoseconds
+Factor point located : 4 , 4823078 at SystemTime {
+    tv_sec: 1750780912,
+    tv_nsec: 260223178,
+} nanoseconds
+Factor point located : 8 , 2411539 at SystemTime {
+    tv_sec: 1750780912,
+    tv_nsec: 333302013,
+} nanoseconds
+Parallel Rasterization phase of factoring 19292312 was completed in (nanoseconds): 3.079598974s 
+Factorization of 19292312 was completed in (nanoseconds): 3.079913948s 
+Factorization of 19292313 began in (nanoseconds): SystemTime {
+    tv_sec: 1750780913,
+    tv_nsec: 796826476,
+} 
+Size of integer to be factorized (in bits): 24
+Factor point located : 19292313 , 1 at SystemTime {
+    tv_sec: 1750780913,
+    tv_nsec: 796898739,
+} nanoseconds
+Factor point located : 6430771 , 3 at SystemTime {
+    tv_sec: 1750780913,
+    tv_nsec: 796924156,
+} nanoseconds
+Factor point located : 191013 , 101 at SystemTime {
+    tv_sec: 1750780913,
+    tv_nsec: 796970226,
+} nanoseconds
+Factor point located : 63671 , 303 at SystemTime {
+    tv_sec: 1750780913,
+    tv_nsec: 797123890,
+} nanoseconds
+Factor point located : 303 , 63671 at SystemTime {
+    tv_sec: 1750780913,
+    tv_nsec: 837067510,
+} nanoseconds
+Factor point located : 101 , 191013 at SystemTime {
+    tv_sec: 1750780913,
+    tv_nsec: 921488525,
+} nanoseconds
+Factor point located : 3 , 6430771 at SystemTime {
+    tv_sec: 1750780914,
+    tv_nsec: 885048903,
+} nanoseconds
+Parallel Rasterization phase of factoring 19292313 was completed in (nanoseconds): 3.15754098s 
+Factorization of 19292313 was completed in (nanoseconds): 3.157659461s 
+Factorization of 19292314 began in (nanoseconds): SystemTime {
+    tv_sec: 1750780916,
+    tv_nsec: 954494733,
+} 
+Size of integer to be factorized (in bits): 24
+Factor point located : 19292314 , 1 at SystemTime {
+    tv_sec: 1750780916,
+    tv_nsec: 954570104,
+} nanoseconds
+Factor point located : 9646157 , 2 at SystemTime {
+    tv_sec: 1750780916,
+    tv_nsec: 954599390,
+} nanoseconds
+Factor point located : 1134842 , 17 at SystemTime {
+    tv_sec: 1750780916,
+    tv_nsec: 954619369,
+} nanoseconds
+Factor point located : 567421 , 34 at SystemTime {
+    tv_sec: 1750780916,
+    tv_nsec: 954638134,
+} nanoseconds
+Factor point located : 180302 , 107 at SystemTime {
+    tv_sec: 1750780916,
+    tv_nsec: 954663800,
+} nanoseconds
+Factor point located : 2 , 9646157 at SystemTime {
+    tv_sec: 1750780916,
+    tv_nsec: 954578384,
+} nanoseconds
+Factor point located : 2 , 9646157 at SystemTime {
+    tv_sec: 1750780916,
+    tv_nsec: 954698061,
+} nanoseconds
+Factor point located : 2 , 9646157 at SystemTime {
+    tv_sec: 1750780916,
+    tv_nsec: 954715632,
+} nanoseconds
+Factor point located : 2 , 9646157 at SystemTime {
+    tv_sec: 1750780916,
+    tv_nsec: 954733554,
+} nanoseconds
+Factor point located : 90151 , 214 at SystemTime {
+    tv_sec: 1750780916,
+    tv_nsec: 954828911,
+} nanoseconds
+Factor point located : 10606 , 1819 at SystemTime {
+    tv_sec: 1750780916,
+    tv_nsec: 955634845,
+} nanoseconds
+Factor point located : 5303 , 3638 at SystemTime {
+    tv_sec: 1750780916,
+    tv_nsec: 956626870,
+} nanoseconds
+Factor point located : 3638 , 5303 at SystemTime {
+    tv_sec: 1750780916,
+    tv_nsec: 957571658,
+} nanoseconds
+Factor point located : 1819 , 10606 at SystemTime {
+    tv_sec: 1750780916,
+    tv_nsec: 960759736,
+} nanoseconds
+Factor point located : 214 , 90151 at SystemTime {
+    tv_sec: 1750780917,
+    tv_nsec: 8737522,
+} nanoseconds
+Factor point located : 107 , 180302 at SystemTime {
+    tv_sec: 1750780917,
+    tv_nsec: 61476753,
+} nanoseconds
+Factor point located : 34 , 567421 at SystemTime {
+    tv_sec: 1750780917,
+    tv_nsec: 297431879,
+} nanoseconds
+Factor point located : 17 , 1134842 at SystemTime {
+    tv_sec: 1750780917,
+    tv_nsec: 658373522,
+} nanoseconds
+Parallel Rasterization phase of factoring 19292314 was completed in (nanoseconds): 3.179850116s 
+Factorization of 19292314 was completed in (nanoseconds): 3.179984279s 
+Factorization of 19292315 began in (nanoseconds): SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 134487920,
+} 
+Size of integer to be factorized (in bits): 24
+Factor point located : 19292315 , 1 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 134584851,
+} nanoseconds
+Factor point located : 3858463 , 5 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 134612527,
+} nanoseconds
+Factor point located : 2756045 , 7 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 134631407,
+} nanoseconds
+Factor point located : 1015385 , 19 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 134649876,
+} nanoseconds
+Factor point located : 551209 , 35 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 134691887,
+} nanoseconds
+Factor point located : 287945 , 67 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 134712497,
+} nanoseconds
+Factor point located : 203077 , 95 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 134732399,
+} nanoseconds
+Factor point located : 145055 , 133 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 134753662,
+} nanoseconds
+Factor point located : 57589 , 335 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 134851889,
+} nanoseconds
+Factor point located : 44555 , 433 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 134884652,
+} nanoseconds
+Factor point located : 41135 , 469 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 134906506,
+} nanoseconds
+Factor point located : 29011 , 665 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 134979511,
+} nanoseconds
+Factor point located : 15155 , 1273 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 135298516,
+} nanoseconds
+Factor point located : 8911 , 2165 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 135874065,
+} nanoseconds
+Factor point located : 8227 , 2345 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 135949663,
+} nanoseconds
+Factor point located : 6365 , 3031 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 136386860,
+} nanoseconds
+Factor point located : 3031 , 6365 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 138507918,
+} nanoseconds
+Factor point located : 2345 , 8227 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 139608513,
+} nanoseconds
+Factor point located : 2165 , 8911 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 139987209,
+} nanoseconds
+Factor point located : 1273 , 15155 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 143914799,
+} nanoseconds
+Factor point located : 665 , 29011 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 168682369,
+} nanoseconds
+Factor point located : 469 , 41135 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 177349224,
+} nanoseconds
+Factor point located : 433 , 44555 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 179749356,
+} nanoseconds
+Factor point located : 335 , 57589 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 189241117,
+} nanoseconds
+Factor point located : 133 , 145055 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 250546414,
+} nanoseconds
+Factor point located : 95 , 203077 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 291174772,
+} nanoseconds
+Factor point located : 67 , 287945 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 349758512,
+} nanoseconds
+Factor point located : 7 , 2756045 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 357079635,
+} nanoseconds
+Factor point located : 35 , 551209 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 533974161,
+} nanoseconds
+Factor point located : 19 , 1015385 at SystemTime {
+    tv_sec: 1750780920,
+    tv_nsec: 871365278,
+} nanoseconds
+Factor point located : 5 , 3858463 at SystemTime {
+    tv_sec: 1750780921,
+    tv_nsec: 66208510,
+} nanoseconds
+Parallel Rasterization phase of factoring 19292315 was completed in (nanoseconds): 3.197444644s 
+Factorization of 19292315 was completed in (nanoseconds): 3.197617461s 
+Factorization of 19292316 began in (nanoseconds): SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 332114152,
+} 
+Size of integer to be factorized (in bits): 24
+Factor point located : 19292316 , 1 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 332203955,
+} nanoseconds
+Factor point located : 9646158 , 2 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 332228591,
+} nanoseconds
+Factor point located : 6430772 , 3 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 332247536,
+} nanoseconds
+Factor point located : 4 , 4823079 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 332213078,
+} nanoseconds
+Factor point located : 2 , 9646158 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 332210004,
+} nanoseconds
+Factor point located : 2 , 9646158 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 332317076,
+} nanoseconds
+Factor point located : 2 , 9646158 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 332360817,
+} nanoseconds
+Factor point located : 2 , 9646158 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 332379644,
+} nanoseconds
+Factor point located : 4823079 , 4 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 332410236,
+} nanoseconds
+Factor point located : 3215386 , 6 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 332431898,
+} nanoseconds
+Factor point located : 1607693 , 12 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 332450936,
+} nanoseconds
+Factor point located : 151908 , 127 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 332497237,
+} nanoseconds
+Factor point located : 75954 , 254 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 332572034,
+} nanoseconds
+Factor point located : 50636 , 381 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 332630171,
+} nanoseconds
+Factor point located : 37977 , 508 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 332672375,
+} nanoseconds
+Factor point located : 25318 , 762 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 332759606,
+} nanoseconds
+Factor point located : 12659 , 1524 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 333264775,
+} nanoseconds
+Factor point located : 1524 , 12659 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 340535974,
+} nanoseconds
+Factor point located : 762 , 25318 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 349126353,
+} nanoseconds
+Factor point located : 508 , 37977 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 357011262,
+} nanoseconds
+Factor point located : 381 , 50636 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 364738728,
+} nanoseconds
+Factor point located : 254 , 75954 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 381153846,
+} nanoseconds
+Factor point located : 127 , 151908 at SystemTime {
+    tv_sec: 1750780923,
+    tv_nsec: 431464549,
+} nanoseconds
+Factor point located : 3 , 6430772 at SystemTime {
+    tv_sec: 1750780924,
+    tv_nsec: 400222638,
+} nanoseconds
+Factor point located : 12 , 1607693 at SystemTime {
+    tv_sec: 1750780924,
+    tv_nsec: 402930044,
+} nanoseconds
+Factor point located : 6 , 3215386 at SystemTime {
+    tv_sec: 1750780925,
+    tv_nsec: 463127203,
+} nanoseconds
+Parallel Rasterization phase of factoring 19292316 was completed in (nanoseconds): 3.195900404s 
+Factorization of 19292316 was completed in (nanoseconds): 3.196082255s 
+main():Vector of HashSet of Factors in integer range 19292312 to 19292312 + 5 are [
+    {
+        412,
+        7204,
+        104,
+        185503,
+        4,
+        26,
+        46826,
+        206,
+        8,
+        4823078,
+        93652,
+        3602,
+        187304,
+        742012,
+        824,
+        103,
+        19292312,
+        23413,
+        14408,
+        1339,
+        2678,
+        10712,
+        5356,
+        9646156,
+        52,
+        2,
+        13,
+        2411539,
+        1484024,
+        1,
+        371006,
+        1801,
+    },
+    {
+        63671,
+        303,
+        19292313,
+        191013,
+        1,
+        101,
+        6430771,
+        3,
+    },
+    {
+        19292314,
+        1134842,
+        9646157,
+        90151,
+        107,
+        34,
+        1,
+        214,
+        5303,
+        17,
+        3638,
+        180302,
+        2,
+        1819,
+        10606,
+        567421,
+    },
+    {
+        203077,
+        469,
+        19292315,
+        1,
+        665,
+        433,
+        6365,
+        8911,
+        8227,
+        3858463,
+        7,
+        95,
+        57589,
+        41135,
+        1273,
+        35,
+        287945,
+        3031,
+        44555,
+        5,
+        19,
+        1015385,
+        335,
+        145055,
+        2345,
+        2756045,
+        67,
+        29011,
+        2165,
+        15155,
+        551209,
+        133,
+    },
+    {
+        37977,
+        2,
+        1607693,
+        12,
+        75954,
+        6430772,
+        3,
+        4,
+        127,
+        762,
+        1524,
+        25318,
+        50636,
+        12659,
+        1,
+        9646158,
+        3215386,
+        151908,
+        381,
+        508,
+        19292316,
+        254,
+        4823079,
+        6,
+    },
+] 
+------ greatest_common_divisor() of the integer range ------- 
+prev: {
+    412,
+    7204,
+    104,
+    185503,
+    4,
+    26,
+    46826,
+    206,
+    8,
+    4823078,
+    93652,
+    3602,
+    187304,
+    742012,
+    824,
+    103,
+    19292312,
+    23413,
+    14408,
+    1339,
+    2678,
+    10712,
+    5356,
+    9646156,
+    52,
+    2,
+    13,
+    2411539,
+    1484024,
+    1,
+    371006,
+    1801,
+}
+next: {
+    63671,
+    303,
+    19292313,
+    191013,
+    1,
+    101,
+    6430771,
+    3,
+}
+intersection sorted: [
+    1,
+] 
+Greatest Common Divisor: 1 
+prev: {
+    63671,
+    303,
+    19292313,
+    191013,
+    1,
+    101,
+    6430771,
+    3,
+}
+next: {
+    19292314,
+    1134842,
+    9646157,
+    90151,
+    107,
+    34,
+    1,
+    214,
+    5303,
+    17,
+    3638,
+    180302,
+    2,
+    1819,
+    10606,
+    567421,
+}
+intersection sorted: [
+    1,
+] 
+Greatest Common Divisor: 1 
+prev: {
+    19292314,
+    1134842,
+    9646157,
+    90151,
+    107,
+    34,
+    1,
+    214,
+    5303,
+    17,
+    3638,
+    180302,
+    2,
+    1819,
+    10606,
+    567421,
+}
+next: {
+    203077,
+    469,
+    19292315,
+    1,
+    665,
+    433,
+    6365,
+    8911,
+    8227,
+    3858463,
+    7,
+    95,
+    57589,
+    41135,
+    1273,
+    35,
+    287945,
+    3031,
+    44555,
+    5,
+    19,
+    1015385,
+    335,
+    145055,
+    2345,
+    2756045,
+    67,
+    29011,
+    2165,
+    15155,
+    551209,
+    133,
+}
+intersection sorted: [
+    1,
+] 
+Greatest Common Divisor: 1 
+prev: {
+    203077,
+    469,
+    19292315,
+    1,
+    665,
+    433,
+    6365,
+    8911,
+    8227,
+    3858463,
+    7,
+    95,
+    57589,
+    41135,
+    1273,
+    35,
+    287945,
+    3031,
+    44555,
+    5,
+    19,
+    1015385,
+    335,
+    145055,
+    2345,
+    2756045,
+    67,
+    29011,
+    2165,
+    15155,
+    551209,
+    133,
+}
+next: {
+    37977,
+    2,
+    1607693,
+    12,
+    75954,
+    6430772,
+    3,
+    4,
+    127,
+    762,
+    1524,
+    25318,
+    50636,
+    12659,
+    1,
+    9646158,
+    3215386,
+    151908,
+    381,
+    508,
+    19292316,
+    254,
+    4823079,
+    6,
+}
+intersection sorted: [
+    1,
+] 
+Greatest Common Divisor: 1 
+Size of integer to be factorized (in bits): 24
+Factor point located : 20102912 , 1 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 529603626,
+} nanoseconds
+Factor point located : 10051456 , 2 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 529635949,
+} nanoseconds
+Factor point located : 5025728 , 4 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 529655851,
+} nanoseconds
+Factor point located : 2512864 , 8 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 529674781,
+} nanoseconds
+Factor point located : 1256432 , 16 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 529694325,
+} nanoseconds
+Factor point located : 1058048 , 19 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 529712587,
+} nanoseconds
+Factor point located : 628216 , 32 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 529732202,
+} nanoseconds
+Factor point located : 529024 , 38 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 529750781,
+} nanoseconds
+Factor point located : 314108 , 64 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 529772165,
+} nanoseconds
+Factor point located : 264512 , 76 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 529791406,
+} nanoseconds
+Factor point located : 157054 , 128 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 529816240,
+} nanoseconds
+Factor point located : 132256 , 152 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 529837172,
+} nanoseconds
+Factor point located : 2 , 10051456 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 529615087,
+} nanoseconds
+Factor point located : 2 , 10051456 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 529884971,
+} nanoseconds
+Factor point located : 2 , 10051456 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 529903720,
+} nanoseconds
+Factor point located : 2 , 10051456 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 529921916,
+} nanoseconds
+Factor point located : 4 , 5025728 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 529646609,
+} nanoseconds
+Factor point located : 78527 , 256 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 530010076,
+} nanoseconds
+Factor point located : 66128 , 304 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 530036724,
+} nanoseconds
+Factor point located : 33064 , 608 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 530215703,
+} nanoseconds
+Factor point located : 16532 , 1216 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 530525622,
+} nanoseconds
+Factor point located : 8266 , 2432 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 531322964,
+} nanoseconds
+Factor point located : 4864 , 4133 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 532567128,
+} nanoseconds
+Factor point located : 4133 , 4864 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 532999794,
+} nanoseconds
+Factor point located : 2432 , 8266 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 535349478,
+} nanoseconds
+Factor point located : 1216 , 16532 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 540907479,
+} nanoseconds
+Factor point located : 608 , 33064 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 551586095,
+} nanoseconds
+Factor point located : 304 , 66128 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 573511894,
+} nanoseconds
+Factor point located : 256 , 78527 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 581757902,
+} nanoseconds
+Factor point located : 152 , 132256 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 617997885,
+} nanoseconds
+Factor point located : 128 , 157054 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 634672822,
+} nanoseconds
+Factor point located : 76 , 264512 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 706829395,
+} nanoseconds
+Factor point located : 64 , 314108 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 739177269,
+} nanoseconds
+Factor point located : 38 , 529024 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 881421955,
+} nanoseconds
+Factor point located : 32 , 628216 at SystemTime {
+    tv_sec: 1750780926,
+    tv_nsec: 947411966,
+} nanoseconds
+Factor point located : 19 , 1058048 at SystemTime {
+    tv_sec: 1750780927,
+    tv_nsec: 233151624,
+} nanoseconds
+Factor point located : 16 , 1256432 at SystemTime {
+    tv_sec: 1750780927,
+    tv_nsec: 364179667,
+} nanoseconds
+Factor point located : 8 , 2512864 at SystemTime {
+    tv_sec: 1750780928,
+    tv_nsec: 213918327,
+} nanoseconds
+Parallel Rasterization phase of factoring 20102912 was completed in (nanoseconds): 3.32152238s 
+Size of integer to be factorized (in bits): 20
+Factor point located : 1212008 , 1 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851229688,
+} nanoseconds
+Factor point located : 606004 , 2 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851255649,
+} nanoseconds
+Factor point located : 303002 , 4 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851273536,
+} nanoseconds
+Factor point located : 173144 , 7 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851288390,
+} nanoseconds
+Factor point located : 4 , 303002 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851237878,
+} nanoseconds
+Factor point located : 2 , 606004 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851234699,
+} nanoseconds
+Factor point located : 2 , 606004 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851355406,
+} nanoseconds
+Factor point located : 2 , 606004 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851373260,
+} nanoseconds
+Factor point located : 2 , 606004 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851390984,
+} nanoseconds
+Factor point located : 8 , 151501 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851242291,
+} nanoseconds
+Factor point located : 151501 , 8 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851453131,
+} nanoseconds
+Factor point located : 86572 , 14 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851472773,
+} nanoseconds
+Factor point located : 52696 , 23 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851491167,
+} nanoseconds
+Factor point located : 43286 , 28 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851554524,
+} nanoseconds
+Factor point located : 26348 , 46 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851579906,
+} nanoseconds
+Factor point located : 21643 , 56 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851597918,
+} nanoseconds
+Factor point located : 13174 , 92 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851618862,
+} nanoseconds
+Factor point located : 7528 , 161 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851643821,
+} nanoseconds
+Factor point located : 6587 , 184 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851663055,
+} nanoseconds
+Factor point located : 3764 , 322 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851705563,
+} nanoseconds
+Factor point located : 1882 , 644 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 851958502,
+} nanoseconds
+Factor point located : 1288 , 941 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 852108838,
+} nanoseconds
+Factor point located : 941 , 1288 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 852351534,
+} nanoseconds
+Factor point located : 644 , 1882 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 852617498,
+} nanoseconds
+Factor point located : 322 , 3764 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 853894999,
+} nanoseconds
+Factor point located : 184 , 6587 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 855651989,
+} nanoseconds
+Factor point located : 161 , 7528 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 856275960,
+} nanoseconds
+Factor point located : 92 , 13174 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 859707423,
+} nanoseconds
+Factor point located : 56 , 21643 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 865316129,
+} nanoseconds
+Factor point located : 7 , 173144 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 865899109,
+} nanoseconds
+Factor point located : 46 , 26348 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 868586327,
+} nanoseconds
+Factor point located : 28 , 43286 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 880133589,
+} nanoseconds
+Factor point located : 23 , 52696 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 886971729,
+} nanoseconds
+Factor point located : 14 , 86572 at SystemTime {
+    tv_sec: 1750780929,
+    tv_nsec: 910377269,
+} nanoseconds
+Parallel Rasterization phase of factoring 1212008 was completed in (nanoseconds): 202.747483ms 
+------ greatest_common_divisor() of the integer range ------- 
+prev: {
+    5025728,
+    38,
+    8,
+    1216,
+    2,
+    256,
+    2512864,
+    2432,
+    1058048,
+    32,
+    16,
+    10051456,
+    19,
+    76,
+    66128,
+    128,
+    264512,
+    16532,
+    33064,
+    78527,
+    4,
+    608,
+    152,
+    157054,
+    529024,
+    1,
+    628216,
+    4864,
+    314108,
+    20102912,
+    132256,
+    1256432,
+    64,
+    304,
+    8266,
+    4133,
+}
+next: {
+    52696,
+    3764,
+    941,
+    1882,
+    26348,
+    1212008,
+    28,
+    184,
+    14,
+    303002,
+    2,
+    46,
+    92,
+    23,
+    173144,
+    8,
+    151501,
+    644,
+    1,
+    21643,
+    13174,
+    6587,
+    161,
+    43286,
+    322,
+    4,
+    86572,
+    7,
+    56,
+    7528,
+    606004,
+    1288,
+}
+intersection sorted: [
+    1,
+    2,
+    4,
+    8,
+] 
+Greatest Common Divisor: 8 
