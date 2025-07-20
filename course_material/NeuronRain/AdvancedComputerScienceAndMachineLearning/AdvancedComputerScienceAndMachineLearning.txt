@@ -924,7 +924,7 @@ References:
 1627. (THEORY) Axiom of Choice, Tie-free Majority Social Choice Function and Well-ordering, Pseudorandom Choice - related to
 sections 311,546 and all sections on Integer partitions, Majority voting, Axiom of choice and Social choice - Usecase addition to https://github.com/shrinivaasanka/Krishna_iResearch_DoxygenDocs/blob/master/kuja27_website_mirrored/site/kuja27/IndepthAnalysisOfVariantOfMajorityVotingwithZFAOC_2014.pdf
 ---------------------------------------------------------------------------------------------------------------------------- 
-1627.1 Section 1493 of NeuronRain documentation in https://shrinivaasanka.github.io/Krishna_iResearch_DoxygenDocs/ describes a reduction between Axiom of Choice and Social Choice by translating following defintion of Axiom of Choice:
+1627.1 Section 1493 of NeuronRain documentation in https://shrinivaasanka.github.io/Krishna_iResearch_DoxygenDocs/ describes a reduction between Axiom of Choice and Social Choice by translating following definition of Axiom of Choice:
 
 (1) Axiom of Choice = {f(x) = e |e in x and x in S} - for set of sets S there exists a choice function f choosing a unique least element e from any x in S
 
@@ -943,3 +943,4 @@ If social choice function f is "candidate having majority votes", (2) Axiom of S
 References:
 ----------
 1627.6 Well-ordering Theorem from Axiom of Choice - https://en.wikipedia.org/wiki/Well-ordering_theorem
+1627.7 Jars-Marbles Illustration of Axiom of Choice - https://en.wikipedia.org/wiki/Axiom_of_choice#/media/File:Axiome_du_choix.png
