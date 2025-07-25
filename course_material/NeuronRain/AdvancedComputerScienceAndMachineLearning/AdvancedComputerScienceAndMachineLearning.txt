@@ -954,11 +954,11 @@ If social choice function f is "candidate having majority votes", (2) Axiom of S
 		(*) Candidate ck is removed from C
 		// Voters who chose ck are removed from next iteration and E is adjusted
 		(*) E = votes_against_ck (Voters who did not vote for ck)
-		(*) If size of E is even, next candidate ck (ck is in E) is disallowed to vote for himself so that E is reduced by one to odd integer.
+		(*) If size of E is even, next candidate cl (cl is in E) is disallowed to vote for himself so that E is reduced by one to odd integer.
 	}
 1627.6.4 Reduce one vote each for each candidate in final tally who were not affected by even electorate cases earlier which ensures equally fair treatment to all candidates (assuming self-voting by all candidates and deducting them).  	
 1627.6.5 Earlier loop computes a hieararchical binary strict partition of an odd electorate by computing voters for and against a candidate at each iteration of the loop. Correctness of the loop is provable by ensuring that For-Against partition is always strict at each iteration of the loop due to enforcement of odd electorate rule.
-1627.6.6 For earlier 11 voters-3 candidates example algorithm in 1627.6.3 : 
+1627.6.6 For earlier 11 voters-3 candidates example, algorithm in 1627.6.3 is iterated as: 
 	C={c1,c2,c3}
 	E=size 11 - {v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11}
 	-----------
@@ -972,7 +972,7 @@ If social choice function f is "candidate having majority votes", (2) Axiom of S
 	Iteration 2:
 	-----------
 	// Size of E is 6 (even) and one of v6,v7,v8,v9,v10,v11 is c2 
-	// c2 is disallowed to vote e.g c2=v8 is removed from E to make size of E=5(odd)
+	// c2 is disallowed to self-vote e.g c2=v8 is removed from E to make size of E=5(odd)
 	// Rationale for removing a candidate from electorate is it is unfair to permit self-voting and
 	// a candidate would always self-vote (won't be expected to vote against h(im|er)self in favour of another candidate) 
 	E={v6,v7,v9,v10,v11} # candidate c2=v8 is removed for enforcing odd electorate size.
@@ -1011,8 +1011,13 @@ print(f"Is {p2} a strict partition? {is_strict_partition(p2)}")
 							  \
 							  For(c3)
 
+1627.9 Strict partition function q(n) and Partition function p(n) are related by identities (from https://en.wikipedia.org/wiki/Partition_function_(number_theory)#Identities_about_strict_partition_numbers):
+	 p(2n) = ∑k = 0-n p(n−k)*q(2k)
+	 p(2n+1) = ∑k = 0-n p(n−k)*q(2k+1)
+from which probability of tie in multipartisan elections could be derived as q(n)/p(n). 
+ 
 References:
 ----------
-1627.9 Well-ordering Theorem from Axiom of Choice - https://en.wikipedia.org/wiki/Well-ordering_theorem
-1627.10 Jars-Marbles Illustration of Axiom of Choice - https://en.wikipedia.org/wiki/Axiom_of_choice#/media/File:Axiome_du_choix.png - For Axiom of Social Choice, Jars are constituencies and Marbles are electorate and one marble (elector) is chosen from each jar (constituency) by a choice function. Existence of such a choice function is independent of ZF for sets of infinite cardinalities.
-1627.11 Banach-Tarski Paradox due to Axiom of Choice - Rotations on sphere clone the sphere - 2 infinities for sets of countable integers and uncountable reals - https://www.quantamagazine.org/how-a-mathematical-paradox-allows-infinite-cloning-20210826/#:~:text=The%20axiom%20of%20choice%20grants%20mathematicians%20the,paradox%20as%20wondrous;%20critics%20like%20Wildberger%20cringe - ".... In the historical development of ZFC, the axiom of choice is sometimes viewed as an add-on to the other eight — a status that makes it vulnerable to criticism when it enables outcomes like the Banach-Tarski paradox. The axiom of choice grants mathematicians the power to “choose” an item from each bin of a collection, even if that collection is infinite. This makes Banach-Tarski a Rorschach test for working with infinity: Many see the paradox as wondrous; critics like Wildberger cringe....."
+1627.10 Well-ordering Theorem from Axiom of Choice - https://en.wikipedia.org/wiki/Well-ordering_theorem
+1627.11 Jars-Marbles Illustration of Axiom of Choice - https://en.wikipedia.org/wiki/Axiom_of_choice#/media/File:Axiome_du_choix.png - For Axiom of Social Choice, Jars are constituencies and Marbles are electorate and one marble (elector) is chosen from each jar (constituency) by a choice function. Existence of such a choice function is independent of ZF for sets of infinite cardinalities.
+1627.12 Banach-Tarski Paradox due to Axiom of Choice - Rotations on sphere clone the sphere - 2 infinities for sets of countable integers and uncountable reals - https://www.quantamagazine.org/how-a-mathematical-paradox-allows-infinite-cloning-20210826/#:~:text=The%20axiom%20of%20choice%20grants%20mathematicians%20the,paradox%20as%20wondrous;%20critics%20like%20Wildberger%20cringe - ".... In the historical development of ZFC, the axiom of choice is sometimes viewed as an add-on to the other eight — a status that makes it vulnerable to criticism when it enables outcomes like the Banach-Tarski paradox. The axiom of choice grants mathematicians the power to “choose” an item from each bin of a collection, even if that collection is infinite. This makes Banach-Tarski a Rorschach test for working with infinity: Many see the paradox as wondrous; critics like Wildberger cringe....."
