@@ -882,7 +882,7 @@ where parts of speech for above sentence are That (Noun) is (verb) cat (Object),
 	Verb 		0.5  1	   0.25  0.1      | 0.5  1     0.25   0.1     |  0.5    1    0.25   0.1 	
 	Object		0.25 0.5   1     0.1      | 0.25 0.5   1      0.1     |  0.25  0.5   1      0.1
 	Position	0.1  0.1   0.1   0.1      | 0.1  0.1   0.1    0.1     |  0.1   0.1   0.1    0.1 
-1641.4 Product of Embedding array in 1641.2 and Weights array in 1641.3 produces following QKV attention matrix of shape 4*12:
+1641.4 Product of Embedding array in 1641.2 and Weights array in 1641.3 produces following QKV attention matrix of shape 3*12:
 			Query				Key			Value
 			------				---			------
 		Noun Verb Object Position | Noun Verb Object Position | Noun Verb Object Position
@@ -894,4 +894,4 @@ where parts of speech for above sentence are That (Noun) is (verb) cat (Object),
 	elephant ---> in 	{ Noun "elephant" has attention on Phrase "in" }
 	in -----> (pajamas, my) { Phrase "in" has attention on Noun "pajamas" and Determinent "my" }
 1641.6 Q-K-V weights array might have to be filled up from number of dependents in earlier head-dependent grammar rules for respective PoS X to PoS Y entry e.g (X,Y) is marked 1 if there is a dependency between PoS X and PoS Y.
-1641.7 Caveat: Earlier usecase has been added to theory drafts just to motivate how formal language grammars could empower pret-raining of transformer models. Q-K-V weights in earlier example are arbitrary and have not been tested by any coded model.
+1641.7 Caveat: Earlier usecase has been added to theory drafts just to motivate how formal language grammars could empower pre-training of transformer models. Q-K-V weights in earlier example are arbitrary and have not been tested by any coded model.
