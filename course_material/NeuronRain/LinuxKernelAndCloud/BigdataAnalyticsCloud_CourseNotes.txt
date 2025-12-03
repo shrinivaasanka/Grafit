@@ -895,3 +895,18 @@ where parts of speech for above sentence are That (Noun) is (verb) cat (Object),
 	in -----> (pajamas, my) { Phrase "in" has attention on Noun "pajamas" and Determinent "my" }
 1641.6 Q-K-V weights array might have to be filled up from number of dependents in earlier head-dependent grammar rules for respective PoS X to PoS Y entry e.g (X,Y) is marked 1 if there is a dependency between PoS X and PoS Y.
 1641.7 Caveat: Earlier usecase has been added to theory drafts just to motivate how formal language grammars could empower pre-training of transformer models. Q-K-V weights in earlier example are arbitrary and have not been tested by any coded model.
+1641.8 An alternative solution to populate Query-Key-Value Weights array above (instead of dependency graph) could be to compute probability of PoS(y) following PoS(x) in sentence template derived from inorder traversal of Penn TreeBank grammar trees. This requires finding PoS 2-grams of all sentence templates and finding the probability as:
+	Probability(PoSx,PoSy) = Number of sentence templates in which PoSx is followed by PoSy (number of PoSx-PoSy 2-grams)
+				----------------------------------------------------------------
+					Total number of sentence templates (number of all PoS 2-grams)
+1641.9 Following are few example sentence fine-grained PoS templates:
+['NNP', 'NNP', 'CD', 'NNS', 'JJ', 'MD', 'VB', 'DT', 'NN', 'IN', 'DT', 'JJ', 'NN', 'NNP', 'CD']
+['NNP', 'NNP', 'VBZ', 'NN', 'IN', 'NNP', 'NNP', 'DT', 'NNP', 'VBG', 'NN']
+['NNP', 'NNP', 'CD', 'NNS', 'JJ', 'CC', 'JJ', 'NN', 'IN', 'NNP', 'NNP', 'NNP', 'NNP', 'VBD', 'VBN', '-NONE-', 'DT', 'JJ', 'NN', 'IN', 'DT', 'JJ', 'JJ', 'NN']
+['NNP', 'NNP', 'CD', 'NNS', 'JJ', 'CC', 'JJ', 'NN', 'IN', 'NNP', 'NNP', 'NNP', 'NNP', 'VBD', 'VBN', '-NONE-', 'DT', 'JJ', 'NN', 'IN', 'DT', 'JJ', 'JJ', 'NN']
+...
+in which part-of-speech NNP follows NNP in 4 of 4 templates and NNS follows CD in 3 of 4 templates which translate to weights 1.0 and 0.75 respectively for NNP-to-NNP and CD-to-NNS entries in QKV weights matrix.
+
+References:
+----------
+1641.10 SpaCy v3 AttributeRuler and SpaCy v2 tag_map -  Fine grained PoS versus Coarse grained PoS - https://spacy.io/usage/linguistic-features#mappings-exceptions
