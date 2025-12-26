@@ -190,7 +190,7 @@ References:
 1647.2 course_material/Programming/Rust/rasterization/Cargo.toml has been updated to included dependency for simple-plot=0.1
 1647.3 course_material/Programming/Rust/rasterization/src/main.rs has been updated to use simple_plot::plot crate.
 1647.4 Function factorize_multipleintegers(num_fact:i64,range:i64,rasterization:String) has been updated to define a vector of durations (128 bits integers) for factorization runtimes. 
-1647.5 durations vector is populated by casting Duration datatype to nanoseconds and plot!() macro is invoked that creates an html javascript plot at rasterization/src/logs/rasterization.26December2025.html
+1647.5 durations vector is populated by casting Duration datatype to nanoseconds and plot!() macro is invoked that creates an html javascript plot at rasterization/src/logs/rasterization.26December2025.html (also saved as rasterization/src/logs/rasterization.26December2025.jpeg)
 1647.6 Graph plot of runtimes in rasterization/src/logs/rasterization.26December2025.html shows a gradual rise in factorization runtime from 1 (1 bit) to 100000 (17 bits) as below which aligns with the theoretically expected logarithmic increase in runtime O((log N)^k) in input number of bits:
 	10000 - 2.22 million nanoseconds (13 bits) or 13^k ~= 2.22 (k=0.307) 
 	20000 - 3.83 million nanoseconds (14 bits) or 14^k ~= 3.83 (k=0.508)
