@@ -6,6 +6,7 @@ use foreach::*;
 use std::collections::HashSet;
 use std::collections::HashMap;
 use std::iter::FromIterator;
+use simple_plot::plot;
 
 static mut factors: Vec<i64> = Vec::new();
 static mut number2factors: Vec<HashSet<i64>> = Vec::new();
@@ -62,7 +63,7 @@ fn pariter64bits() {
 
 fn factorize_multipleintegers(num_fact:i64,range:i64,rasterization:String) {
     let mut i = 0;
-    let mut runtimes = Vec::new();
+    let mut durations: Vec<i128> = Vec::new();
     for i in 0..range {
         let mut systemtimebegin = SystemTime::now();
         let mut number_to_factorize = num_fact+i;
@@ -74,8 +75,14 @@ fn factorize_multipleintegers(num_fact:i64,range:i64,rasterization:String) {
         }
         let systemtimeend = SystemTime::now();
         let duration = systemtimeend.duration_since(systemtimebegin).unwrap(); 
-        println!("Factorization of {number_to_factorize} was completed in (nanoseconds): {:#?} ",duration);
-        runtimes.push(duration);
+        println!("Factorization of {number_to_factorize} was completed in (nanoseconds): {:#?} ",duration.as_nanos());
+	unsafe {
+		durations.push(duration.as_nanos().try_into().unwrap());
+	}
+    }
+    unsafe {
+    	println!("Range Factorization durations: {:#?} ",durations);
+	plot!("Factorization runtime plot", durations);
     }
 }
 
