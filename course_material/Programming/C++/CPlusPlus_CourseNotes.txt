@@ -3,11 +3,12 @@
 #<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 ###############################################################################################################################################
 #Course Authored By:
-#-----------------------------------------------------------------------------------------------------------
-#K.Srinivasan
-#NeuronRain Documentation and Licensing: http://neuronrain-documentation.readthedocs.io/en/latest/
-#Personal website(research): https://sites.google.com/site/kuja27/
-#-----------------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------------
+# K.Srinivasan
+# Krishna iResearch - https://www.krishna-iresearch.org/
+# NeuronRain Documentation and Licensing: http://neuronrain-documentation.readthedocs.io/en/latest/
+# Personal website(research): https://acadpdrafts.readthedocs.io/en/latest/ 
+#-------------------------------------------------------------------------------------------------
 ##############################################################################################################################################
 */
 
@@ -670,3 +671,49 @@ Product Factor1 * Factor2 of 66721 and 67222:4485119062
 References:
 -----------
 6. Dynamically-resizable, fixed capacity, inplace contiguous array - inplace_vector - C++-2026 - https://en.cppreference.com/w/cpp/container/inplace_vector 
+
+----------------------------------------------------------------------------------------------------------------------------
+1653. (THEORY and FEATURE) Brute Force Factorization in C++ - related to 668,1383,1384,1385,1519,1593,1622,1647,1652 and all sections on Integer Factorization,Computational Geometry,Set Partitions-to-Tile Cover reduction by Lagranges Four Square Theorem and ILP,Primality Testing,RSA Semiprimes,Almost-Square Bounding Boxes in Large Scale Visual Recognition,Pell's Equation,Brahmagupta's Chakravala,Approximate Factoring by Newton-Raphson Rayshooting queries,Algebraic Geometry of Computational Geometric Factorization,Quantum computation and Derandomization of BQP Factorization by Condorcet Jury Theorem Majority-BQPVoterSAT boolean composition, Spark-Python and Rust Rayon computational geometric parallel planar point location factorization  - 5 March 2026 
+----------------------------------------------------------------------------------------------------------------------------
+1653.1 Pursuant to section 1652 on AI review of NeuronRain Computational Geometric Parallel Planar Point Location Factorization algorithm implemented in Spark-Python and Rust Rayon, a comparison is made between factorization of same integer by (*) bruteforce factor search by a C++ code fragment and (*) computational geometric parallel planar point location Rust Rayon implementation in Grafit/course_material/Programming/Rust/rasterization
+1653.2 Objective of the comparison is to distinguish the (*) Bruteforce sequential factor search over real 2D plane and (*) Computational geometric parallel planar point location binary search over a rasterized integer 2D grid - Rasterization of hyperbolic arc decreases the factor search space by lifting a hyperbola on 2D real plane to a planar graph subdivision on 2D integer plane formed from pixellated rectangular faces. Mere parallelizing sequential loop in C++/code/bruteforcefactorization.cpp wouldn't solve the real plane search problem unless hyperbola gets rasterized to integer pixel values. Only rasterization would enable allocation of (logN)^k sorted tile segments to N/(logN)^k parallel RAMs for binary or interpolation search that qualifies for complexity class NC.
+1653.3 New source file C++/code/bruteforcefactorization.cpp implements a naive bruteforce sequential factor search loop that checks if N/x is an integer where x ranges from 1 to N.
+1653.4 Decimal part of N/x is checked by std::fmod() function. 
+1653.5 17-bits Integer 209999 is factorized by C++/code/bruteforcefactorization.cpp and Rust/rasterization/src/main.rs and following are the runtimes (2.473 seconds for the former and 31.92 milliseconds for the latter which is roughly 77x speedup):
+--------------------------------------------------------------------------
+C++/code/bruteforcefactorization.cpp
+--------------------------------------------------------------------------
+$time code/bruteforcefactorization 209999|grep Factors
+Factors of 209999 are 209999 and 1
+Factors of 209999 are 563 and 373
+Factors of 209999 are 373 and 563
+Factors of 209999 are 1 and 209999
+
+real	0m2.755s
+user	0m1.824s
+sys	0m2.473s
+
+---------------------------------------------------------------------------
+Rust/rasterization/src/main.rs
+---------------------------------------------------------------------------
+excerpts from Rust/rasterization/src/logs/rasterization.log.27February2026 - Rust Rayon factorization time for 209999:
+---------------------------------------------------------------------------
+Factorization of 209999 began in (nanoseconds): SystemTime {
+    tv_sec: 1772183338,
+    tv_nsec: 318987821,
+}
+Size of integer to be factorized (in bits): 17
+Factor point located : 209999 , 1 at SystemTime {
+    tv_sec: 1772183338,
+    tv_nsec: 319218513,
+} nanoseconds
+Factor point located : 563 , 373 at SystemTime {
+    tv_sec: 1772183338,
+    tv_nsec: 321773734,
+} nanoseconds
+Factor point located : 373 , 563 at SystemTime {
+    tv_sec: 1772183338,
+    tv_nsec: 321948835,
+} nanoseconds
+Parallel Rasterization phase of factoring 209999 was completed in (nanoseconds): 31.926884ms
+Factorization of 209999 was completed in (nanoseconds): 32059666
