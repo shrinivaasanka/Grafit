@@ -717,3 +717,7 @@ Factor point located : 373 , 563 at SystemTime {
 } nanoseconds
 Parallel Rasterization phase of factoring 209999 was completed in (nanoseconds): 31.926884ms
 Factorization of 209999 was completed in (nanoseconds): 32059666
+
+References:
+-----------
+1653.6 Aleph-0 (N0), Aleph-1 (N1) and Continuum hypothesis - https://en.wikipedia.org/wiki/Aleph_number - There are two kinds of infinities - countable infinity N0 (e.g natural integers) and uncountable infinity N1 (e.g real numbers). Continuum hypothesis postulates that 2^N0 = N1. Implications for earlier hyperbolic arc rasterization are obvious: Bruteforce factor search space of N1=2^N0 for real 2D plane gets exponentially shrunk to N0 for rasterized integer 2D plane which evidences the change in computational geometric factoring complexity classification from exponential to polynomial. In other words, any search based factorization algorithm that finds factors in polynomial time must exploit earlier 2 levels of infinities.
