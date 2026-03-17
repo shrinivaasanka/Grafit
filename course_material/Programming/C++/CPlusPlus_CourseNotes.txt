@@ -735,3 +735,14 @@ References:
 1.Bruteforce factorization1() - exhaustive real plane search -  runtime in nanoseconds:3702292436
 2.Bruteforce factorization2() - recursive trial division - runtime in nanoseconds:1121587
 
+--------------------------------------------------------------------------------------------
+17 March 2026 - Ramanujan and Chudnovsky brothers series for Pi 
+--------------------------------------------------------------------------------------------
+C++ code fragment code/ramanujan_pi.cpp implements 2 functions - ramanujan_pi() and chudnovsky_pi() - respectively to compute (*) Ramanujan series for approximating Pi and (*) its variant by Chudnovsky brothers that is used for benchmarking Pi to trillions of decimal digits. Logs code/logs/ramanujan_pi.log.17March2026 contain first 100 iterations for Pi value approximated to 3.14159 by both functions. Accurate value of Pi is essential for equations from multiple disciplines that depend on it (e.g ubiquitous area,volume measurements).
+
+References:
+----------
+1.Approximations of Pi - Complexity of various algorithms - From Mahabharata,Archimedes,Aryabhatta to Ramanujan,Chudnovsky brothers - https://en.wikipedia.org/wiki/Approximations_of_pi - ".... On 11 December 2025, the record returned to the StorageReview Team, after they computed π to 314 trillion digits, again using y-cruncher..."
+2.A PROOF OF RAMANUJAN’S CLASSIC π FORMULA - https://arxiv.org/pdf/2411.15803v1
+3.ON THE ELEGANCE OF RAMANUJAN’S SERIES FOR 1/π - https://arxiv.org/pdf/2104.12412
+4.Modular equations and approximations to π - [Srinivasa Ramanujan] - Quarterly Journal of Mathematics, XLV, 1914, 350 – 372 - https://ramanujan.sirinudi.org/Volumes/published/ram06.pdf
