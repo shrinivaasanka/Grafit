@@ -6,12 +6,16 @@ long double factorial(int x);
 
 int ramanujan_pi(int maxrange);
 int chudnovsky_pi(int maxrange);
+long double rasterization_pi(long double radius);
 
 int main(int argc,char* argv[])
 {
 	int maxrange=atoi(argv[1]);
-	ramanujan_pi(maxrange);
-	chudnovsky_pi(maxrange);
+	//ramanujan_pi(maxrange);
+	//chudnovsky_pi(maxrange);
+	int radius=maxrange;
+	for(long double r=1.0;r < radius;r++)
+		rasterization_pi(r);
 }
 
 int ramanujan_pi(int maxrange)
@@ -46,6 +50,20 @@ int chudnovsky_pi(int maxrange)
 		cout<<"Approximate value of Pi (Chudnovsky brothers variant of Ramanujan's series):"<<1/(approximatepi1*approximatepi2)<<endl;
 	}
 	cout<<"Approximate value of Pi (Chudnovsky brothers variant of Ramanujan's series):"<<1/(approximatepi1*approximatepi2)<<endl;
+}
+
+long double rasterization_pi(long double radius)
+{
+	long double approximatepi=2.0/radius;	
+	long double seriesterm=0;
+	for(long double n=0;n < radius;n++)
+	{
+		seriesterm+=std::sqrt(radius*radius-n*n) - std::sqrt(radius*radius-n*n-2*n-1);
+		//cout<<"seriesterm:"<<seriesterm<<endl;
+	}
+	approximatepi*=seriesterm;
+	cout<<"Approximate value of Discrete Pi from Circle Rasterization (Radius "<<radius<<"):"<<approximatepi<<endl;
+	return approximatepi;
 }
 
 long double factorial(int x)

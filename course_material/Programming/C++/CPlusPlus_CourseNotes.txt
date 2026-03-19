@@ -736,13 +736,39 @@ References:
 2.Bruteforce factorization2() - recursive trial division - runtime in nanoseconds:1121587
 
 --------------------------------------------------------------------------------------------
-17 March 2026 - Ramanujan and Chudnovsky brothers series for Pi 
+1655. (THEORY and FEATURE) Ramanujan and Chudnovsky brothers series for Pi - related to 473,582,1625 and all sections on Discrete version of Pythagoas theorem, Bresenham's Line Algorithm and some theoretical conflicts involving Special relativity and Planck scale in Quantum mechanics, rasterization - 17 March 2026 
 --------------------------------------------------------------------------------------------
 C++ code fragment code/ramanujan_pi.cpp implements 2 functions - ramanujan_pi() and chudnovsky_pi() - respectively to compute (*) Ramanujan series for approximating Pi and (*) its variant by Chudnovsky brothers that is used for benchmarking Pi to trillions of decimal digits. Logs code/logs/ramanujan_pi.log.17March2026 contain first 100 iterations for Pi value approximated to 3.14159 by both functions. Accurate value of Pi is essential for equations from multiple disciplines that depend on it (e.g ubiquitous area,volume measurements).
 
 References:
 ----------
-1.Approximations of Pi - Complexity of various algorithms - From Mahabharata,Archimedes,Aryabhatta to Ramanujan,Chudnovsky brothers - https://en.wikipedia.org/wiki/Approximations_of_pi - ".... On 11 December 2025, the record returned to the StorageReview Team, after they computed π to 314 trillion digits, again using y-cruncher..."
-2.A PROOF OF RAMANUJAN’S CLASSIC π FORMULA - https://arxiv.org/pdf/2411.15803v1
-3.ON THE ELEGANCE OF RAMANUJAN’S SERIES FOR 1/π - https://arxiv.org/pdf/2104.12412
-4.Modular equations and approximations to π - [Srinivasa Ramanujan] - Quarterly Journal of Mathematics, XLV, 1914, 350 – 372 - https://ramanujan.sirinudi.org/Volumes/published/ram06.pdf
+1655.1.Approximations of Pi - Complexity of various algorithms - From Mahabharata,Archimedes,Aryabhatta to Ramanujan,Chudnovsky brothers - https://en.wikipedia.org/wiki/Approximations_of_pi - ".... On 11 December 2025, the record returned to the StorageReview Team, after they computed π to 314 trillion digits, again using y-cruncher..."
+1655.2.A PROOF OF RAMANUJAN’S CLASSIC π FORMULA - https://arxiv.org/pdf/2411.15803v1
+1655.3.ON THE ELEGANCE OF RAMANUJAN’S SERIES FOR 1/π - https://arxiv.org/pdf/2104.12412
+1655.4.Modular equations and approximations to π - [Srinivasa Ramanujan] - Quarterly Journal of Mathematics, XLV, 1914, 350 – 372 - https://ramanujan.sirinudi.org/Volumes/published/ram06.pdf
+
+--------------------------------------------------------------------------------------------
+1656.(THEORY and FEATURE) Discrete version of Pi computed over rasterized circle on 2D plane - related to 473,582,1625 and all sections on Discrete version of Pythagoas theorem, Bresenham's Line Algorithm and some theoretical conflicts involving Special relativity and Planck scale in Quantum mechanics, rasterization - 19 March 2026 
+--------------------------------------------------------------------------------------------
+1656.1. course_material/Programming/C++/code/ramanujan_pi.cpp has been updated to implement a new
+function rasterization_pi() which tries to compute Pi in a non-conventional manner from rasterization of a circle (on an experimental basis) which is a discretized circle on an integer 2D plane.
+1656.2. Rationale for computing Pi from circle raster is computational geometric and all conic sections (including circles) visualized in computer graphics-VFX are rasterized - Example - Bresenham midpoint circle drawing algorithm raster graphics in https://en.wikipedia.org/wiki/Midpoint_circle_algorithm#/media/File:Midpoint_circle_algorithm_animation_(radius_23).gif 
+1656.3. Instead of Bresenham, following equation from Calculus is used to compute circle raster:
+	Circle equation: x^2 + y^2 = r^2
+	(x+deltax)^2 + (y-deltay)^2 = r^2
+=> deltax^2 + 2*x*deltax + deltay^2 - 2*y*deltay = 0
+where deltax is side length of each pixel square on raster
+
+1656.4.For deltax=1:
+-------------
+	deltay^2 - 2*y*deltay + 2*x + 1 = 0
+=> deltay = sqrt(r^2 - x^2) +/- sqrt(r^2 - x^2 - 2*x - 1)
+=> Summation of deltay must equal 1/4-th of circle perimeter = Pi*r/2:
+Sigma_x=0_to_r(deltay) = Sigma_x=0_to_r(sqrt(r^2 - x^2) +/- sqrt(r^2 - x^2 - 2*x - 1)) = Pi*r/2
+=> Pi = 2/r * Sigma_x=0_to_r(sqrt(r^2 - x^2) +/- sqrt(r^2 - x^2 - 2*x - 1))
+
+1656.5. Earlier logic is implemented in function rasterization_pi(long double radius) and code/logs/ramanujan_pi.log.19March2026 contain discrete Pi value computed for circles of radius upto 100000. Value of Pi is 2 (as expected) in discrete version as against real version of Pi (3.14....). Side of each pixel square deltax tends infinitesimally to 0 when circle on integer raster plane converges to a circle on real plane.
+1656.6. Circle rasterization is connected to Hyperbola rasterization which is central to Computational Geometric Parallel Planar Point Location Factorization - through following relation between circle equation and factorization:
+	x^2 + y^2 = r^2 = (x+y)^2-2xy = r^2
+i.e sum (x+y) and product (xy) of factors x and y of an RSA semiprime integer N=xy indirectly constitute a circle of radius r. 
+1656.7 On a related note Elliptic Curve Cryptography operates on an ellipse y^2 = x^3 + a*x + b over finite field than real plane - https://en.wikipedia.org/wiki/Elliptic-curve_cryptography 
