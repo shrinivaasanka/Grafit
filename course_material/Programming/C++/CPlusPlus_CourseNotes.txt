@@ -772,3 +772,4 @@ Sigma_x=0_to_r(deltay) = Sigma_x=0_to_r(sqrt(r^2 - x^2) +/- sqrt(r^2 - x^2 - 2*x
 	x^2 + y^2 = r^2 = (x+y)^2-2xy = r^2
 i.e sum (x+y) and product (xy) of factors x and y of an RSA semiprime integer N=xy indirectly constitute a circle of radius r. 
 1656.7 On a related note Elliptic Curve Cryptography operates on an ellipse y^2 = x^3 + a*x + b over finite field than real plane - https://en.wikipedia.org/wiki/Elliptic-curve_cryptography 
+1656.8 There exists another weird relationship between venerated Goldbach conjecture and earlier identity (x+y)^2 - 2xy = r^2 subject to few assumptions (https://en.wikipedia.org/wiki/Goldbach's_conjecture - which states "every natural integer greater than 2 is sum of two primes"): In rephrasal of earlier circle identity sqrt(r^2 + 2xy) = x + y, sqrt(r^2 + 2xy) ranges over entire set of natural integers for prime values of x and y if Goldbach conjecture is true. 
