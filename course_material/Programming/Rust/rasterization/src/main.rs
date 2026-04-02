@@ -64,6 +64,9 @@ fn pariter64bits() {
 fn factorize_multipleintegers(num_fact:i64,range:i64,rasterization:String) {
     let mut i = 0;
     let mut durations: Vec<i128> = Vec::new();
+    let mut theoretical: Vec<f64> = Vec::new();
+    let constant: f64 = 200.0;
+    let k: f64 = 4.0;
     for i in 0..range {
         let mut systemtimebegin = SystemTime::now();
         let mut number_to_factorize = num_fact+i;
@@ -75,14 +78,18 @@ fn factorize_multipleintegers(num_fact:i64,range:i64,rasterization:String) {
         }
         let systemtimeend = SystemTime::now();
         let duration = systemtimeend.duration_since(systemtimebegin).unwrap(); 
+	let number_to_factorize_float: f64 = number_to_factorize as f64;
+        let numberofbits: f64 = number_to_factorize_float.log2().into();
+	let theoreticaltime: f64 =  constant*numberofbits.powf(k); 
         println!("Factorization of {number_to_factorize} was completed in (nanoseconds): {:#?} ",duration.as_nanos());
 	unsafe {
 		durations.push(duration.as_nanos().try_into().unwrap());
+		theoretical.push(theoreticaltime);
 	}
     }
     unsafe {
     	//println!("Range Factorization durations: {:#?} ",durations);
-	plot!("Factorization runtime plot", durations);
+	plot!("Factorization runtime plot - actual versus theoretical", durations, theoretical);
     }
 }
 
