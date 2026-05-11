@@ -16,7 +16,8 @@ fn main() {
     let number_to_factorize: i64=args[1].parse().unwrap(); 
     let range: i64=args[2].parse().unwrap();
     let rasterization: String=args[3].clone();
-    factorize_multipleintegers(number_to_factorize,range,rasterization.clone());
+    let maxfactors: i64=args[4].parse().unwrap();
+    factorize_multipleintegers(number_to_factorize,range,rasterization.clone(),maxfactors);
     unsafe {
         //println!("main():Vector of HashSet of Factors in integer range {number_to_factorize} to {number_to_factorize} + {range} are {:#?} ",number2factors);
     }
@@ -24,10 +25,10 @@ fn main() {
     unsafe {
         number2factors.clear();
     }
-    let number1: i64 = args[4].parse().unwrap();
-    let number2: i64 = args[5].parse().unwrap();
-    rasterize_hyperbolic_arc(number1,rasterization.clone());
-    rasterize_hyperbolic_arc(number2,rasterization.clone());
+    let number1: i64 = args[5].parse().unwrap();
+    let number2: i64 = args[6].parse().unwrap();
+    rasterize_hyperbolic_arc(number1,rasterization.clone(),maxfactors);
+    rasterize_hyperbolic_arc(number2,rasterization.clone(),maxfactors);
     greatest_common_divisor();
     stdout().flush().unwrap();
     //pariter64bits();
@@ -61,7 +62,7 @@ fn pariter64bits() {
     });
 }
 
-fn factorize_multipleintegers(num_fact:i64,range:i64,rasterization:String) {
+fn factorize_multipleintegers(num_fact:i64,range:i64,rasterization:String,maxfactors:i64) {
     let mut i = 0;
     let mut durations: Vec<i128> = Vec::new();
     let mut theoretical: Vec<f64> = Vec::new();
@@ -72,7 +73,7 @@ fn factorize_multipleintegers(num_fact:i64,range:i64,rasterization:String) {
         let mut number_to_factorize = num_fact+i;
         let mut raster = rasterization.clone();
         //println!("Factorization of {number_to_factorize} began in (nanoseconds): {:#?} ",systemtimebegin);
-        rasterize_hyperbolic_arc(number_to_factorize,raster);
+        rasterize_hyperbolic_arc(number_to_factorize,raster,maxfactors);
         unsafe {
             factors.clear();
         }
@@ -94,7 +95,7 @@ fn factorize_multipleintegers(num_fact:i64,range:i64,rasterization:String) {
 }
 
 #[inline]
-fn rasterize_hyperbolic_arc(num_fact: i64,rasterization: String) -> i64
+fn rasterize_hyperbolic_arc(num_fact: i64,rasterization: String,maxfactors: i64) -> i64
 {
     let mut y1 = 1..num_fact-1;
     let mut y2 = 1..num_fact-1;
@@ -105,7 +106,7 @@ fn rasterize_hyperbolic_arc(num_fact: i64,rasterization: String) -> i64
             let mut xtile_start = num_fact/item;
             let mut xtile_end = num_fact/(item+1);
             //println!("tile segment {item}: from {xtile_start} to {xtile_end}");
-            binary_search(num_fact,xtile_end,item,xtile_start,item);
+            binary_search(num_fact,xtile_end,item,xtile_start,item,maxfactors);
         });
         let systemtimeend = SystemTime::now();
         let duration = systemtimeend.duration_since(systemtimebegin).unwrap(); 
@@ -123,7 +124,7 @@ fn rasterize_hyperbolic_arc(num_fact: i64,rasterization: String) -> i64
                 let mut xtile_start = num_fact/paritem;
                 let mut xtile_end = num_fact/(paritem+1);
                 //println!("tile segment {paritem}: from {xtile_start} to {xtile_end}");
-                binary_search(num_fact,xtile_end,paritem,xtile_start,paritem);
+                binary_search(num_fact,xtile_end,paritem,xtile_start,paritem,maxfactors);
             });
         }
         else
@@ -132,7 +133,7 @@ fn rasterize_hyperbolic_arc(num_fact: i64,rasterization: String) -> i64
                 let mut xtile_start = num_fact/paritem;
                 let mut xtile_end = num_fact/(paritem+1);
                 //println!("tile segment {paritem}: from {xtile_start} to {xtile_end}");
-                binary_search(num_fact,xtile_end,paritem,xtile_start,paritem);
+                binary_search(num_fact,xtile_end,paritem,xtile_start,paritem,maxfactors);
             });
         }
         let systemtimeend = SystemTime::now();
@@ -154,7 +155,7 @@ fn rasterize_hyperbolic_arc(num_fact: i64,rasterization: String) -> i64
 
 #[inline]
 //fn binary_search(num_fact:i64,xl:i64,yl:i64,xr:i64,yr:i64) -> Vec<i64> 
-fn binary_search(num_fact:i64,xl:i64,yl:i64,xr:i64,yr:i64)
+fn binary_search(num_fact:i64,xl:i64,yl:i64,xr:i64,yr:i64,maxfactors:i64)
 {
     //println!("binary seach of rasterized hyperbolic arc bow tilesegment xy = {num_fact}: {xl},{yl},{xr},{yr}");
     let mut xl_clone = xl.clone();
@@ -182,8 +183,11 @@ fn binary_search(num_fact:i64,xl:i64,yl:i64,xr:i64,yr:i64)
              let systemtimenow = SystemTime::now();
              //println!("Factor point located : {midpoint} , {yl_clone} at {:#?} nanoseconds",systemtimenow);
              unsafe {
-                factors.push(factorcandidate);
-                //println!("2.Factors of {num_fact} are {:#?} ",factors);
+		if factors.len() < maxfactors.try_into().unwrap()
+		{
+                	factors.push(factorcandidate);
+                	//println!("2.Factors of {num_fact} are {:#?} ",factors);
+		}
              }
         }
         if xl_clone*yl_clone==num_fact
@@ -191,9 +195,12 @@ fn binary_search(num_fact:i64,xl:i64,yl:i64,xr:i64,yr:i64)
              let systemtimenow = SystemTime::now();
              //println!("Factor point located : {xl_clone} , {yl_clone} at {:#?} nanoseconds",systemtimenow);
              unsafe {
-                factors.push(xl_clone);
-                factors.push(yl_clone);
-                //println!("3.Factors of {num_fact} are {:#?} ",factors);
+		if factors.len() < maxfactors.try_into().unwrap()
+		{
+                	factors.push(xl_clone);
+                	factors.push(yl_clone);
+                	//println!("3.Factors of {num_fact} are {:#?} ",factors);
+		}
              }
         }
         if xr_clone*yr_clone==num_fact
@@ -202,9 +209,12 @@ fn binary_search(num_fact:i64,xl:i64,yl:i64,xr:i64,yr:i64)
              let systemtimenow = SystemTime::now();
              //println!("Factor point located : {xr_clone} , {yr_clone} at {:#?} nanoseconds",systemtimenow);
              unsafe {
-                factors.push(xr_clone);
-                factors.push(yr_clone);
-                //println!("4.Factors of {num_fact} are {:#?} ",factors);
+		if factors.len() < maxfactors.try_into().unwrap()
+		{
+                	factors.push(xr_clone);
+                	factors.push(yr_clone);
+                	//println!("4.Factors of {num_fact} are {:#?} ",factors);
+		}
              }
         }
         if factorcandidate > num_fact
