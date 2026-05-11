@@ -266,3 +266,5 @@ References:
 1666.3 Consecutive 1000 integers from 1200000 to 1200999 have been factorized by limiting the maxfactors to 3 (or less than 3 pairs, which limits factors to first 2 pairs)- corresponding benchmark numbers and theory-actual runtime graphics can be found in following files - from logs it is evident that only first 2 pairs of factors are computed for all 1000 integers:
 	rasterization/src/logs/rasterization.11May2026.html
 	rasterization/src/logs/rasterization.log.maxfactors.11May2026
+        rasterization/src/logs/rasterization.11May2026.html.pdf (PDF of html - theoretical and actual runtime curves are aligned)
+
