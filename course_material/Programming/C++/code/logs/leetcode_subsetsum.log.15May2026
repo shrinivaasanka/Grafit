@@ -1,0 +1,30 @@
+it1:1
+it2:1
+it1:5
+it2:5
+it1:6
+it2:6
+it1:7
+it2:7
+it1:8
+it2:8
+it1:10
+it2:10
+k=5;v=0
+(10 <===> 1)
+k=4;v=2
+(8 <===> 6)
+k=3;v=3
+(7 <===> 7)
+k=2;v=4
+(6 <===> 8)
+k=1;v=1
+(5 <===> 5)
+k=0;v=5
+(1 <===> 10)
+Indices summing up to 27 in unsorted array
+integer:1 at index 5
+integer:5 at index 1
+integer:6 at index 4
+integer:7 at index 3
+integer:8 at index 2
