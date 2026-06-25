@@ -27,6 +27,7 @@ pid2cpudict=defaultdict(str)
 process_queue=deque()
 elapsedclockticks=0
 
+
 def clockticks():
 #async def clockticks():
     global elapsedclockticks
@@ -42,11 +43,16 @@ def countdown_keys():
     while True:
         new_dynamic_hashmap_dict=defaultdict(list)
         dynamic_hashmap_dict_keys=dynamic_hashmap_dict.keys()
+        print("dynamic_hashmap_dict_keys:",list(dynamic_hashmap_dict_keys))
         for k in list(dynamic_hashmap_dict_keys):
-            new_dynamic_hashmap_dict[k-1] = dynamic_hashmap_dict.pop(k) 
+            if k > 0:
+            	new_dynamic_hashmap_dict[k-1] = dynamic_hashmap_dict.pop(k)
+            else:
+                print("Timed out processes:",dynamic_hashmap_dict.pop(k))
         dynamic_hashmap_dict=new_dynamic_hashmap_dict
         print("countdown_keys(): dynamic_hashmap_dict = ",new_dynamic_hashmap_dict)
         time.sleep(1)
+        #await asyncio.sleep(1)
 
 def survival_index_scheduler():
 #async def survival_index_scheduler():
@@ -81,13 +87,11 @@ def survival_index_scheduler():
         for k,v in cpuwqdict.items():
              print(k,"-----------",v)
         print("PID ------------ CPU",pid2cpudict)
-        #time.sleep(1)
-        #await asyncio.sleep(1)
         try:
             process=process_queue.popleft()
         except IndexError:
-            #print("IndexError")
-            continue
+            print("IndexError")
+            #continue
         dynamic_hashmap_dict[process[1]].append((process[0],pid2cpudict[process[0]]))
         print("survival_index_scheduler(): dynamic_hashmap_dict = ",dynamic_hashmap_dict)
         print("survival_index_scheduler(): pid2cpudict = ",pid2cpudict)
@@ -97,6 +101,8 @@ def survival_index_scheduler():
         kernelanalyticsf.write(" --------------------------------------------- ")
         kernelanalyticsf.write("\n")
         kernelanalyticsf.close()
+        time.sleep(1)
+        #await asyncio.sleep(1)
 
 #def process_stream():
 #async def process_stream():
@@ -119,6 +125,7 @@ def survival_index_scheduler():
 #        time.sleep(1)
 #        #await asyncio.sleep(1)
 
+#async def process_stream():
 def process_stream():
     global cpuwqdict
     while True:
@@ -128,6 +135,7 @@ def process_stream():
           ptoks=p.split()
           process_id=ptoks[0]
           sched_policy=ptoks[1]
+          print("sched_policy:",sched_policy)
           if sched_policy=="DLN":
               schedparams=subprocess.run(["chrt","-p",process_id],capture_output=True)
               print(schedparams)
@@ -148,11 +156,15 @@ def spawn_processes(no_of_processes):
     #----------------------------------------------------------
     #chrt -d --sched-runtime 1000000 --sched-deadline 5000000 --sched-period 5000000 -p 0 <pid>
     #chrt -d --sched-runtime 1000000 --sched-deadline 5000000 --sched-period 5000000 0 <processname>
+    envdeadline=os.environ["DEADLINE"]
+    envruntime=os.environ["RUNTIME"]
+    envperiod=os.environ["PERIOD"]
     for n in range(no_of_processes):
-        os.system("chrt -d --sched-runtime 1000000 --sched-deadline 5000000 --sched-period 5000000 0 python3.11 SurvivalIndexScheduler_process.py&")
+        #os.system("chrt -d --sched-runtime 1000000 --sched-deadline 5000000 --sched-period 5000000 0 python3.13 SurvivalIndexScheduler_process.py&")
+        os.system("chrt -d --sched-runtime "+envruntime+" --sched-deadline "+envdeadline+" --sched-period "+envperiod+" 0 python3.13 SurvivalIndexScheduler_process.py&")
 
 if __name__=="__main__":
-    sys.setswitchinterval(1.0)
+    sys.setswitchinterval(0.01)
     spawn_processes(5)
     thread1 = Thread(target=process_stream)
     thread2 = Thread(target=clockticks)
@@ -165,3 +177,4 @@ if __name__=="__main__":
     #asyncio.run(process_stream())
     #asyncio.run(clockticks())
     #asyncio.run(survival_index_scheduler())
+    #asyncio.run(countdown_keys())
