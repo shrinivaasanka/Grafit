@@ -791,3 +791,15 @@ References:
 -----------
 4. Subset sum problem - https://en.wikipedia.org/wiki/Subset_sum_problem - "... In its most general formulation, there is a multiset S of integers and a target-sum T, and the question is to decide whether any subset of the integers sum to precisely T. The problem is known to be NP-complete. ..." 
 5. Promise problem - https://en.wikipedia.org/wiki/Promise_problem - "... a promise problem is a generalization of a decision problem where the input is promised to belong to a particular subset of all possible inputs.[1] Unlike decision problems, the yes instances (the inputs for which an algorithm must return yes) and no instances do not exhaust the set of all inputs ..."
+
+-------------------------------------------------------------------------------------------------
+(CODE PUZZLE) LeetCode Sum of integers in linked list - 7 July 2026
+-------------------------------------------------------------------------------------------------
+1. LeetCode problem https://leetcode.com/problems/add-two-numbers/description/ for adding two integers whose digits are stored in linked list has been implemented in code fragment code/sumofintegers.cpp 
+2. Two integers are read from stdin digit-by-digit and stored in vectors. Tricky part is the order reversal of digits (right-to-left) in the integers during summation and carry digit propagation alongwith use of % and / operators in place of divmod to get quotient and remainder after each digit sum. Integers read from stdin are delimited by -1 explicitly.
+3. Logs code/logs/sumofintegers.log.7July2026 demonstrate summation of 2 pairs of numbers: (1) Two integers 123456 and 234567 are added to get 0358023 (2) Two integers 123456789 and 987654321 are added to get 1111111110 
+
+References:
+----------
+4. Iterated addition is in NC1 - https://pages.cs.wisc.edu/~dieter/Courses/2010s-CS710/Scribes/PDF/lecture10.pdf
+5. Parallel Prefix Adders in latest CPUs - https://web.stanford.edu/class/archive/ee/ee371/ee371.1066/handouts/harris03.pdf - Brent-Kung, Sklansky, Kogge-Stone parallel prefix networks 

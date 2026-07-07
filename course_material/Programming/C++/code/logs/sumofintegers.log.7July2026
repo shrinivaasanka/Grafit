@@ -1,0 +1,148 @@
+./sumofintegers 
+Number 1
+1
+digit read:1
+2
+digit read:2
+3
+digit read:3
+4
+digit read:4
+5
+digit read:5
+6
+digit read:6
+-1
+digit read:-1
+Number 2
+2
+digit read:2
+3
+digit read:3
+4
+digit read:4
+5
+digit read:5
+6
+digit read:6
+7
+digit read:7
+-1
+digit read:-1
+Number 1 (as vector)
+123456
+Number 2 (as vector)
+234567
+Number1 - digit:6
+Number2 - digit:7
+Number3 - digit:3
+Number3 - carry:1
+Number1 - digit:5
+Number2 - digit:6
+Number3 - digit:2
+Number3 - carry:1
+Number1 - digit:4
+Number2 - digit:5
+Number3 - digit:0
+Number3 - carry:1
+Number1 - digit:3
+Number2 - digit:4
+Number3 - digit:8
+Number3 - carry:0
+Number1 - digit:2
+Number2 - digit:3
+Number3 - digit:5
+Number3 - carry:0
+Number1 - digit:1
+Number2 - digit:2
+Number3 - digit:3
+Number3 - carry:0
+Sum of 2 integer vectors - Number1 and Number2:
+0358023
+===========================================================================================
+root@ksrinivasan-Acer-One-14-Z422:/home/ksrinivasan/Krishna_iResearch_OpenSource_wc1/GitHub/Grafit/course_material/Programming/C++/code# 
+root@ksrinivasan-Acer-One-14-Z422:/home/ksrinivasan/Krishna_iResearch_OpenSource_wc1/GitHub/Grafit/course_material/Programming/C++/code# ./sumofintegers 
+Number 1
+1
+digit read:1
+2
+digit read:2
+3
+digit read:3
+4
+digit read:4
+5
+digit read:5
+6
+digit read:6
+7
+digit read:7
+8
+digit read:8
+9
+digit read:9
+-1
+digit read:-1
+Number 2
+9
+digit read:9
+8
+digit read:8
+7
+digit read:7
+6
+digit read:6
+5
+digit read:5
+4
+digit read:4
+3
+digit read:3
+2
+digit read:2
+1
+digit read:1
+-1
+digit read:-1
+Number 1 (as vector)
+123456789
+Number 2 (as vector)
+987654321
+Number1 - digit:9
+Number2 - digit:1
+Number3 - digit:0
+Number3 - carry:1
+Number1 - digit:8
+Number2 - digit:2
+Number3 - digit:1
+Number3 - carry:1
+Number1 - digit:7
+Number2 - digit:3
+Number3 - digit:1
+Number3 - carry:1
+Number1 - digit:6
+Number2 - digit:4
+Number3 - digit:1
+Number3 - carry:1
+Number1 - digit:5
+Number2 - digit:5
+Number3 - digit:1
+Number3 - carry:1
+Number1 - digit:4
+Number2 - digit:6
+Number3 - digit:1
+Number3 - carry:1
+Number1 - digit:3
+Number2 - digit:7
+Number3 - digit:1
+Number3 - carry:1
+Number1 - digit:2
+Number2 - digit:8
+Number3 - digit:1
+Number3 - carry:1
+Number1 - digit:1
+Number2 - digit:9
+Number3 - digit:1
+Number3 - carry:1
+Sum of 2 integer vectors - Number1 and Number2:
+1111111110
