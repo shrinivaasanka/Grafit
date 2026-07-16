@@ -1,0 +1,768 @@
+Here are two randomly selected IIT-JEE–syllabus, textbook-style problems. The methods follow **NCERT Mathematics Class XII** chapters *Integrals* and *Applications of Integrals*.
+
+## 1. Definite Integral
+
+Evaluate
+\[
+I=\int_{0}^{\pi/2}\frac{x}{\sin x+\cos x}\,dx.
+\]
+
+### Solution
+
+Using the substitution \(x\mapsto \frac{\pi}{2}-x\),
+\[
+I=\int_{0}^{\pi/2}
+\frac{\frac{\pi}{2}-x}{\sin x+\cos x}\,dx.
+\]
+
+Adding this to the original integral,
+\[
+2I=\frac{\pi}{2}\int_{0}^{\pi/2}\frac{dx}{\sin x+\cos x}.
+\]
+
+Since
+\[
+\sin x+\cos x=\sqrt2\sin\left(x+\frac{\pi}{4}\right),
+\]
+we obtain
+\[
+\int_{0}^{\pi/2}\frac{dx}{\sin x+\cos x}
+=\frac1{\sqrt2}\int_{\pi/4}^{3\pi/4}\csc u\,du.
+\]
+
+Now,
+\[
+\int \csc u\,du=\ln\left|\tan\frac u2\right|+C.
+\]
+
+Therefore,
+\[
+\begin{aligned}
+\int_{0}^{\pi/2}\frac{dx}{\sin x+\cos x}
+&=\frac1{\sqrt2}
+\ln\left(\frac{\tan(3\pi/8)}{\tan(\pi/8)}\right)\\
+&=\frac1{\sqrt2}\ln\left(\frac{\sqrt2+1}{\sqrt2-1}\right)\\
+&=\sqrt2\ln(1+\sqrt2).
+\end{aligned}
+\]
+
+Thus,
+\[
+2I=\frac{\pi}{\sqrt2}\ln(1+\sqrt2),
+\]
+and hence
+
+\[
+\boxed{I=\frac{\pi}{2\sqrt2}\ln(1+\sqrt2)}.
+\]
+
+---
+
+## 2. Area Bounded by Two Parabolas
+
+Find the area enclosed by
+\[
+y^2=4ax
+\qquad\text{and}\qquad
+x^2=4ay,
+\]
+where \(a>0\).
+
+### Solution
+
+In the first quadrant, write the curves as
+\[
+y=2\sqrt{ax}
+\quad\text{and}\quad
+y=\frac{x^2}{4a}.
+\]
+
+To find their intersection points, substitute \(y=x^2/(4a)\) into \(y^2=4ax\):
+\[
+\frac{x^4}{16a^2}=4ax.
+\]
+
+Thus,
+\[
+x(x^3-64a^3)=0,
+\]
+giving
+\[
+x=0\quad\text{or}\quad x=4a.
+\]
+
+The corresponding points are
+\[
+(0,0)\quad\text{and}\quad(4a,4a).
+\]
+
+Between \(x=0\) and \(x=4a\), the upper curve is \(y=2\sqrt{ax}\). Hence the enclosed area is
+
+\[
+A=\int_0^{4a}\left(2\sqrt{ax}-\frac{x^2}{4a}\right)dx.
+\]
+
+Therefore,
+\[
+\begin{aligned}
+A
+&=\left[
+\frac{4\sqrt a}{3}x^{3/2}-\frac{x^3}{12a}
+\right]_0^{4a}\\
+&=\frac{32a^2}{3}-\frac{16a^2}{3}\\
+&=\boxed{\frac{16a^2}{3}}.
+\end{aligned}
+\]
+
+### Answers
+
+1. \(\displaystyle \boxed{\frac{\pi}{2\sqrt2}\ln(1+\sqrt2)}\)
+2. \(\displaystyle \boxed{\frac{16a^2}{3}}\)
+## Five randomly selected Class 12 Physics questions with solutions
+
+These are **Tamil Nadu State Board (Samacheer Kalvi) textbook-aligned questions** based on the English-medium syllabus. Since the textbook PDF was not provided, the wording is representative rather than claimed as verbatim; the formulas and chapter structure follow the textbook.
+
+---
+
+### 1. Electrostatics — Parallel-plate capacitor
+
+**Question:**  
+A parallel-plate capacitor has plate area \(2.0\times10^{-2}\,\text{m}^2\) and separation \(1.0\times10^{-3}\,\text{m}\). The space is filled with a dielectric of relative permittivity \(K=5\). It is connected to a \(100\,\text{V}\) supply. Find:
+
+1. Capacitance  
+2. Charge stored  
+3. Energy stored  
+
+Take \(\varepsilon_0=8.854\times10^{-12}\,\text{F m}^{-1}\).
+
+#### Solution
+
+For a capacitor completely filled with dielectric,
+
+\[
+C=\frac{K\varepsilon_0A}{d}
+\]
+
+\[
+C=\frac{5(8.854\times10^{-12})(2.0\times10^{-2})}
+{1.0\times10^{-3}}
+=8.854\times10^{-10}\,\text{F}
+\]
+
+Charge stored:
+
+\[
+Q=CV
+\]
+
+\[
+Q=(8.854\times10^{-10})(100)
+=8.854\times10^{-8}\,\text{C}
+\]
+
+Energy stored:
+
+\[
+U=\frac12CV^2
+\]
+
+\[
+U=\frac12(8.854\times10^{-10})(100)^2
+=4.427\times10^{-6}\,\text{J}
+\]
+
+**Answer:**
+
+\[
+\boxed{C=8.85\times10^{-10}\,\text{F}=0.885\,\text{nF}}
+\]
+
+\[
+\boxed{Q=8.85\times10^{-8}\,\text{C}=88.5\,\text{nC}}
+\]
+
+\[
+\boxed{U=4.43\times10^{-6}\,\text{J}}
+\]
+
+---
+
+### 2. Current Electricity — Cell with internal resistance
+
+**Question:**  
+A cell of emf \(12\,\text{V}\) and internal resistance \(1\,\Omega\) is connected to \(6\,\Omega\) and \(3\,\Omega\) resistors in parallel. Calculate:
+
+1. Total current supplied by the cell  
+2. Terminal potential difference  
+3. Current through each resistor  
+
+#### Solution
+
+Equivalent resistance of the parallel combination:
+
+\[
+\frac{1}{R}=\frac{1}{6}+\frac{1}{3}
+=\frac{1}{6}+\frac{2}{6}
+=\frac{1}{2}
+\]
+
+Therefore,
+
+\[
+R=2\,\Omega
+\]
+
+Including internal resistance,
+
+\[
+R_{\text{total}}=R+r=2+1=3\,\Omega
+\]
+
+Total current:
+
+\[
+I=\frac{\mathcal E}{R+r}
+=\frac{12}{3}=4\,\text{A}
+\]
+
+Terminal potential difference:
+
+\[
+V=\mathcal E-Ir
+\]
+
+\[
+V=12-(4)(1)=8\,\text{V}
+\]
+
+Current through the \(6\,\Omega\) resistor:
+
+\[
+I_1=\frac{V}{R_1}=\frac{8}{6}=1.33\,\text{A}
+\]
+
+Current through the \(3\,\Omega\) resistor:
+
+\[
+I_2=\frac{V}{R_2}=\frac{8}{3}=2.67\,\text{A}
+\]
+
+Check:
+
+\[
+I_1+I_2=1.33+2.67=4\,\text{A}
+\]
+
+**Answer:**
+
+\[
+\boxed{I=4\,\text{A}}
+\]
+
+\[
+\boxed{V_{\text{terminal}}=8\,\text{V}}
+\]
+
+\[
+\boxed{I_{6\Omega}=1.33\,\text{A},\quad I_{3\Omega}=2.67\,\text{A}}
+\]
+
+---
+
+### 3. Electromagnetic Induction and Alternating Current — AC generator
+
+**Question:**  
+A coil of \(200\) turns and area \(4.0\times10^{-3}\,\text{m}^2\) rotates at \(50\,\text{Hz}\) in a uniform magnetic field of \(0.20\,\text{T}\). Find:
+
+1. Maximum induced emf  
+2. RMS value of induced emf  
+3. Instantaneous emf at \(t=5.0\,\text{ms}\), if magnetic flux is maximum at \(t=0\)
+
+#### Solution
+
+Angular frequency:
+
+\[
+\omega=2\pi f
+\]
+
+\[
+\omega=2\pi(50)=100\pi
+=314.16\,\text{rad s}^{-1}
+\]
+
+Maximum induced emf:
+
+\[
+E_0=NBA\omega
+\]
+
+\[
+E_0=(200)(0.20)(4.0\times10^{-3})(314.16)
+\]
+
+\[
+E_0=50.27\,\text{V}
+\]
+
+RMS value:
+
+\[
+E_{\mathrm{rms}}=\frac{E_0}{\sqrt 2}
+=\frac{50.27}{\sqrt 2}
+=35.55\,\text{V}
+\]
+
+Instantaneous emf:
+
+\[
+e=E_0\sin\omega t
+\]
+
+At \(t=5.0\,\text{ms}=5.0\times10^{-3}\,\text{s}\),
+
+\[
+\omega t=(100\pi)(5.0\times10^{-3})
+=\frac{\pi}{2}
+\]
+
+Therefore,
+
+\[
+e=50.27\sin\frac{\pi}{2}
+=50.27\,\text{V}
+\]
+
+**Answer:**
+
+\[
+\boxed{E_0=50.3\,\text{V}}
+\]
+
+\[
+\boxed{E_{\mathrm{rms}}=35.5\,\text{V}}
+\]
+
+\[
+\boxed{e(5.0\,\text{ms})=50.3\,\text{V}}
+\]
+
+---
+
+### 4. Dual Nature of Radiation and Matter — Photoelectric effect
+
+**Question:**  
+Light of wavelength \(400\,\text{nm}\) falls on a metal whose work function is \(2.2\,\text{eV}\). Find:
+
+1. Maximum kinetic energy of the emitted photoelectrons  
+2. Stopping potential  
+
+Use \(hc=1240\,\text{eV nm}\).
+
+#### Solution
+
+According to Einstein’s photoelectric equation,
+
+\[
+K_{\max}=\frac{hc}{\lambda}-\phi
+\]
+
+Energy of the incident photon:
+
+\[
+E=\frac{1240}{400}=3.10\,\text{eV}
+\]
+
+Therefore,
+
+\[
+K_{\max}=3.10-2.20=0.90\,\text{eV}
+\]
+
+In joules:
+
+\[
+K_{\max}=0.90(1.602\times10^{-19})
+=1.44\times10^{-19}\,\text{J}
+\]
+
+Stopping potential is given by
+
+\[
+eV_s=K_{\max}
+\]
+
+Since \(K_{\max}=0.90\,\text{eV}\),
+
+\[
+V_s=0.90\,\text{V}
+\]
+
+**Answer:**
+
+\[
+\boxed{K_{\max}=0.90\,\text{eV}
+=1.44\times10^{-19}\,\text{J}}
+\]
+
+\[
+\boxed{V_s=0.90\,\text{V}}
+\]
+
+---
+
+### 5. Atomic and Nuclear Physics — Radioactive decay
+
+**Question:**  
+A radioactive sample initially contains \(8.0\times10^{20}\) nuclei. Its half-life is \(10\) days. Find:
+
+1. Number of undecayed nuclei after \(30\) days  
+2. Percentage of the original sample that has decayed  
+
+#### Solution
+
+The radioactive decay relation in terms of half-life is
+
+\[
+N=N_0\left(\frac12\right)^{t/T_{1/2}}
+\]
+
+Number of half-lives:
+
+\[
+n=\frac{t}{T_{1/2}}
+=\frac{30}{10}=3
+\]
+
+Therefore,
+
+\[
+N=8.0\times10^{20}\left(\frac12\right)^3
+\]
+
+\[
+N=8.0\times10^{20}\times\frac18
+=1.0\times10^{20}
+\]
+
+Number of nuclei decayed:
+
+\[
+N_d=N_0-N
+\]
+
+\[
+N_d=8.0\times10^{20}-1.0\times10^{20}
+=7.0\times10^{20}
+\]
+
+Percentage decayed:
+
+\[
+\frac{N_d}{N_0}\times100
+=\frac{7.0\times10^{20}}{8.0\times10^{20}}\times100
+\]
+
+\[
+=87.5\%
+\]
+
+**Answer:**
+
+\[
+\boxed{N=1.0\times10^{20}\text{ undecayed nuclei}}
+\]
+
+\[
+\boxed{87.5\%\text{ of the sample has decayed}}
+\]
+## Five Random NEET-Style Questions with Textbook-Based Solutions
+
+These are original NEET-style questions based on NCERT Class XI–XII concepts, not reproduced past-paper questions.
+
+### 1. Biology — C₄ Photosynthesis
+
+In C₄ plants, the primary carbon dioxide acceptor and the first stable product are respectively:
+
+A. RuBP and 3-PGA  
+B. PEP and oxaloacetic acid  
+C. PEP and malic acid  
+D. RuBP and oxaloacetic acid  
+
+**Answer: B. PEP and oxaloacetic acid**
+
+**Solution:**  
+In mesophyll cells of C₄ plants, phosphoenolpyruvate (**PEP**), a three-carbon compound, accepts CO₂. The reaction is catalysed by PEP carboxylase and produces the four-carbon compound oxaloacetic acid:
+
+\[
+\text{PEP}+\mathrm{CO_2}\longrightarrow \text{Oxaloacetic acid}
+\]
+
+Oxaloacetic acid may subsequently be converted into malate or aspartate.
+
+**Textbook basis:** NCERT Class XI Biology, *Photosynthesis in Higher Plants*.
+
+---
+
+### 2. Biology — Hardy–Weinberg Equilibrium
+
+In a population under Hardy–Weinberg equilibrium, 9% of individuals exhibit an autosomal recessive trait. What percentage of the population is heterozygous?
+
+A. 21%  
+B. 30%  
+C. 42%  
+D. 49%
+
+**Answer: C. 42%**
+
+**Solution:**  
+Let the frequencies of the dominant and recessive alleles be \(p\) and \(q\).
+
+\[
+p^2+2pq+q^2=1
+\]
+
+The recessive phenotype frequency is:
+
+\[
+q^2=0.09
+\]
+
+Therefore:
+
+\[
+q=\sqrt{0.09}=0.3
+\]
+
+Since \(p+q=1\):
+
+\[
+p=1-0.3=0.7
+\]
+
+The heterozygote frequency is:
+
+\[
+2pq=2(0.7)(0.3)=0.42
+\]
+
+Thus, **42%** of the population is heterozygous.
+
+**Textbook basis:** NCERT Class XII Biology, *Evolution*.
+
+---
+
+### 3. Chemistry — Chemical Kinetics
+
+The half-life of a first-order reaction is 20 minutes. How much time is required for 75% completion of the reaction?
+
+A. 10 minutes  
+B. 20 minutes  
+C. 40 minutes  
+D. 60 minutes
+
+**Answer: C. 40 minutes**
+
+**Solution:**  
+At 75% completion, 25% of the reactant remains:
+
+\[
+\frac{[A]_t}{[A]_0}=\frac14
+\]
+
+For a first-order reaction:
+
+- After one half-life, \(\frac12\) remains.
+- After two half-lives, \(\frac14\) remains.
+
+Therefore:
+
+\[
+t=2t_{1/2}=2(20)=40\text{ minutes}
+\]
+
+Alternatively:
+
+\[
+t=\frac{2.303}{k}\log\frac{[A]_0}{[A]_t}
+\]
+
+with \(k=0.693/t_{1/2}\) gives the same result.
+
+**Textbook basis:** NCERT Class XII Chemistry, *Chemical Kinetics*.
+
+---
+
+### 4. Chemistry — Electrochemistry
+
+For a galvanic cell at \(298\ \mathrm K\),
+
+\[
+E^\circ_{\text{cell}}=1.10\ \mathrm V
+\]
+
+and two electrons are transferred. The approximate equilibrium constant is:
+
+A. \(1.6\times10^{18}\)  
+B. \(1.6\times10^{37}\)  
+C. \(3.2\times10^{37}\)  
+D. \(1.1\times10^{-37}\)
+
+**Answer: B. \(1.6\times10^{37}\)**
+
+**Solution:**  
+At equilibrium:
+
+\[
+\Delta G^\circ=-nFE^\circ_{\text{cell}}
+\]
+
+and
+
+\[
+\Delta G^\circ=-RT\ln K
+\]
+
+At \(298\ \mathrm K\), these equations give:
+
+\[
+\log K=\frac{nE^\circ_{\text{cell}}}{0.0591}
+\]
+
+Substituting \(n=2\) and \(E^\circ_{\text{cell}}=1.10\ \mathrm V\):
+
+\[
+\log K=\frac{2(1.10)}{0.0591}\approx37.23
+\]
+
+Therefore:
+
+\[
+K=10^{37.23}\approx1.7\times10^{37}
+\]
+
+The closest option is:
+
+\[
+\boxed{1.6\times10^{37}}
+\]
+
+The very large \(K\) indicates that the cell reaction strongly favours products.
+
+**Textbook basis:** NCERT Class XII Chemistry, *Electrochemistry*.
+
+---
+
+### 5. Physics — Ray Optics
+
+An object is placed \(30\ \mathrm{cm}\) in front of a convex lens of focal length \(20\ \mathrm{cm}\). The position and nature of the image are:
+
+A. \(60\ \mathrm{cm}\), real, inverted and magnified  
+B. \(60\ \mathrm{cm}\), virtual, erect and magnified  
+C. \(12\ \mathrm{cm}\), real, inverted and diminished  
+D. \(12\ \mathrm{cm}\), virtual, erect and diminished
+
+**Answer: A. \(60\ \mathrm{cm}\), real, inverted and magnified**
+
+**Solution:**  
+Using the Cartesian sign convention:
+
+\[
+u=-30\ \mathrm{cm},\qquad f=+20\ \mathrm{cm}
+\]
+
+The lens formula is:
+
+\[
+\frac1v-\frac1u=\frac1f
+\]
+
+Therefore:
+
+\[
+\frac1v-\frac1{-30}=\frac1{20}
+\]
+
+\[
+\frac1v+\frac1{30}=\frac1{20}
+\]
+
+\[
+\frac1v=\frac1{20}-\frac1{30}=\frac1{60}
+\]
+
+Thus:
+
+\[
+v=+60\ \mathrm{cm}
+\]
+
+The positive value of \(v\) indicates a **real image**. Magnification is:
+
+\[
+m=\frac vu=\frac{60}{-30}=-2
+\]
+
+The negative sign means the image is inverted, while \(|m|=2\) means it is magnified two times.
+
+**Textbook basis:** NCERT Class XII Physics, *Ray Optics and Optical Instruments*.
+
+### Answer Key
+
+| Question | Subject | Answer |
+|---|---|---|
+| 1 | Biology | B |
+| 2 | Biology | C |
+| 3 | Chemistry | C |
+| 4 | Chemistry | B |
+| 5 | Physics | A |
+## 1. Polity — UPSC CSE Prelims 2014
+
+**Question:** Which one of the following is the best description of the term **“Constitutional Government”**?
+
+A. Government by legislature  
+B. Popular government  
+C. Multi-party government  
+D. Government limited by the terms of the Constitution  
+
+**Textbook basis:**  
+NCERT Class XI, *Indian Constitution at Work* explains that a Constitution:
+
+- specifies how governments are constituted;
+- distributes governmental powers; and
+- places limitations on what a government can impose upon citizens.
+
+A legislature, popular mandate, or multiple parties alone does not make a government constitutional. The defining feature is that governmental power is constrained by constitutional rules.
+
+**Answer: D — Government limited by the terms of the Constitution**
+
+---
+
+## 2. Geography — UPSC CSE Prelims 2021
+
+**Question:** With reference to water on planet Earth, consider the following statements:
+
+1. The amount of water in rivers and lakes is more than the amount of groundwater.  
+2. The amount of water in polar ice caps and glaciers is more than the amount of groundwater.
+
+Which of the statements given above is/are correct?
+
+A. 1 only  
+B. 2 only  
+C. Both 1 and 2  
+D. Neither 1 nor 2  
+
+**Textbook basis:**  
+The water-distribution table in NCERT Class VII, *Our Environment*, Chapter 5, shows approximately:
+
+| Reservoir | Share of Earth’s water |
+|---|---:|
+| Ice caps and glaciers | 2.0% |
+| Groundwater | 0.68% |
+| Freshwater lakes | 0.009% |
+| Rivers | 0.0001% |
+
+- Rivers and lakes contain **far less** water than groundwater. Therefore, Statement 1 is incorrect.
+- Ice caps and glaciers contain **more** water than groundwater. Therefore, Statement 2 is correct.
+
+**Answer: B — 2 only**
