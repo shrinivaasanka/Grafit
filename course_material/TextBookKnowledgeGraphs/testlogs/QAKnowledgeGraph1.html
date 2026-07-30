@@ -1,0 +1,4359 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Knowledge Graph Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            color-scheme: light;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            height: 100vh;
+            transition: grid-template-columns 0.3s ease;
+        }
+
+        .layout.sidebar-collapsed {
+            grid-template-columns: 0px 1fr;
+        }
+
+        .layout.sidebar-disabled {
+            grid-template-columns: 1fr;
+            width: 100%;
+        }
+
+        .layout.sidebar-disabled .main {
+            width: 100vw !important;
+        }
+
+        .layout.sidebar-disabled .tab-panel {
+            padding: 0 !important;
+            width: 100vw !important;
+        }
+
+        .layout.sidebar-disabled .network-panel {
+            width: 100vw !important;
+            height: 100vh !important;
+            border-radius: 0;
+            border: none;
+            max-width: none !important;
+        }
+
+        .layout.sidebar-disabled #networkCanvas {
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: none !important;
+        }
+
+        /* Force canvas to take full iframe space */
+        canvas#networkCanvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .sidebar {
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            padding: 24px 24px 16px;
+            overflow-y: auto;
+            transition: width 0.3s ease, opacity 0.3s ease;
+            display: block; /* Visible in standalone mode */
+        }
+
+        .sidebar.collapsed {
+            width: 0;
+            padding: 24px 0 16px;
+            overflow: hidden;
+            opacity: 0;
+        }
+
+        .sidebar h1 {
+            margin: 0 0 8px;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .sidebar p {
+            margin: 0 0 20px;
+            color: #475569;
+            font-size: 0.95rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section h2 {
+            font-size: 1rem;
+            margin: 0 0 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #1e293b;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5f5;
+            border-radius: 10px;
+            font-size: 0.95rem;
+        }
+
+        .search-hint {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .list-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .list-item strong {
+            font-weight: 600;
+        }
+
+        .cluster-item,
+        .relation-item {
+            border-left: 4px solid transparent;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .cluster-item:hover,
+        .relation-item:hover {
+            background: #e2e8f0;
+        }
+
+        .cluster-item.active,
+        .relation-item.active {
+            transform: translateX(4px);
+            background: #e2e8f0;
+        }
+
+        .cluster-item .meta,
+        .relation-item .meta {
+            font-size: 0.8rem;
+            color: #475569;
+        }
+
+        .main {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .tab-bar {
+            display: flex;
+            gap: 8px;
+            padding: 16px 20px 0;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .tab {
+            border: none;
+            background: #e2e8f0;
+            color: #1e293b;
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .tab.active {
+            background: #1d4ed8;
+            color: #ffffff;
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: none; /* Hidden when sidebar is disabled */
+        }
+
+        .sidebar-toggle:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .sidebar-toggle::before {
+            content: '☰';
+            margin-right: 6px;
+        }
+
+        .sidebar-toggle.collapsed::before {
+            content: '☰';
+        }
+
+        .tab-panel {
+            flex: 1;
+            display: none;
+            padding: 16px 20px;
+            overflow: hidden;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .network-panel {
+            height: calc(100vh - 74px);
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+
+        #networkCanvas {
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            border-radius: 16px;
+        }
+
+        #networkCanvas {
+            cursor: grab;
+        }
+
+        #networkCanvas:active {
+            cursor: grabbing;
+        }
+
+        .selection-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 0.9rem;
+        }
+
+        .selection-card h3 {
+            margin: 0 0 8px;
+            font-size: 1rem;
+        }
+
+        .selection-card ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .selection-card li {
+            margin-bottom: 4px;
+            color: #475569;
+        }
+
+        .table-container {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            height: calc(100vh - 90px);
+            overflow: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: #f8fafc;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 2px 10px;
+            border-radius: 999px;
+            background: #e2e8f0;
+            font-size: 0.75rem;
+            color: #0f172a;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+
+        .legend-swatch {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(15, 23, 42, 0.25);
+        }
+
+
+        /* Mobile/narrow iframe handling - when sidebar is disabled, use full space */
+        @media (max-width: 800px) {
+            .layout:not(.sidebar-disabled) {
+                grid-template-columns: 1fr;
+            }
+
+            .layout:not(.sidebar-disabled) .sidebar {
+                height: 280px;
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            .layout:not(.sidebar-disabled) .main {
+                height: calc(100vh - 280px);
+            }
+
+            /* When sidebar is disabled (iframe mode), ensure full viewport usage */
+            .layout.sidebar-disabled .main {
+                width: 100% !important;
+                height: 100vh !important;
+            }
+
+            .layout.sidebar-disabled .tab-panel {
+                padding: 0 !important;
+                width: 100% !important;
+                height: 100vh !important;
+            }
+
+            .layout.sidebar-disabled .network-panel {
+                width: 100% !important;
+                height: 100vh !important;
+                border-radius: 0 !important;
+                border: none !important;
+                max-width: none !important;
+            }
+
+            .layout.sidebar-disabled #networkCanvas {
+                width: 100% !important;
+                height: 100vh !important;
+                max-width: none !important;
+            }
+
+            /* Ensure iframe canvas takes full space on mobile */
+            canvas#networkCanvas {
+                width: 100% !important;
+                height: 100% !important;
+                min-width: 100% !important;
+                min-height: 100% !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <h1>Knowledge Graph Explorer</h1>
+            <p>Search, highlight, and inspect entities and relations to understand how the graph fits together.</p>
+            <div class="stats-grid" id="statsGrid"></div>
+            <div class="section">
+                <h2>Search</h2>
+                <input id="searchInput" class="search-input" type="text" placeholder="Search for entities or
+                    relations" />
+                <div class="search-hint">Matches are highlighted. Press Escape to clear.</div>
+            </div>
+            <div class="section" id="selectionSection">
+                <h2>Selection</h2>
+                <div id="selectionDetails" class="selection-card">Click a node or relation in the network to inspect
+                    details.</div>
+            </div>
+            <div class="section">
+                <h2>Entity Clusters</h2>
+                <div id="clusterList" class="list"></div>
+            </div>
+            <div class="section">
+                <h2>Top Entities</h2>
+                <div id="topEntities" class="list"></div>
+            </div>
+            <div class="section">
+                <h2>Top Relations</h2>
+                <div id="topRelations" class="list"></div>
+            </div>
+        </aside>
+        <main class="main">
+            <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar"></button>
+            <div class="tab-bar" style="padding-bottom: 10px; display: none;">
+                <button class="tab active" data-tab="network">Network</button>
+                <!-- <button class="tab" data-tab="relations">Relations</button>
+                <button class="tab" data-tab="insights">Insights</button> -->
+            </div>
+            <section id="network" class="tab-panel active">
+                <div class="network-panel">
+                    <canvas id="networkCanvas"></canvas>
+                </div>
+            </section>
+            <!-- <section id="relations" class="tab-panel">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Relation</th>
+                                <th>Object</th>
+                            </tr>
+                        </thead>
+                        <tbody id="relationsTable"></tbody>
+                    </table>
+                </div>
+            </section>
+            <section id="insights" class="tab-panel">
+                <div class="table-container" style="padding: 20px;">
+                    <div id="insightsContent"></div>
+                </div>
+            </section> -->
+        </main>
+    </div>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script id="viz-data" type="application/json">
+{
+  "nodes": [
+    {
+      "id": "agricultural distress",
+      "label": "agricultural distress",
+      "cluster": null,
+      "color": "#e4457d",
+      "degree": 1,
+      "indegree": 0,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "upward mobility"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e70"
+        ]
+      }
+    },
+    {
+      "id": "agricultural productivity",
+      "label": "agricultural productivity",
+      "cluster": null,
+      "color": "#52a1e4",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e67"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Ayushman Bharat",
+      "label": "Ayushman Bharat",
+      "cluster": null,
+      "color": "#1fdab0",
+      "degree": 1,
+      "indegree": 0,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "social-protection framework"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e28"
+        ]
+      }
+    },
+    {
+      "id": "backward regions",
+      "label": "backward regions",
+      "cluster": null,
+      "color": "#7f7de4",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e62"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "balanced regional development",
+      "label": "balanced regional development",
+      "cluster": null,
+      "color": "#30b6b8",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e15"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "balanced rural–urban development",
+      "label": "balanced rural–urban development",
+      "cluster": null,
+      "color": "#a5e214",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e16"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "banking access",
+      "label": "banking access",
+      "cluster": null,
+      "color": "#4c44ed",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "India"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e10"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "climate-resilient infrastructure",
+      "label": "climate-resilient infrastructure",
+      "cluster": null,
+      "color": "#bfdd57",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e63"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "digital divide",
+      "label": "digital divide",
+      "cluster": null,
+      "color": "#da524f",
+      "degree": 1,
+      "indegree": 0,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "upward mobility"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e71"
+        ]
+      }
+    },
+    {
+      "id": "digital inclusion",
+      "label": "digital inclusion",
+      "cluster": null,
+      "color": "#da621a",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e17"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "digital services",
+      "label": "digital services",
+      "cluster": null,
+      "color": "#d6db3b",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "India"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e13"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "direct benefit transfers",
+      "label": "direct benefit transfers",
+      "cluster": null,
+      "color": "#349cb6",
+      "degree": 1,
+      "indegree": 0,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "social-protection framework"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e31"
+        ]
+      }
+    },
+    {
+      "id": "economic growth",
+      "label": "economic growth",
+      "cluster": null,
+      "color": "#e8bc38",
+      "degree": 3,
+      "indegree": 1,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "inclusive growth",
+        "infrastructure",
+        "multidimensional poverty"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e34"
+        ],
+        "outgoing": [
+          "e8",
+          "e14"
+        ]
+      }
+    },
+    {
+      "id": "economic shocks",
+      "label": "economic shocks",
+      "cluster": null,
+      "color": "#d854da",
+      "degree": 2,
+      "indegree": 0,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "informal-sector households",
+        "migrant workers"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e3",
+          "e4"
+        ]
+      }
+    },
+    {
+      "id": "electricity access",
+      "label": "electricity access",
+      "cluster": null,
+      "color": "#c2e038",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "India"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e11"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "employment-oriented micro, small and medium enterprises (MSMEs)",
+      "label": "employment-oriented micro, small and medium enterprises (MSMEs)",
+      "cluster": null,
+      "color": "#19b3e6",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e65"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "empowerment of marginalised communities",
+      "label": "empowerment of marginalised communities",
+      "cluster": null,
+      "color": "#e26b79",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e18"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "environmentally sustainable resource use",
+      "label": "environmentally sustainable resource use",
+      "cluster": null,
+      "color": "#7970e6",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e19"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "equal opportunity",
+      "label": "equal opportunity",
+      "cluster": null,
+      "color": "#d018ce",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e48"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "fair distribution of growth benefits",
+      "label": "fair distribution of growth benefits",
+      "cluster": null,
+      "color": "#3bdc4e",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e5"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "financial inclusion",
+      "label": "financial inclusion",
+      "cluster": null,
+      "color": "#79e2b2",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e20"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "food-security schemes",
+      "label": "food-security schemes",
+      "cluster": null,
+      "color": "#c0da32",
+      "degree": 1,
+      "indegree": 0,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "social-protection framework"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e32"
+        ]
+      }
+    },
+    {
+      "id": "foundational education",
+      "label": "foundational education",
+      "cluster": null,
+      "color": "#addd82",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e55"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "gender equality",
+      "label": "gender equality",
+      "cluster": null,
+      "color": "#5eaad6",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e21"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "gender inequality",
+      "label": "gender inequality",
+      "cluster": null,
+      "color": "#dcba52",
+      "degree": 2,
+      "indegree": 0,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "inclusive growth",
+        "India"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e35",
+          "e44"
+        ]
+      }
+    },
+    {
+      "id": "General Studies III",
+      "label": "General Studies III",
+      "cluster": null,
+      "color": "#91e275",
+      "degree": 2,
+      "indegree": 1,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "inclusive growth",
+        "UPSC Civil Services Examination (CSE) Mains"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e33"
+        ],
+        "outgoing": [
+          "e6"
+        ]
+      }
+    },
+    {
+      "id": "gig workers",
+      "label": "gig workers",
+      "cluster": null,
+      "color": "#42dcb6",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "inclusive growth",
+        "social security"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e52",
+          "e73"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "inclusive growth",
+      "label": "inclusive growth",
+      "cluster": null,
+      "color": "#5d27d9",
+      "degree": 49,
+      "indegree": 9,
+      "outdegree": 40,
+      "isRepresentative": false,
+      "radius": 34,
+      "neighbors": [
+        "agricultural productivity",
+        "backward regions",
+        "balanced regional development",
+        "balanced rural–urban development",
+        "climate-resilient infrastructure",
+        "digital inclusion",
+        "economic growth",
+        "employment-oriented micro, small and medium enterprises (MSMEs)",
+        "empowerment of marginalised communities",
+        "environmentally sustainable resource use",
+        "equal opportunity",
+        "fair distribution of growth benefits",
+        "financial inclusion",
+        "foundational education",
+        "gender equality",
+        "gender inequality",
+        "General Studies III",
+        "gig workers",
+        "income inequality",
+        "income inequality reduction",
+        "India",
+        "informal employment",
+        "informal workers",
+        "labour-intensive manufacturing",
+        "national income",
+        "nutrition",
+        "opportunities for all sections of society",
+        "poverty reduction",
+        "productive and decent employment",
+        "productive employment",
+        "progressive taxation",
+        "public healthcare",
+        "regional inequality",
+        "rural non-farm employment",
+        "social justice",
+        "social security",
+        "targeted welfare delivery",
+        "unemployment",
+        "universal capabilities",
+        "universal education access",
+        "universal healthcare access",
+        "wealth inequality",
+        "welfare",
+        "wider participation",
+        "women’s asset ownership",
+        "women’s safety",
+        "women’s skills",
+        "women’s workforce participation"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e6",
+          "e7",
+          "e9",
+          "e35",
+          "e36",
+          "e37",
+          "e38",
+          "e39",
+          "e40"
+        ],
+        "outgoing": [
+          "e0",
+          "e1",
+          "e2",
+          "e5",
+          "e15",
+          "e16",
+          "e17",
+          "e18",
+          "e19",
+          "e20",
+          "e21",
+          "e22",
+          "e23",
+          "e24",
+          "e25",
+          "e26",
+          "e27",
+          "e34",
+          "e43",
+          "e48",
+          "e49",
+          "e50",
+          "e51",
+          "e52",
+          "e53",
+          "e54",
+          "e55",
+          "e56",
+          "e57",
+          "e58",
+          "e59",
+          "e60",
+          "e61",
+          "e62",
+          "e63",
+          "e64",
+          "e65",
+          "e66",
+          "e67",
+          "e68"
+        ]
+      }
+    },
+    {
+      "id": "income inequality",
+      "label": "income inequality",
+      "cluster": null,
+      "color": "#d9798b",
+      "degree": 2,
+      "indegree": 0,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "inclusive growth",
+        "India"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e36",
+          "e45"
+        ]
+      }
+    },
+    {
+      "id": "income inequality reduction",
+      "label": "income inequality reduction",
+      "cluster": null,
+      "color": "#d05d99",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e22"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "India",
+      "label": "India",
+      "cluster": null,
+      "color": "#dd70e1",
+      "degree": 12,
+      "indegree": 6,
+      "outdegree": 6,
+      "isRepresentative": false,
+      "radius": 34,
+      "neighbors": [
+        "banking access",
+        "digital services",
+        "electricity access",
+        "gender inequality",
+        "inclusive growth",
+        "income inequality",
+        "informal employment",
+        "regional inequality",
+        "sanitation access",
+        "unemployment",
+        "wealth inequality"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e41",
+          "e42",
+          "e44",
+          "e45",
+          "e46",
+          "e47"
+        ],
+        "outgoing": [
+          "e7",
+          "e9",
+          "e10",
+          "e11",
+          "e12",
+          "e13"
+        ]
+      }
+    },
+    {
+      "id": "informal employment",
+      "label": "informal employment",
+      "cluster": null,
+      "color": "#d8ab70",
+      "degree": 2,
+      "indegree": 0,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "inclusive growth",
+        "India"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e37",
+          "e41"
+        ]
+      }
+    },
+    {
+      "id": "informal workers",
+      "label": "informal workers",
+      "cluster": null,
+      "color": "#e73951",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "inclusive growth",
+        "social security"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e53",
+          "e74"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "informal-sector households",
+      "label": "informal-sector households",
+      "cluster": null,
+      "color": "#c1dd6a",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "economic shocks"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e3"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "infrastructure",
+      "label": "infrastructure",
+      "cluster": null,
+      "color": "#76e029",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "economic growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e8"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "labour-intensive manufacturing",
+      "label": "labour-intensive manufacturing",
+      "cluster": null,
+      "color": "#a0e922",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e66"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Mahatma Gandhi National Rural Employment Guarantee Act (MGNREGA)",
+      "label": "Mahatma Gandhi National Rural Employment Guarantee Act (MGNREGA)",
+      "cluster": null,
+      "color": "#68edf1",
+      "degree": 1,
+      "indegree": 0,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "social-protection framework"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e29"
+        ]
+      }
+    },
+    {
+      "id": "migrant workers",
+      "label": "migrant workers",
+      "cluster": null,
+      "color": "#2abc7c",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "economic shocks"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e4"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "multidimensional poverty",
+      "label": "multidimensional poverty",
+      "cluster": null,
+      "color": "#cca545",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "economic growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e14"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "national income",
+      "label": "national income",
+      "cluster": null,
+      "color": "#4e14e1",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e1"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "nutrition",
+      "label": "nutrition",
+      "cluster": null,
+      "color": "#69f1a6",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e56"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "opportunities for all sections of society",
+      "label": "opportunities for all sections of society",
+      "cluster": null,
+      "color": "#2e5ce2",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e2"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "out-of-pocket health expenditure",
+      "label": "out-of-pocket health expenditure",
+      "cluster": null,
+      "color": "#dc4144",
+      "degree": 1,
+      "indegree": 0,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "upward mobility"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e72"
+        ]
+      }
+    },
+    {
+      "id": "poverty reduction",
+      "label": "poverty reduction",
+      "cluster": null,
+      "color": "#a555d8",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e23"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Pradhan Mantri Jan Dhan Yojana",
+      "label": "Pradhan Mantri Jan Dhan Yojana",
+      "cluster": null,
+      "color": "#e5e051",
+      "degree": 1,
+      "indegree": 0,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "social-protection framework"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e30"
+        ]
+      }
+    },
+    {
+      "id": "productive and decent employment",
+      "label": "productive and decent employment",
+      "cluster": null,
+      "color": "#35e35e",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e24"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "productive employment",
+      "label": "productive employment",
+      "cluster": null,
+      "color": "#d9619f",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e49"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "progressive taxation",
+      "label": "progressive taxation",
+      "cluster": null,
+      "color": "#4848d0",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e51"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "public healthcare",
+      "label": "public healthcare",
+      "cluster": null,
+      "color": "#12db33",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e57"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "regional inequality",
+      "label": "regional inequality",
+      "cluster": null,
+      "color": "#4ade51",
+      "degree": 2,
+      "indegree": 0,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "inclusive growth",
+        "India"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e38",
+          "e46"
+        ]
+      }
+    },
+    {
+      "id": "rural non-farm employment",
+      "label": "rural non-farm employment",
+      "cluster": null,
+      "color": "#f07b52",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e68"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "sanitation access",
+      "label": "sanitation access",
+      "cluster": null,
+      "color": "#eb78e9",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "India"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e12"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "social justice",
+      "label": "social justice",
+      "cluster": null,
+      "color": "#484fec",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e0"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "social security",
+      "label": "social security",
+      "cluster": null,
+      "color": "#dd6a8d",
+      "degree": 3,
+      "indegree": 1,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "gig workers",
+        "inclusive growth",
+        "informal workers"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e25"
+        ],
+        "outgoing": [
+          "e73",
+          "e74"
+        ]
+      }
+    },
+    {
+      "id": "social-protection framework",
+      "label": "social-protection framework",
+      "cluster": null,
+      "color": "#80df5b",
+      "degree": 5,
+      "indegree": 5,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 28,
+      "neighbors": [
+        "Ayushman Bharat",
+        "direct benefit transfers",
+        "food-security schemes",
+        "Mahatma Gandhi National Rural Employment Guarantee Act (MGNREGA)",
+        "Pradhan Mantri Jan Dhan Yojana"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e28",
+          "e29",
+          "e30",
+          "e31",
+          "e32"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "targeted welfare delivery",
+      "label": "targeted welfare delivery",
+      "cluster": null,
+      "color": "#943fdd",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e54"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "unemployment",
+      "label": "unemployment",
+      "cluster": null,
+      "color": "#33d2d4",
+      "degree": 2,
+      "indegree": 0,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "inclusive growth",
+        "India"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e39",
+          "e42"
+        ]
+      }
+    },
+    {
+      "id": "unequal learning outcomes",
+      "label": "unequal learning outcomes",
+      "cluster": null,
+      "color": "#2dd296",
+      "degree": 1,
+      "indegree": 0,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "upward mobility"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e69"
+        ]
+      }
+    },
+    {
+      "id": "universal capabilities",
+      "label": "universal capabilities",
+      "cluster": null,
+      "color": "#e92331",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e50"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "universal education access",
+      "label": "universal education access",
+      "cluster": null,
+      "color": "#2dc622",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e26"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "universal healthcare access",
+      "label": "universal healthcare access",
+      "cluster": null,
+      "color": "#8ce56d",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e27"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "UPSC Civil Services Examination (CSE) Mains",
+      "label": "UPSC Civil Services Examination (CSE) Mains",
+      "cluster": null,
+      "color": "#d59525",
+      "degree": 1,
+      "indegree": 0,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "General Studies III"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e33"
+        ]
+      }
+    },
+    {
+      "id": "upward mobility",
+      "label": "upward mobility",
+      "cluster": null,
+      "color": "#e7c574",
+      "degree": 4,
+      "indegree": 4,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 26,
+      "neighbors": [
+        "agricultural distress",
+        "digital divide",
+        "out-of-pocket health expenditure",
+        "unequal learning outcomes"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e69",
+          "e70",
+          "e71",
+          "e72"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "wealth inequality",
+      "label": "wealth inequality",
+      "cluster": null,
+      "color": "#2a2ecc",
+      "degree": 2,
+      "indegree": 0,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "inclusive growth",
+        "India"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e40",
+          "e47"
+        ]
+      }
+    },
+    {
+      "id": "welfare",
+      "label": "welfare",
+      "cluster": null,
+      "color": "#b648ce",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e64"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "wider participation",
+      "label": "wider participation",
+      "cluster": null,
+      "color": "#9a44d1",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e43"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "women’s asset ownership",
+      "label": "women’s asset ownership",
+      "cluster": null,
+      "color": "#30da88",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e58"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "women’s safety",
+      "label": "women’s safety",
+      "cluster": null,
+      "color": "#ca8e27",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e59"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "women’s skills",
+      "label": "women’s skills",
+      "cluster": null,
+      "color": "#e3815e",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e60"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "women’s workforce participation",
+      "label": "women’s workforce participation",
+      "cluster": null,
+      "color": "#ed75db",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "inclusive growth"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e61"
+        ],
+        "outgoing": []
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "source": "inclusive growth",
+      "target": "social justice",
+      "predicate": "combines economic advancement with",
+      "cluster": null,
+      "color": "#62dd3d",
+      "tooltip": "inclusive growth —combines economic advancement with→ social justice"
+    },
+    {
+      "id": "e1",
+      "source": "inclusive growth",
+      "target": "national income",
+      "predicate": "combines increased",
+      "cluster": null,
+      "color": "#e778e1",
+      "tooltip": "inclusive growth —combines increased→ national income"
+    },
+    {
+      "id": "e2",
+      "source": "inclusive growth",
+      "target": "opportunities for all sections of society",
+      "predicate": "creates",
+      "cluster": null,
+      "color": "#63e1df",
+      "tooltip": "inclusive growth —creates→ opportunities for all sections of society"
+    },
+    {
+      "id": "e3",
+      "source": "economic shocks",
+      "target": "informal-sector households",
+      "predicate": "disproportionately affect",
+      "cluster": null,
+      "color": "#f05255",
+      "tooltip": "economic shocks —disproportionately affect→ informal-sector households"
+    },
+    {
+      "id": "e4",
+      "source": "economic shocks",
+      "target": "migrant workers",
+      "predicate": "disproportionately affect",
+      "cluster": null,
+      "color": "#f05255",
+      "tooltip": "economic shocks —disproportionately affect→ migrant workers"
+    },
+    {
+      "id": "e5",
+      "source": "inclusive growth",
+      "target": "fair distribution of growth benefits",
+      "predicate": "ensures",
+      "cluster": null,
+      "color": "#e9cc74",
+      "tooltip": "inclusive growth —ensures→ fair distribution of growth benefits"
+    },
+    {
+      "id": "e6",
+      "source": "General Studies III",
+      "target": "inclusive growth",
+      "predicate": "examines",
+      "cluster": null,
+      "color": "#cd5353",
+      "tooltip": "General Studies III —examines→ inclusive growth"
+    },
+    {
+      "id": "e7",
+      "source": "India",
+      "target": "inclusive growth",
+      "predicate": "has established important foundations for",
+      "cluster": null,
+      "color": "#52ecc3",
+      "tooltip": "India —has established important foundations for→ inclusive growth"
+    },
+    {
+      "id": "e8",
+      "source": "economic growth",
+      "target": "infrastructure",
+      "predicate": "has expanded in India",
+      "cluster": null,
+      "color": "#68ebed",
+      "tooltip": "economic growth —has expanded in India→ infrastructure"
+    },
+    {
+      "id": "e9",
+      "source": "India",
+      "target": "inclusive growth",
+      "predicate": "has had a mixed experience with",
+      "cluster": null,
+      "color": "#c33362",
+      "tooltip": "India —has had a mixed experience with→ inclusive growth"
+    },
+    {
+      "id": "e10",
+      "source": "India",
+      "target": "banking access",
+      "predicate": "has improved",
+      "cluster": null,
+      "color": "#3fda59",
+      "tooltip": "India —has improved→ banking access"
+    },
+    {
+      "id": "e11",
+      "source": "India",
+      "target": "electricity access",
+      "predicate": "has improved",
+      "cluster": null,
+      "color": "#3fda59",
+      "tooltip": "India —has improved→ electricity access"
+    },
+    {
+      "id": "e12",
+      "source": "India",
+      "target": "sanitation access",
+      "predicate": "has improved",
+      "cluster": null,
+      "color": "#3fda59",
+      "tooltip": "India —has improved→ sanitation access"
+    },
+    {
+      "id": "e13",
+      "source": "India",
+      "target": "digital services",
+      "predicate": "has improved access to",
+      "cluster": null,
+      "color": "#68b6e7",
+      "tooltip": "India —has improved access to→ digital services"
+    },
+    {
+      "id": "e14",
+      "source": "economic growth",
+      "target": "multidimensional poverty",
+      "predicate": "has reduced in India",
+      "cluster": null,
+      "color": "#d1bd1b",
+      "tooltip": "economic growth —has reduced in India→ multidimensional poverty"
+    },
+    {
+      "id": "e15",
+      "source": "inclusive growth",
+      "target": "balanced regional development",
+      "predicate": "has salient feature",
+      "cluster": null,
+      "color": "#42e31d",
+      "tooltip": "inclusive growth —has salient feature→ balanced regional development"
+    },
+    {
+      "id": "e16",
+      "source": "inclusive growth",
+      "target": "balanced rural–urban development",
+      "predicate": "has salient feature",
+      "cluster": null,
+      "color": "#42e31d",
+      "tooltip": "inclusive growth —has salient feature→ balanced rural–urban development"
+    },
+    {
+      "id": "e17",
+      "source": "inclusive growth",
+      "target": "digital inclusion",
+      "predicate": "has salient feature",
+      "cluster": null,
+      "color": "#42e31d",
+      "tooltip": "inclusive growth —has salient feature→ digital inclusion"
+    },
+    {
+      "id": "e18",
+      "source": "inclusive growth",
+      "target": "empowerment of marginalised communities",
+      "predicate": "has salient feature",
+      "cluster": null,
+      "color": "#42e31d",
+      "tooltip": "inclusive growth —has salient feature→ empowerment of marginalised communities"
+    },
+    {
+      "id": "e19",
+      "source": "inclusive growth",
+      "target": "environmentally sustainable resource use",
+      "predicate": "has salient feature",
+      "cluster": null,
+      "color": "#42e31d",
+      "tooltip": "inclusive growth —has salient feature→ environmentally sustainable resource use"
+    },
+    {
+      "id": "e20",
+      "source": "inclusive growth",
+      "target": "financial inclusion",
+      "predicate": "has salient feature",
+      "cluster": null,
+      "color": "#42e31d",
+      "tooltip": "inclusive growth —has salient feature→ financial inclusion"
+    },
+    {
+      "id": "e21",
+      "source": "inclusive growth",
+      "target": "gender equality",
+      "predicate": "has salient feature",
+      "cluster": null,
+      "color": "#42e31d",
+      "tooltip": "inclusive growth —has salient feature→ gender equality"
+    },
+    {
+      "id": "e22",
+      "source": "inclusive growth",
+      "target": "income inequality reduction",
+      "predicate": "has salient feature",
+      "cluster": null,
+      "color": "#42e31d",
+      "tooltip": "inclusive growth —has salient feature→ income inequality reduction"
+    },
+    {
+      "id": "e23",
+      "source": "inclusive growth",
+      "target": "poverty reduction",
+      "predicate": "has salient feature",
+      "cluster": null,
+      "color": "#42e31d",
+      "tooltip": "inclusive growth —has salient feature→ poverty reduction"
+    },
+    {
+      "id": "e24",
+      "source": "inclusive growth",
+      "target": "productive and decent employment",
+      "predicate": "has salient feature",
+      "cluster": null,
+      "color": "#42e31d",
+      "tooltip": "inclusive growth —has salient feature→ productive and decent employment"
+    },
+    {
+      "id": "e25",
+      "source": "inclusive growth",
+      "target": "social security",
+      "predicate": "has salient feature",
+      "cluster": null,
+      "color": "#42e31d",
+      "tooltip": "inclusive growth —has salient feature→ social security"
+    },
+    {
+      "id": "e26",
+      "source": "inclusive growth",
+      "target": "universal education access",
+      "predicate": "has salient feature",
+      "cluster": null,
+      "color": "#42e31d",
+      "tooltip": "inclusive growth —has salient feature→ universal education access"
+    },
+    {
+      "id": "e27",
+      "source": "inclusive growth",
+      "target": "universal healthcare access",
+      "predicate": "has salient feature",
+      "cluster": null,
+      "color": "#42e31d",
+      "tooltip": "inclusive growth —has salient feature→ universal healthcare access"
+    },
+    {
+      "id": "e28",
+      "source": "Ayushman Bharat",
+      "target": "social-protection framework",
+      "predicate": "has widened",
+      "cluster": null,
+      "color": "#91dd76",
+      "tooltip": "Ayushman Bharat —has widened→ social-protection framework"
+    },
+    {
+      "id": "e29",
+      "source": "Mahatma Gandhi National Rural Employment Guarantee Act (MGNREGA)",
+      "target": "social-protection framework",
+      "predicate": "has widened",
+      "cluster": null,
+      "color": "#91dd76",
+      "tooltip": "Mahatma Gandhi National Rural Employment Guarantee Act (MGNREGA) —has widened→ social-protection framework"
+    },
+    {
+      "id": "e30",
+      "source": "Pradhan Mantri Jan Dhan Yojana",
+      "target": "social-protection framework",
+      "predicate": "has widened",
+      "cluster": null,
+      "color": "#91dd76",
+      "tooltip": "Pradhan Mantri Jan Dhan Yojana —has widened→ social-protection framework"
+    },
+    {
+      "id": "e31",
+      "source": "direct benefit transfers",
+      "target": "social-protection framework",
+      "predicate": "have widened",
+      "cluster": null,
+      "color": "#2ce0d1",
+      "tooltip": "direct benefit transfers —have widened→ social-protection framework"
+    },
+    {
+      "id": "e32",
+      "source": "food-security schemes",
+      "target": "social-protection framework",
+      "predicate": "have widened",
+      "cluster": null,
+      "color": "#2ce0d1",
+      "tooltip": "food-security schemes —have widened→ social-protection framework"
+    },
+    {
+      "id": "e33",
+      "source": "UPSC Civil Services Examination (CSE) Mains",
+      "target": "General Studies III",
+      "predicate": "includes",
+      "cluster": null,
+      "color": "#26c2bd",
+      "tooltip": "UPSC Civil Services Examination (CSE) Mains —includes→ General Studies III"
+    },
+    {
+      "id": "e34",
+      "source": "inclusive growth",
+      "target": "economic growth",
+      "predicate": "is a form of",
+      "cluster": null,
+      "color": "#5fbf30",
+      "tooltip": "inclusive growth —is a form of→ economic growth"
+    },
+    {
+      "id": "e35",
+      "source": "gender inequality",
+      "target": "inclusive growth",
+      "predicate": "limits",
+      "cluster": null,
+      "color": "#d03c31",
+      "tooltip": "gender inequality —limits→ inclusive growth"
+    },
+    {
+      "id": "e36",
+      "source": "income inequality",
+      "target": "inclusive growth",
+      "predicate": "limits",
+      "cluster": null,
+      "color": "#d03c31",
+      "tooltip": "income inequality —limits→ inclusive growth"
+    },
+    {
+      "id": "e37",
+      "source": "informal employment",
+      "target": "inclusive growth",
+      "predicate": "limits",
+      "cluster": null,
+      "color": "#d03c31",
+      "tooltip": "informal employment —limits→ inclusive growth"
+    },
+    {
+      "id": "e38",
+      "source": "regional inequality",
+      "target": "inclusive growth",
+      "predicate": "limits",
+      "cluster": null,
+      "color": "#d03c31",
+      "tooltip": "regional inequality —limits→ inclusive growth"
+    },
+    {
+      "id": "e39",
+      "source": "unemployment",
+      "target": "inclusive growth",
+      "predicate": "limits",
+      "cluster": null,
+      "color": "#d03c31",
+      "tooltip": "unemployment —limits→ inclusive growth"
+    },
+    {
+      "id": "e40",
+      "source": "wealth inequality",
+      "target": "inclusive growth",
+      "predicate": "limits",
+      "cluster": null,
+      "color": "#d03c31",
+      "tooltip": "wealth inequality —limits→ inclusive growth"
+    },
+    {
+      "id": "e41",
+      "source": "informal employment",
+      "target": "India",
+      "predicate": "persists in",
+      "cluster": null,
+      "color": "#63d36d",
+      "tooltip": "informal employment —persists in→ India"
+    },
+    {
+      "id": "e42",
+      "source": "unemployment",
+      "target": "India",
+      "predicate": "persists in",
+      "cluster": null,
+      "color": "#63d36d",
+      "tooltip": "unemployment —persists in→ India"
+    },
+    {
+      "id": "e43",
+      "source": "inclusive growth",
+      "target": "wider participation",
+      "predicate": "promotes",
+      "cluster": null,
+      "color": "#67e561",
+      "tooltip": "inclusive growth —promotes→ wider participation"
+    },
+    {
+      "id": "e44",
+      "source": "gender inequality",
+      "target": "India",
+      "predicate": "remains significant in",
+      "cluster": null,
+      "color": "#d62553",
+      "tooltip": "gender inequality —remains significant in→ India"
+    },
+    {
+      "id": "e45",
+      "source": "income inequality",
+      "target": "India",
+      "predicate": "remains significant in",
+      "cluster": null,
+      "color": "#d62553",
+      "tooltip": "income inequality —remains significant in→ India"
+    },
+    {
+      "id": "e46",
+      "source": "regional inequality",
+      "target": "India",
+      "predicate": "remains significant in",
+      "cluster": null,
+      "color": "#d62553",
+      "tooltip": "regional inequality —remains significant in→ India"
+    },
+    {
+      "id": "e47",
+      "source": "wealth inequality",
+      "target": "India",
+      "predicate": "remains significant in",
+      "cluster": null,
+      "color": "#d62553",
+      "tooltip": "wealth inequality —remains significant in→ India"
+    },
+    {
+      "id": "e48",
+      "source": "inclusive growth",
+      "target": "equal opportunity",
+      "predicate": "requires",
+      "cluster": null,
+      "color": "#2e39cc",
+      "tooltip": "inclusive growth —requires→ equal opportunity"
+    },
+    {
+      "id": "e49",
+      "source": "inclusive growth",
+      "target": "productive employment",
+      "predicate": "requires",
+      "cluster": null,
+      "color": "#2e39cc",
+      "tooltip": "inclusive growth —requires→ productive employment"
+    },
+    {
+      "id": "e50",
+      "source": "inclusive growth",
+      "target": "universal capabilities",
+      "predicate": "requires",
+      "cluster": null,
+      "color": "#2e39cc",
+      "tooltip": "inclusive growth —requires→ universal capabilities"
+    },
+    {
+      "id": "e51",
+      "source": "inclusive growth",
+      "target": "progressive taxation",
+      "predicate": "requires adoption of",
+      "cluster": null,
+      "color": "#de6a9e",
+      "tooltip": "inclusive growth —requires adoption of→ progressive taxation"
+    },
+    {
+      "id": "e52",
+      "source": "inclusive growth",
+      "target": "gig workers",
+      "predicate": "requires expanded social security for",
+      "cluster": null,
+      "color": "#4bcbe2",
+      "tooltip": "inclusive growth —requires expanded social security for→ gig workers"
+    },
+    {
+      "id": "e53",
+      "source": "inclusive growth",
+      "target": "informal workers",
+      "predicate": "requires expanded social security for",
+      "cluster": null,
+      "color": "#4bcbe2",
+      "tooltip": "inclusive growth —requires expanded social security for→ informal workers"
+    },
+    {
+      "id": "e54",
+      "source": "inclusive growth",
+      "target": "targeted welfare delivery",
+      "predicate": "requires improved",
+      "cluster": null,
+      "color": "#3636bf",
+      "tooltip": "inclusive growth —requires improved→ targeted welfare delivery"
+    },
+    {
+      "id": "e55",
+      "source": "inclusive growth",
+      "target": "foundational education",
+      "predicate": "requires improvement of",
+      "cluster": null,
+      "color": "#26ccb3",
+      "tooltip": "inclusive growth —requires improvement of→ foundational education"
+    },
+    {
+      "id": "e56",
+      "source": "inclusive growth",
+      "target": "nutrition",
+      "predicate": "requires improvement of",
+      "cluster": null,
+      "color": "#26ccb3",
+      "tooltip": "inclusive growth —requires improvement of→ nutrition"
+    },
+    {
+      "id": "e57",
+      "source": "inclusive growth",
+      "target": "public healthcare",
+      "predicate": "requires improvement of",
+      "cluster": null,
+      "color": "#26ccb3",
+      "tooltip": "inclusive growth —requires improvement of→ public healthcare"
+    },
+    {
+      "id": "e58",
+      "source": "inclusive growth",
+      "target": "women’s asset ownership",
+      "predicate": "requires improvement of",
+      "cluster": null,
+      "color": "#26ccb3",
+      "tooltip": "inclusive growth —requires improvement of→ women’s asset ownership"
+    },
+    {
+      "id": "e59",
+      "source": "inclusive growth",
+      "target": "women’s safety",
+      "predicate": "requires improvement of",
+      "cluster": null,
+      "color": "#26ccb3",
+      "tooltip": "inclusive growth —requires improvement of→ women’s safety"
+    },
+    {
+      "id": "e60",
+      "source": "inclusive growth",
+      "target": "women’s skills",
+      "predicate": "requires improvement of",
+      "cluster": null,
+      "color": "#26ccb3",
+      "tooltip": "inclusive growth —requires improvement of→ women’s skills"
+    },
+    {
+      "id": "e61",
+      "source": "inclusive growth",
+      "target": "women’s workforce participation",
+      "predicate": "requires improvement of",
+      "cluster": null,
+      "color": "#26ccb3",
+      "tooltip": "inclusive growth —requires improvement of→ women’s workforce participation"
+    },
+    {
+      "id": "e62",
+      "source": "inclusive growth",
+      "target": "backward regions",
+      "predicate": "requires investment in",
+      "cluster": null,
+      "color": "#6c43d4",
+      "tooltip": "inclusive growth —requires investment in→ backward regions"
+    },
+    {
+      "id": "e63",
+      "source": "inclusive growth",
+      "target": "climate-resilient infrastructure",
+      "predicate": "requires investment in",
+      "cluster": null,
+      "color": "#6c43d4",
+      "tooltip": "inclusive growth —requires investment in→ climate-resilient infrastructure"
+    },
+    {
+      "id": "e64",
+      "source": "inclusive growth",
+      "target": "welfare",
+      "predicate": "requires moving beyond reliance on",
+      "cluster": null,
+      "color": "#47b3e0",
+      "tooltip": "inclusive growth —requires moving beyond reliance on→ welfare"
+    },
+    {
+      "id": "e65",
+      "source": "inclusive growth",
+      "target": "employment-oriented micro, small and medium enterprises (MSMEs)",
+      "predicate": "requires promotion of",
+      "cluster": null,
+      "color": "#7045ec",
+      "tooltip": "inclusive growth —requires promotion of→ employment-oriented micro, small and medium enterprises (MSMEs)"
+    },
+    {
+      "id": "e66",
+      "source": "inclusive growth",
+      "target": "labour-intensive manufacturing",
+      "predicate": "requires promotion of",
+      "cluster": null,
+      "color": "#7045ec",
+      "tooltip": "inclusive growth —requires promotion of→ labour-intensive manufacturing"
+    },
+    {
+      "id": "e67",
+      "source": "inclusive growth",
+      "target": "agricultural productivity",
+      "predicate": "requires raising",
+      "cluster": null,
+      "color": "#d56094",
+      "tooltip": "inclusive growth —requires raising→ agricultural productivity"
+    },
+    {
+      "id": "e68",
+      "source": "inclusive growth",
+      "target": "rural non-farm employment",
+      "predicate": "requires strengthening",
+      "cluster": null,
+      "color": "#d3ad5c",
+      "tooltip": "inclusive growth —requires strengthening→ rural non-farm employment"
+    },
+    {
+      "id": "e69",
+      "source": "unequal learning outcomes",
+      "target": "upward mobility",
+      "predicate": "restrict",
+      "cluster": null,
+      "color": "#39da72",
+      "tooltip": "unequal learning outcomes —restrict→ upward mobility"
+    },
+    {
+      "id": "e70",
+      "source": "agricultural distress",
+      "target": "upward mobility",
+      "predicate": "restricts",
+      "cluster": null,
+      "color": "#8be57a",
+      "tooltip": "agricultural distress —restricts→ upward mobility"
+    },
+    {
+      "id": "e71",
+      "source": "digital divide",
+      "target": "upward mobility",
+      "predicate": "restricts",
+      "cluster": null,
+      "color": "#8be57a",
+      "tooltip": "digital divide —restricts→ upward mobility"
+    },
+    {
+      "id": "e72",
+      "source": "out-of-pocket health expenditure",
+      "target": "upward mobility",
+      "predicate": "restricts",
+      "cluster": null,
+      "color": "#8be57a",
+      "tooltip": "out-of-pocket health expenditure —restricts→ upward mobility"
+    },
+    {
+      "id": "e73",
+      "source": "social security",
+      "target": "gig workers",
+      "predicate": "should be expanded for",
+      "cluster": null,
+      "color": "#40e340",
+      "tooltip": "social security —should be expanded for→ gig workers"
+    },
+    {
+      "id": "e74",
+      "source": "social security",
+      "target": "informal workers",
+      "predicate": "should be expanded for",
+      "cluster": null,
+      "color": "#40e340",
+      "tooltip": "social security —should be expanded for→ informal workers"
+    }
+  ],
+  "clusters": [],
+  "edgeClusters": [],
+  "topEntities": [
+    {
+      "label": "inclusive growth",
+      "degree": 49,
+      "indegree": 9,
+      "outdegree": 40,
+      "cluster": null
+    },
+    {
+      "label": "India",
+      "degree": 12,
+      "indegree": 6,
+      "outdegree": 6,
+      "cluster": null
+    },
+    {
+      "label": "social-protection framework",
+      "degree": 5,
+      "indegree": 5,
+      "outdegree": 0,
+      "cluster": null
+    },
+    {
+      "label": "upward mobility",
+      "degree": 4,
+      "indegree": 4,
+      "outdegree": 0,
+      "cluster": null
+    },
+    {
+      "label": "economic growth",
+      "degree": 3,
+      "indegree": 1,
+      "outdegree": 2,
+      "cluster": null
+    },
+    {
+      "label": "social security",
+      "degree": 3,
+      "indegree": 1,
+      "outdegree": 2,
+      "cluster": null
+    },
+    {
+      "label": "economic shocks",
+      "degree": 2,
+      "indegree": 0,
+      "outdegree": 2,
+      "cluster": null
+    },
+    {
+      "label": "gender inequality",
+      "degree": 2,
+      "indegree": 0,
+      "outdegree": 2,
+      "cluster": null
+    },
+    {
+      "label": "General Studies III",
+      "degree": 2,
+      "indegree": 1,
+      "outdegree": 1,
+      "cluster": null
+    },
+    {
+      "label": "gig workers",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "cluster": null
+    }
+  ],
+  "topRelations": [
+    {
+      "predicate": "has salient feature",
+      "count": 13,
+      "cluster": null,
+      "color": "#42e31d"
+    },
+    {
+      "predicate": "requires improvement of",
+      "count": 7,
+      "cluster": null,
+      "color": "#26ccb3"
+    },
+    {
+      "predicate": "limits",
+      "count": 6,
+      "cluster": null,
+      "color": "#d03c31"
+    },
+    {
+      "predicate": "remains significant in",
+      "count": 4,
+      "cluster": null,
+      "color": "#d62553"
+    },
+    {
+      "predicate": "has improved",
+      "count": 3,
+      "cluster": null,
+      "color": "#3fda59"
+    },
+    {
+      "predicate": "has widened",
+      "count": 3,
+      "cluster": null,
+      "color": "#91dd76"
+    },
+    {
+      "predicate": "requires",
+      "count": 3,
+      "cluster": null,
+      "color": "#2e39cc"
+    },
+    {
+      "predicate": "restricts",
+      "count": 3,
+      "cluster": null,
+      "color": "#8be57a"
+    },
+    {
+      "predicate": "disproportionately affect",
+      "count": 2,
+      "cluster": null,
+      "color": "#f05255"
+    },
+    {
+      "predicate": "have widened",
+      "count": 2,
+      "cluster": null,
+      "color": "#2ce0d1"
+    }
+  ],
+  "stats": {
+    "entities": 70,
+    "relations": 75,
+    "relationTypes": 34,
+    "entityClusters": 0,
+    "edgeClusters": 0,
+    "isolatedEntities": 0,
+    "components": 4,
+    "averageDegree": 2.14,
+    "density": 0.016
+  },
+  "isolatedEntities": [],
+  "components": [
+    {
+      "size": 56,
+      "members": [
+        "agricultural productivity",
+        "backward regions",
+        "balanced regional development",
+        "balanced rural–urban development",
+        "banking access",
+        "climate-resilient infrastructure",
+        "digital inclusion",
+        "digital services",
+        "economic growth",
+        "electricity access",
+        "employment-oriented micro, small and medium enterprises (MSMEs)",
+        "empowerment of marginalised communities",
+        "environmentally sustainable resource use",
+        "equal opportunity",
+        "fair distribution of growth benefits",
+        "financial inclusion",
+        "foundational education",
+        "gender equality",
+        "gender inequality",
+        "General Studies III",
+        "gig workers",
+        "inclusive growth",
+        "income inequality",
+        "income inequality reduction",
+        "India",
+        "informal employment",
+        "informal workers",
+        "infrastructure",
+        "labour-intensive manufacturing",
+        "multidimensional poverty",
+        "national income",
+        "nutrition",
+        "opportunities for all sections of society",
+        "poverty reduction",
+        "productive and decent employment",
+        "productive employment",
+        "progressive taxation",
+        "public healthcare",
+        "regional inequality",
+        "rural non-farm employment",
+        "sanitation access",
+        "social justice",
+        "social security",
+        "targeted welfare delivery",
+        "unemployment",
+        "universal capabilities",
+        "universal education access",
+        "universal healthcare access",
+        "UPSC Civil Services Examination (CSE) Mains",
+        "wealth inequality",
+        "welfare",
+        "wider participation",
+        "women’s asset ownership",
+        "women’s safety",
+        "women’s skills",
+        "women’s workforce participation"
+      ]
+    },
+    {
+      "size": 6,
+      "members": [
+        "Ayushman Bharat",
+        "direct benefit transfers",
+        "food-security schemes",
+        "Mahatma Gandhi National Rural Employment Guarantee Act (MGNREGA)",
+        "Pradhan Mantri Jan Dhan Yojana",
+        "social-protection framework"
+      ]
+    },
+    {
+      "size": 5,
+      "members": [
+        "agricultural distress",
+        "digital divide",
+        "out-of-pocket health expenditure",
+        "unequal learning outcomes",
+        "upward mobility"
+      ]
+    },
+    {
+      "size": 3,
+      "members": [
+        "economic shocks",
+        "informal-sector households",
+        "migrant workers"
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "source": "inclusive growth",
+      "predicate": "combines economic advancement with",
+      "target": "social justice",
+      "edgeId": "e0",
+      "color": "#62dd3d"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "combines increased",
+      "target": "national income",
+      "edgeId": "e1",
+      "color": "#e778e1"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "creates",
+      "target": "opportunities for all sections of society",
+      "edgeId": "e2",
+      "color": "#63e1df"
+    },
+    {
+      "source": "economic shocks",
+      "predicate": "disproportionately affect",
+      "target": "informal-sector households",
+      "edgeId": "e3",
+      "color": "#f05255"
+    },
+    {
+      "source": "economic shocks",
+      "predicate": "disproportionately affect",
+      "target": "migrant workers",
+      "edgeId": "e4",
+      "color": "#f05255"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "ensures",
+      "target": "fair distribution of growth benefits",
+      "edgeId": "e5",
+      "color": "#e9cc74"
+    },
+    {
+      "source": "General Studies III",
+      "predicate": "examines",
+      "target": "inclusive growth",
+      "edgeId": "e6",
+      "color": "#cd5353"
+    },
+    {
+      "source": "India",
+      "predicate": "has established important foundations for",
+      "target": "inclusive growth",
+      "edgeId": "e7",
+      "color": "#52ecc3"
+    },
+    {
+      "source": "economic growth",
+      "predicate": "has expanded in India",
+      "target": "infrastructure",
+      "edgeId": "e8",
+      "color": "#68ebed"
+    },
+    {
+      "source": "India",
+      "predicate": "has had a mixed experience with",
+      "target": "inclusive growth",
+      "edgeId": "e9",
+      "color": "#c33362"
+    },
+    {
+      "source": "India",
+      "predicate": "has improved",
+      "target": "banking access",
+      "edgeId": "e10",
+      "color": "#3fda59"
+    },
+    {
+      "source": "India",
+      "predicate": "has improved",
+      "target": "electricity access",
+      "edgeId": "e11",
+      "color": "#3fda59"
+    },
+    {
+      "source": "India",
+      "predicate": "has improved",
+      "target": "sanitation access",
+      "edgeId": "e12",
+      "color": "#3fda59"
+    },
+    {
+      "source": "India",
+      "predicate": "has improved access to",
+      "target": "digital services",
+      "edgeId": "e13",
+      "color": "#68b6e7"
+    },
+    {
+      "source": "economic growth",
+      "predicate": "has reduced in India",
+      "target": "multidimensional poverty",
+      "edgeId": "e14",
+      "color": "#d1bd1b"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "has salient feature",
+      "target": "balanced regional development",
+      "edgeId": "e15",
+      "color": "#42e31d"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "has salient feature",
+      "target": "balanced rural–urban development",
+      "edgeId": "e16",
+      "color": "#42e31d"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "has salient feature",
+      "target": "digital inclusion",
+      "edgeId": "e17",
+      "color": "#42e31d"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "has salient feature",
+      "target": "empowerment of marginalised communities",
+      "edgeId": "e18",
+      "color": "#42e31d"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "has salient feature",
+      "target": "environmentally sustainable resource use",
+      "edgeId": "e19",
+      "color": "#42e31d"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "has salient feature",
+      "target": "financial inclusion",
+      "edgeId": "e20",
+      "color": "#42e31d"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "has salient feature",
+      "target": "gender equality",
+      "edgeId": "e21",
+      "color": "#42e31d"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "has salient feature",
+      "target": "income inequality reduction",
+      "edgeId": "e22",
+      "color": "#42e31d"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "has salient feature",
+      "target": "poverty reduction",
+      "edgeId": "e23",
+      "color": "#42e31d"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "has salient feature",
+      "target": "productive and decent employment",
+      "edgeId": "e24",
+      "color": "#42e31d"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "has salient feature",
+      "target": "social security",
+      "edgeId": "e25",
+      "color": "#42e31d"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "has salient feature",
+      "target": "universal education access",
+      "edgeId": "e26",
+      "color": "#42e31d"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "has salient feature",
+      "target": "universal healthcare access",
+      "edgeId": "e27",
+      "color": "#42e31d"
+    },
+    {
+      "source": "Ayushman Bharat",
+      "predicate": "has widened",
+      "target": "social-protection framework",
+      "edgeId": "e28",
+      "color": "#91dd76"
+    },
+    {
+      "source": "Mahatma Gandhi National Rural Employment Guarantee Act (MGNREGA)",
+      "predicate": "has widened",
+      "target": "social-protection framework",
+      "edgeId": "e29",
+      "color": "#91dd76"
+    },
+    {
+      "source": "Pradhan Mantri Jan Dhan Yojana",
+      "predicate": "has widened",
+      "target": "social-protection framework",
+      "edgeId": "e30",
+      "color": "#91dd76"
+    },
+    {
+      "source": "direct benefit transfers",
+      "predicate": "have widened",
+      "target": "social-protection framework",
+      "edgeId": "e31",
+      "color": "#2ce0d1"
+    },
+    {
+      "source": "food-security schemes",
+      "predicate": "have widened",
+      "target": "social-protection framework",
+      "edgeId": "e32",
+      "color": "#2ce0d1"
+    },
+    {
+      "source": "UPSC Civil Services Examination (CSE) Mains",
+      "predicate": "includes",
+      "target": "General Studies III",
+      "edgeId": "e33",
+      "color": "#26c2bd"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "is a form of",
+      "target": "economic growth",
+      "edgeId": "e34",
+      "color": "#5fbf30"
+    },
+    {
+      "source": "gender inequality",
+      "predicate": "limits",
+      "target": "inclusive growth",
+      "edgeId": "e35",
+      "color": "#d03c31"
+    },
+    {
+      "source": "income inequality",
+      "predicate": "limits",
+      "target": "inclusive growth",
+      "edgeId": "e36",
+      "color": "#d03c31"
+    },
+    {
+      "source": "informal employment",
+      "predicate": "limits",
+      "target": "inclusive growth",
+      "edgeId": "e37",
+      "color": "#d03c31"
+    },
+    {
+      "source": "regional inequality",
+      "predicate": "limits",
+      "target": "inclusive growth",
+      "edgeId": "e38",
+      "color": "#d03c31"
+    },
+    {
+      "source": "unemployment",
+      "predicate": "limits",
+      "target": "inclusive growth",
+      "edgeId": "e39",
+      "color": "#d03c31"
+    },
+    {
+      "source": "wealth inequality",
+      "predicate": "limits",
+      "target": "inclusive growth",
+      "edgeId": "e40",
+      "color": "#d03c31"
+    },
+    {
+      "source": "informal employment",
+      "predicate": "persists in",
+      "target": "India",
+      "edgeId": "e41",
+      "color": "#63d36d"
+    },
+    {
+      "source": "unemployment",
+      "predicate": "persists in",
+      "target": "India",
+      "edgeId": "e42",
+      "color": "#63d36d"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "promotes",
+      "target": "wider participation",
+      "edgeId": "e43",
+      "color": "#67e561"
+    },
+    {
+      "source": "gender inequality",
+      "predicate": "remains significant in",
+      "target": "India",
+      "edgeId": "e44",
+      "color": "#d62553"
+    },
+    {
+      "source": "income inequality",
+      "predicate": "remains significant in",
+      "target": "India",
+      "edgeId": "e45",
+      "color": "#d62553"
+    },
+    {
+      "source": "regional inequality",
+      "predicate": "remains significant in",
+      "target": "India",
+      "edgeId": "e46",
+      "color": "#d62553"
+    },
+    {
+      "source": "wealth inequality",
+      "predicate": "remains significant in",
+      "target": "India",
+      "edgeId": "e47",
+      "color": "#d62553"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires",
+      "target": "equal opportunity",
+      "edgeId": "e48",
+      "color": "#2e39cc"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires",
+      "target": "productive employment",
+      "edgeId": "e49",
+      "color": "#2e39cc"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires",
+      "target": "universal capabilities",
+      "edgeId": "e50",
+      "color": "#2e39cc"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires adoption of",
+      "target": "progressive taxation",
+      "edgeId": "e51",
+      "color": "#de6a9e"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires expanded social security for",
+      "target": "gig workers",
+      "edgeId": "e52",
+      "color": "#4bcbe2"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires expanded social security for",
+      "target": "informal workers",
+      "edgeId": "e53",
+      "color": "#4bcbe2"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires improved",
+      "target": "targeted welfare delivery",
+      "edgeId": "e54",
+      "color": "#3636bf"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires improvement of",
+      "target": "foundational education",
+      "edgeId": "e55",
+      "color": "#26ccb3"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires improvement of",
+      "target": "nutrition",
+      "edgeId": "e56",
+      "color": "#26ccb3"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires improvement of",
+      "target": "public healthcare",
+      "edgeId": "e57",
+      "color": "#26ccb3"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires improvement of",
+      "target": "women’s asset ownership",
+      "edgeId": "e58",
+      "color": "#26ccb3"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires improvement of",
+      "target": "women’s safety",
+      "edgeId": "e59",
+      "color": "#26ccb3"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires improvement of",
+      "target": "women’s skills",
+      "edgeId": "e60",
+      "color": "#26ccb3"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires improvement of",
+      "target": "women’s workforce participation",
+      "edgeId": "e61",
+      "color": "#26ccb3"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires investment in",
+      "target": "backward regions",
+      "edgeId": "e62",
+      "color": "#6c43d4"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires investment in",
+      "target": "climate-resilient infrastructure",
+      "edgeId": "e63",
+      "color": "#6c43d4"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires moving beyond reliance on",
+      "target": "welfare",
+      "edgeId": "e64",
+      "color": "#47b3e0"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires promotion of",
+      "target": "employment-oriented micro, small and medium enterprises (MSMEs)",
+      "edgeId": "e65",
+      "color": "#7045ec"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires promotion of",
+      "target": "labour-intensive manufacturing",
+      "edgeId": "e66",
+      "color": "#7045ec"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires raising",
+      "target": "agricultural productivity",
+      "edgeId": "e67",
+      "color": "#d56094"
+    },
+    {
+      "source": "inclusive growth",
+      "predicate": "requires strengthening",
+      "target": "rural non-farm employment",
+      "edgeId": "e68",
+      "color": "#d3ad5c"
+    },
+    {
+      "source": "unequal learning outcomes",
+      "predicate": "restrict",
+      "target": "upward mobility",
+      "edgeId": "e69",
+      "color": "#39da72"
+    },
+    {
+      "source": "agricultural distress",
+      "predicate": "restricts",
+      "target": "upward mobility",
+      "edgeId": "e70",
+      "color": "#8be57a"
+    },
+    {
+      "source": "digital divide",
+      "predicate": "restricts",
+      "target": "upward mobility",
+      "edgeId": "e71",
+      "color": "#8be57a"
+    },
+    {
+      "source": "out-of-pocket health expenditure",
+      "predicate": "restricts",
+      "target": "upward mobility",
+      "edgeId": "e72",
+      "color": "#8be57a"
+    },
+    {
+      "source": "social security",
+      "predicate": "should be expanded for",
+      "target": "gig workers",
+      "edgeId": "e73",
+      "color": "#40e340"
+    },
+    {
+      "source": "social security",
+      "predicate": "should be expanded for",
+      "target": "informal workers",
+      "edgeId": "e74",
+      "color": "#40e340"
+    }
+  ]
+}
+    </script>
+    <script>
+        (function () {
+            console.log('[iframe] Script starting - mobile check:', window.innerWidth <= 768);
+            console.log('[iframe] User agent:', navigator.userAgent);
+
+            const dataElement = document.getElementById('viz-data');
+            if (!dataElement) {
+                console.error('[iframe] viz-data element not found!');
+                return;
+            }
+
+            let vizData;
+            try {
+                vizData = JSON.parse(dataElement.textContent);
+                console.log('[iframe] Data parsed successfully:', vizData.nodes?.length, 'nodes');
+            } catch (e) {
+                console.error('[iframe] Failed to parse data:', e);
+                return;
+            }
+
+            const state = {
+                activeElement: null,
+                focusCluster: null,
+                focusPredicate: null,
+                searchTerm: '',
+                sidebarCollapsed: false,
+                sidebarDisabled: false
+            };
+
+            const nodeById = Object.fromEntries(vizData.nodes.map(node => [node.id, node]));
+            const edgeById = Object.fromEntries(vizData.edges.map(edge => [edge.id, edge]));
+            const clusterById = Object.fromEntries(vizData.clusters.map(cluster => [cluster.id, cluster]));
+            const edgesByPredicate = {};
+            vizData.edges.forEach(edge => {
+                if (!edgesByPredicate[edge.predicate]) {
+                    edgesByPredicate[edge.predicate] = [];
+                }
+                edgesByPredicate[edge.predicate].push(edge.id);
+            });
+
+            const nodesByCluster = {};
+            vizData.clusters.forEach(cluster => {
+                cluster.members.forEach(member => {
+                    if (!nodesByCluster[cluster.id]) {
+                        nodesByCluster[cluster.id] = new Set();
+                    }
+                    nodesByCluster[cluster.id].add(member);
+                });
+            });
+
+            function renderStats() {
+                const grid = document.getElementById('statsGrid');
+                const stats = vizData.stats;
+                const entries = [
+                    { label: 'Entities', value: stats.entities },
+                    { label: 'Relations', value: stats.relations },
+                    { label: 'Relation types', value: stats.relationTypes },
+                    { label: 'Entity clusters', value: stats.entityClusters },
+                    { label: 'Edge clusters', value: stats.edgeClusters },
+                    { label: 'Isolated entities', value: stats.isolatedEntities },
+                    { label: 'Components', value: stats.components },
+                    { label: 'Average degree', value: stats.averageDegree }
+                ];
+                grid.innerHTML = entries
+                    .map(entry => `
+                        <div class="stat-card">
+                            <div class="stat-value">${entry.value}</div>
+                            <div>${entry.label}</div>
+                        </div>
+                    `)
+                    .join('');
+            }
+
+            function renderTopLists() {
+                const topEntitiesContainer = document.getElementById('topEntities');
+                const topRelationsContainer = document.getElementById('topRelations');
+
+                const entityItems = vizData.topEntities.map(item => {
+                    const clusterLabel = item.cluster ? `${item.cluster}` : 'Unclustered';
+                    return `
+                        <div class="list-item">
+                            <div>
+                                <strong>${item.label}</strong>
+                                <div class="meta">Cluster: ${clusterLabel}</div>
+                            </div>
+                            <div>${item.degree}</div>
+                        </div>
+                    `;
+                });
+                topEntitiesContainer.innerHTML = entityItems.join('') || '<div class="meta">No entities</div>';
+
+                const relationItems = vizData.topRelations.map(item => `
+                    <div class="list-item relation-item" data-predicate="${item.predicate}">
+                        <div>
+                            <strong>${item.predicate}</strong>
+                            <div class="meta">${item.count} relations</div>
+                        </div>
+                        <div class="pill" style="background: ${item.color}1a; border: 1px solid ${item.color};">${item.count}</div>
+                    </div>
+                `);
+                topRelationsContainer.innerHTML = relationItems.join('') || '<div class="meta">No relations</div>';
+            }
+
+            function renderClusters() {
+                const container = document.getElementById('clusterList');
+                if (!vizData.clusters.length) {
+                    container.innerHTML = '<div class="meta">No cluster information provided.</div>';
+                    return;
+                }
+                container.innerHTML = vizData.clusters
+                    .map(cluster => `
+                        <button class="list-item cluster-item" data-cluster="${cluster.id}" style="border-left-color: ${cluster.color};">
+                            <div>
+                                <strong>${cluster.label}</strong>
+                                <div class="meta">${cluster.size} members</div>
+                            </div>
+                            <span class="legend-swatch" style="background: ${cluster.color};"></span>
+                        </button>
+                    `)
+                    .join('');
+            }
+
+            // function renderRelationsTable() {
+            //     const tbody = document.getElementById('relationsTable');
+            //     tbody.innerHTML = vizData.relations
+            //         .map(rel => `
+            //             <tr data-edge="${rel.edgeId}">
+            //                 <td>${rel.source}</td>
+            //                 <td><span class="pill" style="border: 1px solid ${rel.color}; background: ${rel.color}1a;">${rel.predicate}</span></td>
+            //                 <td>${rel.target}</td>
+            //             </tr>
+            //         `)
+            //         .join('');
+            // }
+
+            // function renderInsights() {
+            //     const insights = document.getElementById('insightsContent');
+            //     const clusters = vizData.clusters
+            //         .map(cluster => `
+            //             <div class="list-item" style="border-left: 4px solid ${cluster.color};">
+            //                 <div>
+            //                     <strong>${cluster.label}</strong>
+            //                     <div class="meta">Members: ${cluster.members.join(', ')}</div>
+            //                 </div>
+            //                 <div>${cluster.size}</div>
+            //             </div>
+            //         `)
+            //         .join('');
+
+            //     const components = vizData.components
+            //         .map((component, index) => `
+            //             <div class="list-item">
+            //                 <div>
+            //                     <strong>Component ${index + 1}</strong>
+            //                     <div class="meta">${component.members.join(', ')}</div>
+            //                 </div>
+            //                 <div>${component.size}</div>
+            //             </div>
+            //         `)
+            //         .join('');
+
+            //     const isolates = vizData.isolatedEntities.length
+            //         ? vizData.isolatedEntities.join(', ')
+            //         : 'None';
+
+            //     insights.innerHTML = `
+            //         <div class="section">
+            //             <h2>Clusters</h2>
+            //             <div class="list">${clusters || '<div class="meta">No clusters</div>'}</div>
+            //         </div>
+            //         <div class="section">
+            //             <h2>Connected components</h2>
+            //             <div class="list">${components || '<div class="meta">Single connected component</div>'}</div>
+            //         </div>
+            //         <div class="section">
+            //             <h2>Isolated entities</h2>
+            //             <div class="meta">${isolates}</div>
+            //         </div>
+            //     `;
+            // }
+
+            function setActiveElement(element) {
+                state.activeElement = element;
+                renderSelectionDetails();
+                updateHighlights();
+
+                // Notify parent about selection change
+                if (window.parent !== window && state.sidebarDisabled) {
+                    const selection = element ? {
+                        type: element.type,
+                        id: element.id,
+                        ...getElementDetails(element)
+                    } : null;
+                    window.parent.postMessage({
+                        type: 'selectionChanged',
+                        selection: selection
+                    }, '*');
+                }
+            }
+
+            function getElementDetails(element) {
+                if (!element) return {};
+
+                if (element.type === 'node') {
+                    const node = nodeById[element.id];
+                    return {
+                        label: node.label,
+                        cluster: node.cluster,
+                        degree: node.degree,
+                        indegree: node.indegree,
+                        outdegree: node.outdegree,
+                        neighbors: node.neighbors
+                    };
+                } else if (element.type === 'edge') {
+                    const edge = edgeById[element.id];
+                    return {
+                        source: edge.source,
+                        target: edge.target,
+                        predicate: edge.predicate,
+                        cluster: edge.cluster
+                    };
+                }
+                return {};
+            }
+
+            function clearActiveElement() {
+                state.activeElement = null;
+                renderSelectionDetails();
+                updateHighlights();
+            }
+
+            function renderSelectionDetails() {
+                const panel = document.getElementById('selectionDetails');
+                const active = state.activeElement;
+                if (!active) {
+                    panel.innerHTML = 'Click a node or relation in the network to inspect details.';
+                    return;
+                }
+
+                if (active.type === 'node') {
+                    const node = nodeById[active.id];
+                    const cluster = node.cluster ? `Cluster: ${node.cluster}` : 'Unclustered';
+                    const neighbors = node.neighbors.length ? node.neighbors.join(', ') : 'None';
+                    panel.innerHTML = `
+                        <h3>${node.label}</h3>
+                        <ul>
+                            <li>${cluster}</li>
+                            <li>Total degree: ${node.degree}</li>
+                            <li>Outgoing: ${node.outdegree}</li>
+                            <li>Incoming: ${node.indegree}</li>
+                            <li>Neighbors: ${neighbors}</li>
+                        </ul>
+                    `;
+                } else if (active.type === 'edge') {
+                    const edge = edgeById[active.id];
+                    const cluster = edge.cluster ? `Cluster: ${edge.cluster}` : 'Unclustered';
+                    panel.innerHTML = `
+                        <h3>${edge.source} → ${edge.target}</h3>
+                        <ul>
+                            <li>Relation: ${edge.predicate}</li>
+                            <li>${cluster}</li>
+                        </ul>
+                    `;
+                }
+            }
+
+            function toggleClusterFocus(clusterId) {
+                if (state.focusCluster === clusterId) {
+                    state.focusCluster = null;
+                } else {
+                    state.focusCluster = clusterId;
+                }
+                updateActiveButtons();
+                updateHighlights();
+            }
+
+            function togglePredicateFocus(predicate) {
+                if (state.focusPredicate === predicate) {
+                    state.focusPredicate = null;
+                } else {
+                    state.focusPredicate = predicate;
+                }
+                updateActiveButtons();
+                updateHighlights();
+            }
+
+            function updateActiveButtons() {
+                document.querySelectorAll('.cluster-item').forEach(item => {
+                    const clusterId = item.getAttribute('data-cluster');
+                    item.classList.toggle('active', state.focusCluster === clusterId);
+                });
+                document.querySelectorAll('.relation-item').forEach(item => {
+                    const predicate = item.getAttribute('data-predicate');
+                    item.classList.toggle('active', state.focusPredicate === predicate);
+                });
+            }
+
+            // Canvas-based network visualization
+            let canvas, ctx, transform, simulation;
+            let nodes, edges;
+            let highlightedNodes = new Set();
+            let highlightedEdges = new Set();
+            let isFiltering = false;
+
+            function createNetwork() {
+                console.log('[iframe] createNetwork starting...');
+
+                if (typeof d3 === 'undefined') {
+                    console.error('[iframe] D3.js not loaded!');
+                    return;
+                }
+                console.log('[iframe] D3.js version:', d3.version);
+
+                canvas = document.getElementById('networkCanvas');
+                if (!canvas) {
+                    console.error('[iframe] Canvas element not found!');
+                    return;
+                }
+
+                ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    console.error('[iframe] Canvas context not available!');
+                    return;
+                }
+
+                // Force a layout recalculation to ensure proper sizing
+                canvas.offsetHeight; // Trigger reflow
+
+                // Set canvas size with device pixel ratio for crisp rendering
+                const rect = canvas.getBoundingClientRect();
+                console.log('[iframe] Canvas rect:', rect.width, 'x', rect.height);
+
+                // Ensure minimum size for mobile/narrow viewports
+                const width = Math.max(rect.width, 320);
+                const height = Math.max(rect.height, 200);
+
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                ctx.scale(dpr, dpr);
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+
+                // Initialize transform for zooming/panning
+                transform = d3.zoomIdentity;
+
+                // Clone data for simulation
+                nodes = vizData.nodes.map(node => ({ ...node }));
+                edges = vizData.edges.map(edge => ({ ...edge }));
+
+                // Create D3 force simulation
+                simulation = d3
+                    .forceSimulation(nodes)
+                    .force('link', d3.forceLink(edges).id(d => d.id).distance(120).strength(0.3))
+                    .force('charge', d3.forceManyBody().strength(-280))
+                    .force('center', d3.forceCenter(width / 2, height / 2))
+                    .force('collision', d3.forceCollide().radius(d => d.radius + 12));
+
+                // Set up zoom behavior
+                const zoom = d3.zoom()
+                    .scaleExtent([0.25, 3])
+                    .on('zoom', (event) => {
+                        transform = event.transform;
+                        render();
+                    });
+
+                d3.select(canvas).call(zoom);
+
+                // Mouse interaction handling
+                let draggedNode = null;
+                let mouseX, mouseY;
+
+                function getMousePos(event) {
+                    const rect = canvas.getBoundingClientRect();
+                    return {
+                        x: (event.clientX - rect.left - transform.x) / transform.k,
+                        y: (event.clientY - rect.top - transform.y) / transform.k
+                    };
+                }
+
+                function findNode(x, y) {
+                    for (let i = nodes.length - 1; i >= 0; i--) {
+                        const node = nodes[i];
+                        const dx = x - node.x;
+                        const dy = y - node.y;
+                        if (dx * dx + dy * dy < node.radius * node.radius) {
+                            return node;
+                        }
+                    }
+                    return null;
+                }
+
+                function findEdge(x, y) {
+                    for (let i = edges.length - 1; i >= 0; i--) {
+                        const edge = edges[i];
+                        if (!edge.source || !edge.target) continue;
+
+                        // Check if click is near the edge line
+                        const dx = edge.target.x - edge.source.x;
+                        const dy = edge.target.y - edge.source.y;
+                        const length = Math.sqrt(dx * dx + dy * dy);
+                        if (length === 0) continue;
+
+                        const dot = ((x - edge.source.x) * dx + (y - edge.source.y) * dy) / (length * length);
+                        if (dot < 0 || dot > 1) continue;
+
+                        const projX = edge.source.x + dot * dx;
+                        const projY = edge.source.y + dot * dy;
+                        const distSq = (x - projX) * (x - projX) + (y - projY) * (y - projY);
+
+                        if (distSq < 25) { // 5px threshold
+                            return edge;
+                        }
+                    }
+                    return null;
+                }
+
+                canvas.addEventListener('mousedown', (event) => {
+                    const pos = getMousePos(event);
+                    mouseX = pos.x;
+                    mouseY = pos.y;
+                    draggedNode = findNode(pos.x, pos.y);
+
+                    if (draggedNode) {
+                        simulation.alphaTarget(0.3).restart();
+                        draggedNode.fx = draggedNode.x;
+                        draggedNode.fy = draggedNode.y;
+                        canvas.style.cursor = 'grabbing';
+                    }
+                });
+
+                canvas.addEventListener('mousemove', (event) => {
+                    const pos = getMousePos(event);
+
+                    if (draggedNode) {
+                        draggedNode.fx = pos.x;
+                        draggedNode.fy = pos.y;
+                    } else {
+                        // Update cursor based on what's under mouse
+                        const node = findNode(pos.x, pos.y);
+                        const edge = findEdge(pos.x, pos.y);
+                        canvas.style.cursor = (node || edge) ? 'pointer' : 'grab';
+                    }
+                });
+
+                canvas.addEventListener('mouseup', (event) => {
+                    if (draggedNode) {
+                        simulation.alphaTarget(0);
+                        draggedNode.fx = null;
+                        draggedNode.fy = null;
+                        draggedNode = null;
+                        canvas.style.cursor = 'grab';
+                    }
+                });
+
+                canvas.addEventListener('click', (event) => {
+                    const pos = getMousePos(event);
+                    const node = findNode(pos.x, pos.y);
+                    const edge = findEdge(pos.x, pos.y);
+
+                    if (node) {
+                        setActiveElement({ type: 'node', id: node.id });
+                    } else if (edge) {
+                        setActiveElement({ type: 'edge', id: edge.id });
+                    } else {
+                        clearActiveElement();
+                    }
+                });
+
+                // Animation loop
+                simulation.on('tick', () => {
+                    render();
+                });
+
+                // Handle window resize
+                window.addEventListener('resize', resizeCanvas);
+
+                render();
+            }
+
+            function resizeCanvas() {
+                if (!canvas || !ctx) return;
+
+                // Force canvas to take full container size
+                if (state.sidebarDisabled) {
+                    canvas.style.width = '100%';
+                    canvas.style.height = '100%';
+                }
+
+                const rect = canvas.getBoundingClientRect();
+                console.log('Canvas resize - rect:', rect.width, 'x', rect.height);
+
+                // Ensure minimum size for mobile
+                const width = Math.max(rect.width, 320);
+                const height = Math.max(rect.height, 200);
+
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                ctx.scale(dpr, dpr);
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+
+                // Update simulation center
+                if (simulation) {
+                    simulation.force('center', d3.forceCenter(width / 2, height / 2));
+                    simulation.alpha(0.3).restart();
+                }
+
+                render();
+            }
+
+
+            function render() {
+                if (!ctx || !canvas) return;
+
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width / (window.devicePixelRatio || 1),
+                             canvas.height / (window.devicePixelRatio || 1));
+
+                // Apply transform
+                ctx.save();
+                ctx.translate(transform.x, transform.y);
+                ctx.scale(transform.k, transform.k);
+
+                // Set text properties
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = '12px Inter, system-ui, sans-serif';
+
+                // Draw edges first
+                edges.forEach(edge => {
+                    if (!edge.source || !edge.target) return;
+
+                    const isHighlighted = highlightedEdges.has(edge.id);
+                    const isDimmed = isFiltering && !isHighlighted;
+
+                    // Calculate edge endpoints accounting for node radius
+                    const dx = edge.target.x - edge.source.x;
+                    const dy = edge.target.y - edge.source.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy) || 1;
+                    const normX = dx / distance;
+                    const normY = dy / distance;
+
+                    const sourcePadding = edge.source.radius + 2;
+                    const targetPadding = edge.target.radius + 8;
+                    const sourceX = edge.source.x + normX * sourcePadding;
+                    const sourceY = edge.source.y + normY * sourcePadding;
+                    const targetX = edge.target.x - normX * targetPadding;
+                    const targetY = edge.target.y - normY * targetPadding;
+
+                    // Draw edge line
+                    ctx.strokeStyle = edge.color;
+                    ctx.globalAlpha = isDimmed ? 0.15 : (isHighlighted ? 1.0 : 0.55);
+                    ctx.lineWidth = 1.4;
+                    ctx.beginPath();
+                    ctx.moveTo(sourceX, sourceY);
+                    ctx.lineTo(targetX, targetY);
+                    ctx.stroke();
+
+                    // Draw arrowhead
+                    const arrowLength = 10;
+                    const arrowWidth = 5;
+                    const angle = Math.atan2(dy, dx);
+
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.beginPath();
+                    ctx.moveTo(targetX, targetY);
+                    ctx.lineTo(
+                        targetX - arrowLength * Math.cos(angle - arrowWidth * Math.PI / 180),
+                        targetY - arrowLength * Math.sin(angle - arrowWidth * Math.PI / 180)
+                    );
+                    ctx.lineTo(
+                        targetX - arrowLength * Math.cos(angle + arrowWidth * Math.PI / 180),
+                        targetY - arrowLength * Math.sin(angle + arrowWidth * Math.PI / 180)
+                    );
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Draw edge label if zoom level is appropriate
+                    if (transform.k > 0.8) {
+                        const labelX = (sourceX + targetX) / 2;
+                        const labelY = (sourceY + targetY) / 2;
+
+                        ctx.fillStyle = isDimmed ? 'rgba(30, 41, 59, 0.15)' : 'rgba(30, 41, 59, 0.8)';
+                        ctx.font = '10px Inter, system-ui, sans-serif';
+                        ctx.fillText(edge.predicate, labelX, labelY);
+                    }
+                });
+
+                // Draw nodes
+                nodes.forEach(node => {
+                    const isHighlighted = highlightedNodes.has(node.id);
+                    const isDimmed = isFiltering && !isHighlighted;
+
+                    // Draw node circle
+                    ctx.fillStyle = node.color;
+                    ctx.globalAlpha = isDimmed ? 0.15 : 1.0;
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, node.radius, 0, 2 * Math.PI);
+                    ctx.fill();
+
+                    // Draw node border
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.lineWidth = isHighlighted ? 2.4 : 1.2;
+                    ctx.stroke();
+
+                    // Draw node label
+                    if (transform.k > 0.5) {
+                        ctx.fillStyle = isDimmed ? 'rgba(15, 23, 42, 0.15)' : '#0f172a';
+                        ctx.font = '12px Inter, system-ui, sans-serif';
+                        ctx.fillText(node.label, node.x, node.y + node.radius + 14);
+                    }
+                });
+
+                ctx.restore();
+                ctx.globalAlpha = 1.0;
+            }
+
+            function updateHighlights() {
+                // Clear previous highlights
+                highlightedNodes.clear();
+                highlightedEdges.clear();
+                isFiltering = false;
+
+                const addNode = id => {
+                    if (id) {
+                        highlightedNodes.add(id);
+                    }
+                };
+                const addEdge = id => {
+                    if (id) {
+                        highlightedEdges.add(id);
+                    }
+                };
+
+                if (state.activeElement) {
+                    isFiltering = true;
+                    if (state.activeElement.type === 'node') {
+                        const node = nodeById[state.activeElement.id];
+                        addNode(node.id);
+                        node.neighbors.forEach(addNode);
+                        (node.edgeIds.outgoing || []).forEach(addEdge);
+                        (node.edgeIds.incoming || []).forEach(addEdge);
+                    } else if (state.activeElement.type === 'edge') {
+                        const edge = edgeById[state.activeElement.id];
+                        addEdge(edge.id);
+                        addNode(edge.source);
+                        addNode(edge.target);
+                    }
+                }
+
+                if (state.focusCluster && nodesByCluster[state.focusCluster]) {
+                    isFiltering = true;
+                    nodesByCluster[state.focusCluster].forEach(addNode);
+                    vizData.edges.forEach(edge => {
+                        if (
+                            nodesByCluster[state.focusCluster].has(edge.source) &&
+                            nodesByCluster[state.focusCluster].has(edge.target)
+                        ) {
+                            addEdge(edge.id);
+                        }
+                    });
+                }
+
+                if (state.focusPredicate && edgesByPredicate[state.focusPredicate]) {
+                    isFiltering = true;
+                    edgesByPredicate[state.focusPredicate].forEach(edgeId => {
+                        addEdge(edgeId);
+                        const edge = edgeById[edgeId];
+                        addNode(edge.source);
+                        addNode(edge.target);
+                    });
+                }
+
+                if (state.searchTerm) {
+                    const term = state.searchTerm.toLowerCase();
+                    isFiltering = true;
+                    vizData.nodes.forEach(node => {
+                        if (node.label.toLowerCase().includes(term)) {
+                            addNode(node.id);
+                            node.neighbors.forEach(addNode);
+                        }
+                    });
+                    vizData.edges.forEach(edge => {
+                        if (edge.predicate.toLowerCase().includes(term)) {
+                            addEdge(edge.id);
+                            addNode(edge.source);
+                            addNode(edge.target);
+                        }
+                    });
+                }
+
+                // Trigger re-render with updated highlights
+                render();
+            }
+
+            function toggleSidebar() {
+                if (state.sidebarDisabled) return;
+
+                state.sidebarCollapsed = !state.sidebarCollapsed;
+                const layout = document.querySelector('.layout');
+                const sidebar = document.querySelector('.sidebar');
+                const toggleButton = document.getElementById('sidebarToggle');
+
+                layout.classList.toggle('sidebar-collapsed', state.sidebarCollapsed);
+                sidebar.classList.toggle('collapsed', state.sidebarCollapsed);
+                toggleButton.classList.toggle('collapsed', state.sidebarCollapsed);
+
+                // Trigger canvas resize when sidebar toggles
+                setTimeout(() => {
+                    resizeCanvas();
+                }, 300); // Wait for transition to complete
+            }
+
+            function disableSidebar() {
+                state.sidebarDisabled = true;
+
+                const layout = document.querySelector('.layout');
+                const sidebar = document.querySelector('.sidebar');
+                const toggleButton = document.getElementById('sidebarToggle');
+                const main = document.querySelector('.main');
+                const tabPanel = document.querySelector('.tab-panel');
+                const networkPanel = document.querySelector('.network-panel');
+
+                layout.classList.add('sidebar-disabled');
+                sidebar.style.display = 'none';
+                toggleButton.style.display = 'none';
+
+                // Force styles directly for iframe context
+                main.style.width = '100%';
+                main.style.height = '100vh';
+                tabPanel.style.padding = '0';
+                tabPanel.style.width = '100%';
+                tabPanel.style.height = '100vh';
+                networkPanel.style.width = '100%';
+                networkPanel.style.height = '100vh';
+                networkPanel.style.borderRadius = '0';
+                networkPanel.style.border = 'none';
+
+                console.log('Sidebar disabled, forcing full width styles');
+
+                // Multiple resize attempts with forced reflow
+                setTimeout(() => {
+                    canvas.offsetHeight; // Trigger reflow
+                    console.log('First resize attempt after 200ms');
+                    resizeCanvas();
+                }, 200);
+
+                setTimeout(() => {
+                    canvas.offsetHeight; // Trigger reflow
+                    console.log('Second resize attempt after 500ms');
+                    resizeCanvas();
+                }, 500);
+
+                setTimeout(() => {
+                    canvas.offsetHeight; // Trigger reflow
+                    console.log('Final resize attempt after 800ms');
+                    resizeCanvas();
+                }, 800);
+
+                // Notify parent about graph data
+                if (window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'graphDataReady',
+                        data: vizData
+                    }, '*');
+                }
+            }
+
+            function bindInteractions() {
+                document.querySelectorAll('.cluster-item').forEach(item => {
+                    item.addEventListener('click', () => toggleClusterFocus(item.getAttribute('data-cluster')));
+                });
+
+                document.querySelectorAll('.relation-item').forEach(item => {
+                    item.addEventListener('click', () => togglePredicateFocus(item.getAttribute('data-predicate')));
+                });
+
+                // document.getElementById('relationsTable').addEventListener('click', event => {
+                //     const row = event.target.closest('tr');
+                //     if (!row) {
+                //         return;
+                //     }
+                //     const edgeId = row.getAttribute('data-edge');
+                //     if (edgeId) {
+                //         setActiveElement({ type: 'edge', id: edgeId });
+                //     }
+                // });
+
+                const searchInput = document.getElementById('searchInput');
+                searchInput.addEventListener('input', () => {
+                    state.searchTerm = searchInput.value.trim();
+                    updateHighlights();
+
+                    // Notify parent about search change
+                    if (window.parent !== window && state.sidebarDisabled) {
+                        window.parent.postMessage({
+                            type: 'searchChanged',
+                            searchTerm: state.searchTerm
+                        }, '*');
+                    }
+                });
+                searchInput.addEventListener('keydown', event => {
+                    if (event.key === 'Escape') {
+                        searchInput.value = '';
+                        state.searchTerm = '';
+                        updateHighlights();
+                    }
+                });
+
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', event => {
+                        const target = event.currentTarget;
+                        document.querySelectorAll('.tab').forEach(button => button.classList.remove('active'));
+                        target.classList.add('active');
+                        const tabId = target.getAttribute('data-tab');
+                        document.querySelectorAll('.tab-panel').forEach(panel => {
+                            panel.classList.toggle('active', panel.id === tabId);
+                        });
+                    });
+                });
+
+                document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
+
+                // Listen for messages from parent
+                window.addEventListener('message', (event) => {
+                    if (event.data.type === 'disableInternalSidebar') {
+                        disableSidebar();
+                    } else if (event.data.type === 'search') {
+                        state.searchTerm = event.data.term || '';
+                        updateHighlights();
+                    } else if (event.data.type === 'focusCluster') {
+                        toggleClusterFocus(event.data.clusterId);
+                    } else if (event.data.type === 'focusPredicate') {
+                        togglePredicateFocus(event.data.predicate);
+                    }
+                });
+
+            }
+
+            renderStats();
+            renderTopLists();
+            renderClusters();
+            // renderRelationsTable();
+            // renderInsights();
+
+            // Delay network creation to ensure proper layout
+            setTimeout(() => {
+                createNetwork();
+                bindInteractions();
+            }, 100);
+        })();
+    </script>
+</body>
+
+</html>

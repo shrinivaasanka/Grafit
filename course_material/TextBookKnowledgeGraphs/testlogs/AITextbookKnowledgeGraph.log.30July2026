@@ -1,0 +1,259 @@
+## Random IIT-JEE–level question
+
+**Topic:** Electrostatics — capacitors and dielectrics
+
+**Question:**  
+A parallel-plate capacitor of capacitance \(C_0\) is charged and then disconnected from the battery. A dielectric of relative permittivity \(K\) is inserted so that it fills half the plate area and the full separation between the plates. Find:
+
+1. The new capacitance \(C'\)
+2. The ratio of final to initial electrostatic energy, \(U'/U_0\)
+
+**Answer:**
+
+\[
+\boxed{C'=\frac{K+1}{2}C_0}
+\]
+
+Because the battery is disconnected, charge remains constant:
+
+\[
+\boxed{\frac{U'}{U_0}=\frac{2}{K+1}}
+\]
+
+---
+
+## Knowledge graph
+
+```mermaid
+graph TD
+    Q[Problem] -->|contains| CAP[Parallel-plate capacitor]
+    CAP -->|initial capacitance| C0["C₀ = ε₀A/d"]
+
+    Q -->|states| DISC[Battery disconnected]
+    DISC -->|implies| CONS[Free charge Q is conserved]
+
+    Q -->|introduces| DIEL[Dielectric]
+    DIEL -->|relative permittivity| K[K]
+    DIEL -->|occupies| HALF[Half of plate area]
+
+    HALF -->|creates configuration| PAR[Two parallel capacitors]
+
+    PAR -->|dielectric branch| CD["C_d = Kε₀(A/2)/d = KC₀/2"]
+    PAR -->|vacuum branch| CV["C_v = ε₀(A/2)/d = C₀/2"]
+
+    CD -->|contributes to| CEQ[Equivalent capacitance C′]
+    CV -->|contributes to| CEQ
+    PAR -->|uses rule| ADD[Capacitances add in parallel]
+    ADD -->|derives| CEQ["C′ = C_d + C_v = (K+1)C₀/2"]
+
+    CONS -->|selects energy formula| EN["U = Q²/(2C)"]
+    CEQ -->|substituted into| RATIO["U′/U₀ = C₀/C′"]
+    EN -->|derives| RATIO
+    RATIO -->|equals| FINAL["2/(K+1)"]
+```
+
+---
+
+## Knowledge-graph triples
+
+| Subject | Relation | Object |
+|---|---|---|
+| Problem | involves | Parallel-plate capacitor |
+| Capacitor | has initial capacitance | \(C_0=\varepsilon_0A/d\) |
+| Battery | is | Disconnected |
+| Battery disconnected | implies | Charge conservation |
+| Dielectric | has relative permittivity | \(K\) |
+| Dielectric | occupies | Half plate area |
+| Half-area filling | produces | Parallel configuration |
+| Dielectric region | has capacitance | \(KC_0/2\) |
+| Vacuum region | has capacitance | \(C_0/2\) |
+| Parallel configuration | uses | Capacitance addition |
+| Equivalent capacitor | has capacitance | \((K+1)C_0/2\) |
+| Charge conservation | selects | \(U=Q^2/(2C)\) |
+| Energy formula | gives | \(U'/U_0=C_0/C'\) |
+| Capacitance result | gives | \(U'/U_0=2/(K+1)\) |
+
+### Answer-producing path
+
+\[
+\text{Half-area dielectric}
+\rightarrow
+\text{parallel capacitors}
+\rightarrow
+C_d+C_v
+\rightarrow
+C'=\frac{K+1}{2}C_0
+\]
+
+\[
+\text{battery disconnected}
+\rightarrow
+Q=\text{constant}
+\rightarrow
+U=\frac{Q^2}{2C}
+\rightarrow
+\frac{U'}{U_0}=\frac{2}{K+1}
+\]
+
+---
+
+## Quantifying graph meaningfulness
+
+Meaningfulness should measure whether the graph is **correct, relevant, connected, and capable of deriving the answer**, rather than merely counting nodes and edges.
+
+Define:
+
+\[
+M=0.25C+0.25A+0.20P+0.15R+0.10G+0.05E
+\]
+
+where:
+
+- \(C\): concept coverage
+- \(A\): factual and relational accuracy
+- \(P\): answer-path completeness
+- \(R\): relevance to the question
+- \(G\): graph connectivity
+- \(E\): explanatory efficiency
+
+| Criterion | Measurement | Score |
+|---|---|---:|
+| Concept coverage \(C\) | 8 of 8 required concepts represented | 1.00 |
+| Accuracy \(A\) | 14 of 14 triples physically correct | 1.00 |
+| Answer-path completeness \(P\) | 6 of 6 essential inference steps present | 1.00 |
+| Relevance \(R\) | 13 of 14 triples directly support interpretation or solution | 0.929 |
+| Connectivity \(G\) | All answer-relevant nodes belong to one connected component | 1.00 |
+| Efficiency \(E\) | One supporting triple is nonessential but explanatory | 0.929 |
+
+Therefore,
+
+\[
+\begin{aligned}
+M={}&0.25(1)+0.25(1)+0.20(1)\\
+&+0.15(0.929)+0.10(1)+0.05(0.929)\\
+={}&0.9858
+\end{aligned}
+\]
+
+\[
+\boxed{M\approx 98.6\%}
+\]
+
+### Interpretation
+
+The graph has **high task-specific meaningfulness** because:
+
+- Every essential condition in the question is represented.
+- It distinguishes a half-**area** insertion from a half-**distance** insertion.
+- “Battery disconnected” is correctly linked to charge conservation.
+- There is an explicit, valid reasoning path from the problem statement to both answers.
+- Removing either **parallel configuration** or **charge conservation** would break an answer-producing path.
+
+The \(98.6\%\) score is a rubric-based evaluation, not a universal intrinsic property. For a dataset, the same rubric should be applied consistently and ideally validated against expert-labelled graphs.
+### Random UPSC CSE Mains Question — General Studies III
+
+**Question:** *What are the salient features of inclusive growth? Has India been experiencing such a growth process? Analyse and suggest measures for inclusive growth.*
+
+### Answer
+
+Inclusive growth is economic growth that creates opportunities for all sections of society and distributes its benefits fairly. It combines increased national income with social justice and wider participation.
+
+**Salient features:**
+- Creation of productive and decent employment  
+- Reduction of poverty and income inequality  
+- Universal access to healthcare, education and social security  
+- Financial and digital inclusion  
+- Gender equality and empowerment of marginalised communities  
+- Balanced regional and rural–urban development  
+- Environmentally sustainable use of resources  
+
+India’s experience is **mixed**. Rapid economic growth has reduced multidimensional poverty, expanded infrastructure and improved access to banking, electricity, sanitation and digital services. Programmes such as MGNREGA, Jan Dhan Yojana, Ayushman Bharat, food-security schemes and direct benefit transfers have widened the social-protection framework.
+
+However, growth remains insufficiently inclusive. Unemployment and informal employment persist, while inequalities of income, wealth, gender and region remain significant. Agricultural distress, unequal learning outcomes, high out-of-pocket health expenditure and the digital divide restrict upward mobility. Economic shocks also affect migrant workers and informal-sector households disproportionately.
+
+**Measures required:**
+1. Promote labour-intensive manufacturing and employment-oriented MSMEs.  
+2. Improve public healthcare, nutrition and foundational education.  
+3. Raise agricultural productivity and strengthen rural non-farm employment.  
+4. Expand social security for informal and gig workers.  
+5. Improve women’s safety, skills, asset ownership and workforce participation.  
+6. Adopt progressive taxation and better-targeted welfare delivery.  
+7. Direct investment towards backward regions and climate-resilient infrastructure.
+
+Thus, India has established important foundations for inclusive growth, but sustained progress requires shifting from welfare alone to universal capabilities, productive employment and equal opportunity.
+KGGen Knowledge Graph: entities={'wider participation', 'upward mobility', 'migrant workers', 'opportunities for all sections of society', 'labour-intensive manufacturing', 'employment-oriented micro, small and medium enterprises (MSMEs)', 'economic growth', 'digital services', 'gender equality', 'universal healthcare access', 'financial inclusion', 'social-protection framework', 'productive and decent employment', 'wealth inequality', 'Mahatma Gandhi National Rural Employment Guarantee Act (MGNREGA)', 'digital divide', 'social justice', 'multidimensional poverty', 'India', 'welfare', 'inclusive growth', 'women’s skills', 'banking access', 'empowerment of marginalised communities', 'income inequality reduction', 'balanced regional development', 'fair distribution of growth benefits', 'direct benefit transfers', 'regional inequality', 'food-security schemes', 'informal-sector households', 'backward regions', 'informal workers', 'poverty reduction', 'climate-resilient infrastructure', 'digital inclusion', 'foundational education', 'income inequality', 'productive employment', 'General Studies III', 'Ayushman Bharat', 'agricultural distress', 'out-of-pocket health expenditure', 'universal capabilities', 'gig workers', 'gender inequality', 'nutrition', 'unemployment', 'sanitation access', 'social security', 'infrastructure', 'UPSC Civil Services Examination (CSE) Mains', 'economic shocks', 'national income', 'informal employment', 'environmentally sustainable resource use', 'Pradhan Mantri Jan Dhan Yojana', 'women’s workforce participation', 'balanced rural–urban development', 'targeted welfare delivery', 'public healthcare', 'equal opportunity', 'women’s safety', 'women’s asset ownership', 'universal education access', 'electricity access', 'unequal learning outcomes', 'progressive taxation', 'rural non-farm employment', 'agricultural productivity'} edges={'requires moving beyond reliance on', 'requires', 'have widened', 'examines', 'combines increased', 'restricts', 'requires investment in', 'has widened', 'requires raising', 'has improved access to', 'requires adoption of', 'has reduced in India', 'persists in', 'is a form of', 'restrict', 'has had a mixed experience with', 'ensures', 'remains significant in', 'disproportionately affect', 'includes', 'limits', 'has improved', 'requires improvement of', 'promotes', 'requires expanded social security for', 'has salient feature', 'has expanded in India', 'requires promotion of', 'requires improved', 'creates', 'should be expanded for', 'combines economic advancement with', 'requires strengthening', 'has established important foundations for'} relations={('direct benefit transfers', 'have widened', 'social-protection framework'), ('informal employment', 'persists in', 'India'), ('India', 'has improved', 'banking access'), ('UPSC Civil Services Examination (CSE) Mains', 'includes', 'General Studies III'), ('wealth inequality', 'remains significant in', 'India'), ('India', 'has improved', 'sanitation access'), ('inclusive growth', 'has salient feature', 'financial inclusion'), ('inclusive growth', 'requires promotion of', 'employment-oriented micro, small and medium enterprises (MSMEs)'), ('inclusive growth', 'requires', 'equal opportunity'), ('India', 'has improved access to', 'digital services'), ('India', 'has established important foundations for', 'inclusive growth'), ('inclusive growth', 'has salient feature', 'productive and decent employment'), ('Mahatma Gandhi National Rural Employment Guarantee Act (MGNREGA)', 'has widened', 'social-protection framework'), ('regional inequality', 'remains significant in', 'India'), ('inclusive growth', 'requires investment in', 'backward regions'), ('wealth inequality', 'limits', 'inclusive growth'), ('economic growth', 'has reduced in India', 'multidimensional poverty'), ('inclusive growth', 'requires improved', 'targeted welfare delivery'), ('economic growth', 'has expanded in India', 'infrastructure'), ('inclusive growth', 'requires', 'productive employment'), ('inclusive growth', 'has salient feature', 'balanced rural–urban development'), ('inclusive growth', 'has salient feature', 'poverty reduction'), ('India', 'has improved', 'electricity access'), ('regional inequality', 'limits', 'inclusive growth'), ('inclusive growth', 'ensures', 'fair distribution of growth benefits'), ('inclusive growth', 'requires improvement of', 'women’s safety'), ('inclusive growth', 'requires raising', 'agricultural productivity'), ('economic shocks', 'disproportionately affect', 'informal-sector households'), ('inclusive growth', 'requires adoption of', 'progressive taxation'), ('food-security schemes', 'have widened', 'social-protection framework'), ('inclusive growth', 'is a form of', 'economic growth'), ('inclusive growth', 'requires improvement of', 'nutrition'), ('inclusive growth', 'requires investment in', 'climate-resilient infrastructure'), ('inclusive growth', 'combines increased', 'national income'), ('unequal learning outcomes', 'restrict', 'upward mobility'), ('social security', 'should be expanded for', 'gig workers'), ('inclusive growth', 'requires strengthening', 'rural non-farm employment'), ('inclusive growth', 'requires expanded social security for', 'gig workers'), ('inclusive growth', 'requires improvement of', 'public healthcare'), ('gender inequality', 'remains significant in', 'India'), ('inclusive growth', 'requires improvement of', 'women’s workforce participation'), ('economic shocks', 'disproportionately affect', 'migrant workers'), ('Pradhan Mantri Jan Dhan Yojana', 'has widened', 'social-protection framework'), ('digital divide', 'restricts', 'upward mobility'), ('inclusive growth', 'requires improvement of', 'foundational education'), ('inclusive growth', 'promotes', 'wider participation'), ('inclusive growth', 'requires improvement of', 'women’s asset ownership'), ('unemployment', 'limits', 'inclusive growth'), ('inclusive growth', 'has salient feature', 'digital inclusion'), ('inclusive growth', 'requires', 'universal capabilities'), ('inclusive growth', 'has salient feature', 'income inequality reduction'), ('unemployment', 'persists in', 'India'), ('inclusive growth', 'combines economic advancement with', 'social justice'), ('gender inequality', 'limits', 'inclusive growth'), ('out-of-pocket health expenditure', 'restricts', 'upward mobility'), ('income inequality', 'remains significant in', 'India'), ('India', 'has had a mixed experience with', 'inclusive growth'), ('inclusive growth', 'requires improvement of', 'women’s skills'), ('inclusive growth', 'has salient feature', 'universal education access'), ('inclusive growth', 'requires moving beyond reliance on', 'welfare'), ('inclusive growth', 'has salient feature', 'empowerment of marginalised communities'), ('inclusive growth', 'has salient feature', 'environmentally sustainable resource use'), ('inclusive growth', 'requires promotion of', 'labour-intensive manufacturing'), ('General Studies III', 'examines', 'inclusive growth'), ('inclusive growth', 'has salient feature', 'social security'), ('Ayushman Bharat', 'has widened', 'social-protection framework'), ('inclusive growth', 'creates', 'opportunities for all sections of society'), ('income inequality', 'limits', 'inclusive growth'), ('inclusive growth', 'has salient feature', 'universal healthcare access'), ('informal employment', 'limits', 'inclusive growth'), ('inclusive growth', 'has salient feature', 'balanced regional development'), ('inclusive growth', 'has salient feature', 'gender equality'), ('social security', 'should be expanded for', 'informal workers'), ('agricultural distress', 'restricts', 'upward mobility'), ('inclusive growth', 'requires expanded social security for', 'informal workers')} entity_clusters=None edge_clusters=None
+### NEET Biology Question
+
+Which part of the human brain is responsible for maintaining body temperature?
+
+A. Cerebellum  
+B. Hypothalamus  
+C. Medulla oblongata  
+D. Cerebrum  
+
+**Answer: B. Hypothalamus**
+
+The hypothalamus regulates body temperature, hunger, thirst, sleep, and other homeostatic functions.
+KGGen Knowledge Graph: entities={'human brain', 'cerebrum', 'hunger', 'hypothalamus', 'sleep', 'body temperature', 'medulla oblongata', 'NEET Biology', 'thirst', 'homeostatic functions', 'cerebellum'} edges={'is part of', 'regulates'} relations={('hypothalamus', 'regulates', 'thirst'), ('hypothalamus', 'regulates', 'hunger'), ('hypothalamus', 'regulates', 'body temperature'), ('hypothalamus', 'is part of', 'human brain'), ('hypothalamus', 'regulates', 'sleep'), ('hypothalamus', 'regulates', 'homeostatic functions')} entity_clusters=None edge_clusters=None
+### IIT-JEE Physics Question — Mechanics
+
+A block of mass \(m\) slides from rest down a smooth wedge of mass \(M\) and inclination angle \(\theta\). The wedge rests on a smooth horizontal surface and can move freely. Find the horizontal acceleration of the wedge.
+
+### Solution
+
+Let the wedge accelerate horizontally with magnitude \(A\). Using horizontal momentum conservation and the block’s constrained motion along the incline, the equations give
+
+\[
+\boxed{A=\frac{m g\sin\theta\cos\theta}
+{M+m\sin^2\theta}}
+\]
+
+The wedge accelerates horizontally in the direction opposite to the horizontal component of the block’s motion.
+KGGen Knowledge Graph: entities={'gravitational acceleration \\(g\\)', 'smooth wedge', 'block', 'block’s constrained motion along the incline', 'horizontal component of the block’s motion', 'mass \\(m\\)', 'smooth horizontal surface', 'IIT-JEE Physics', 'mechanics', 'horizontal acceleration of the wedge', 'inclination angle \\(\theta\\)', 'wedge mass \\(M\\)', 'acceleration magnitude \\(A\\)', 'horizontal momentum conservation', '\\(A=\\frac{m g\\sin\\theta\\cos\\theta}{M+m\\sin^2\\theta}\\)', 'direction opposite to the block’s horizontal motion'} edges={'has mass', 'is directed in', 'slides down', 'rests on', 'is given by', 'has inclination angle', 'is opposite to', 'is used with', 'includes question in', 'has magnitude', 'depends on'} relations={('smooth wedge', 'has inclination angle', 'inclination angle \\(\\theta\\)'), ('smooth wedge', 'has mass', 'wedge mass \\(M\\)'), ('\\(A=\\frac{m g\\sin\\theta\\cos\\theta}{M+m\\sin^2\\theta}\\)', 'depends on', 'wedge mass \\(M\\)'), ('smooth wedge', 'rests on', 'smooth horizontal surface'), ('\\(A=\\frac{m g\\sin\\theta\\cos\\theta}{M+m\\sin^2\\theta}\\)', 'depends on', 'mass \\(m\\)'), ('IIT-JEE Physics', 'includes question in', 'mechanics'), ('acceleration magnitude \\(A\\)', 'is given by', '\\(A=\\frac{m g\\sin\\theta\\cos\\theta}{M+m\\sin^2\\theta}\\)'), ('horizontal acceleration of the wedge', 'has magnitude', 'acceleration magnitude \\(A\\)'), ('\\(A=\\frac{m g\\sin\\theta\\cos\\theta}{M+m\\sin^2\\theta}\\)', 'depends on', 'gravitational acceleration \\(g\\)'), ('\\(A=\\frac{m g\\sin\\theta\\cos\\theta}{M+m\\sin^2\\theta}\\)', 'depends on', 'inclination angle \\(\\theta\\)'), ('direction opposite to the block’s horizontal motion', 'is opposite to', 'horizontal component of the block’s motion'), ('block', 'slides down', 'smooth wedge'), ('horizontal acceleration of the wedge', 'is directed in', 'direction opposite to the block’s horizontal motion'), ('block', 'has mass', 'mass \\(m\\)'), ('horizontal momentum conservation', 'is used with', 'block’s constrained motion along the incline')} entity_clusters=None edge_clusters=None
+### Random Question — Class 12 Physics  
+**Chapter: Dual Nature of Radiation and Matter**
+
+**Question:** Derive the expression for the de Broglie wavelength of an electron accelerated through a potential difference \(V\).
+
+**Answer:**
+
+According to de Broglie’s hypothesis, the wavelength associated with a moving particle is
+
+\[
+\lambda=\frac{h}{p}
+\]
+
+where \(h\) is Planck’s constant and \(p\) is the particle’s momentum.
+
+When an electron is accelerated through a potential difference \(V\), its kinetic energy is
+
+\[
+\frac{1}{2}mv^2=eV
+\]
+
+Since \(p=mv\),
+
+\[
+\frac{p^2}{2m}=eV
+\]
+
+Therefore,
+
+\[
+p=\sqrt{2meV}
+\]
+
+Substituting this into the de Broglie relation:
+
+\[
+\boxed{\lambda=\frac{h}{\sqrt{2meV}}}
+\]
+
+For an electron, substituting the constants gives
+
+\[
+\boxed{\lambda=\frac{12.27}{\sqrt{V}}\ \text{Å}}
+\]
+
+Thus, the de Broglie wavelength decreases as the accelerating potential increases.
+KGGen Knowledge Graph: entities={'particle momentum p', 'p = √(2meV)', 'angstrom (Å)', '½mv² = eV', 'Planck’s constant h', 'electron mass m', 'moving particle', 'λ = h/√(2meV)', 'λ = h/p', 'electron velocity v', 'electron', 'Class 12 Physics', 'de Broglie’s hypothesis', 'kinetic energy', 'potential difference V', 'de Broglie wavelength', 'de Broglie relation', 'λ = 12.27/√V Å', 'accelerating potential', 'elementary charge e', 'Dual Nature of Radiation and Matter'} edges={'is a chapter in', 'is inversely proportional to', 'is expressed for the accelerated electron by', 'is accelerated through', 'is expressed by', 'is derived from', 'decreases as', 'for an electron is numerically given by', 'contains', 'for an electron accelerated through a potential difference is given by', 'is associated with', 'is substituted into', 'associates', 'uses the unit', 'for the accelerated electron is given by', 'relates'} relations={('p = √(2meV)', 'contains', 'potential difference V'), ('½mv² = eV', 'contains', 'elementary charge e'), ('λ = h/√(2meV)', 'contains', 'elementary charge e'), ('kinetic energy', 'is expressed for the accelerated electron by', '½mv² = eV'), ('½mv² = eV', 'contains', 'electron mass m'), ('λ = h/√(2meV)', 'is derived from', 'de Broglie relation'), ('λ = h/√(2meV)', 'contains', 'electron mass m'), ('λ = h/p', 'contains', 'Planck’s constant h'), ('de Broglie wavelength', 'decreases as', 'accelerating potential'), ('de Broglie’s hypothesis', 'is expressed by', 'λ = h/p'), ('p = √(2meV)', 'contains', 'elementary charge e'), ('de Broglie wavelength', 'for an electron accelerated through a potential difference is given by', 'λ = h/√(2meV)'), ('λ = h/√(2meV)', 'contains', 'Planck’s constant h'), ('de Broglie wavelength', 'for an electron is numerically given by', 'λ = 12.27/√V Å'), ('p = √(2meV)', 'is substituted into', 'de Broglie relation'), ('de Broglie wavelength', 'is inversely proportional to', 'particle momentum p'), ('p = √(2meV)', 'contains', 'electron mass m'), ('electron', 'is accelerated through', 'potential difference V'), ('particle momentum p', 'for the accelerated electron is given by', 'p = √(2meV)'), ('λ = h/p', 'relates', 'de Broglie wavelength'), ('½mv² = eV', 'contains', 'electron velocity v'), ('½mv² = eV', 'contains', 'potential difference V'), ('λ = h/√(2meV)', 'contains', 'potential difference V'), ('de Broglie relation', 'is expressed by', 'λ = h/p'), ('Dual Nature of Radiation and Matter', 'is a chapter in', 'Class 12 Physics'), ('λ = 12.27/√V Å', 'uses the unit', 'angstrom (Å)'), ('λ = h/p', 'contains', 'particle momentum p'), ('de Broglie wavelength', 'is associated with', 'moving particle'), ('de Broglie’s hypothesis', 'associates', 'de Broglie wavelength')} entity_clusters=None edge_clusters=None
