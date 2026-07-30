@@ -99,8 +99,8 @@ Where:
 
 References:
 -----------
-1. KG-Gen - https://github.com/stair-lab/kg-gen
-2. KG-Gen - NeurIPS 2025 paper - arXiv link - KGGen: Extracting Knowledge Graphs from Plain Text with Language Models - https://arxiv.org/pdf/2502.09956 
-3. GraphRAG - Microsoft - https://microsoft.github.io/graphrag/
-4. LangGraph - https://www.langchain.com/langgraph
-
+1679.5. KG-Gen - https://github.com/stair-lab/kg-gen
+1679.6. KG-Gen - NeurIPS 2025 paper - arXiv link - KGGen: Extracting Knowledge Graphs from Plain Text with Language Models - https://arxiv.org/pdf/2502.09956 
+1679.7. GraphRAG - Microsoft - https://microsoft.github.io/graphrag/
+1679.8. LangGraph - https://www.langchain.com/langgraph
+1679.9. KG-Gen - NeurIPS 2025 poster - https://neurips.cc/virtual/2025/loc/san-diego/poster/117386
