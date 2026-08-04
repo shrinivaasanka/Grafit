@@ -118,9 +118,9 @@ Classroom teaching - Transition from Linear Textbooks to KnowledgeGraphs
 -------------------------------------------------------------------------------------------------
 GitHub Pages - GRAFIT Virtual Classroom - Knowledge Graph based Question-Answering - from various examinations - KGGen Visualization of Academic Textbook Concepts 
 -------------------------------------------------------------------------------------------------
-HTML and Image graphics - https://github.com/shrinivaasanka/Grafit/tree/master/course_material/TextBookKnowledgeGraphs/testlogs
+(*) HTML and Image graphics - https://github.com/shrinivaasanka/Grafit/tree/master/course_material/TextBookKnowledgeGraphs/testlogs
 
 -------------------------------
 Moodle Website for GRAFIT
 -------------------------------
-GRAFIT course materials (in .zip) are available from Moodle GRAFIT website - https://moodle.org/pluginfile.php/4765687/user/private/Grafit-master.zip?forcedownload=1 (Defunct URL)
+(*) GRAFIT course materials (in .zip) are available from Moodle GRAFIT website - https://moodle.org/pluginfile.php/4765687/user/private/Grafit-master.zip?forcedownload=1 (Defunct URL)
