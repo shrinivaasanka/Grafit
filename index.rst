@@ -1,3 +1,8 @@
+
+.. image:: GRAFITLogo.png 
+   :width: 1200
+   :height: 1000
+
 --------------------------------------------------------------------------------------------------
 GRAFIT Open Learning - Free Online Course Material based on NeuronRain OpenSource Codebase
 --------------------------------------------------------------------------------------------------
@@ -80,6 +85,11 @@ KingCobra - https://gitlab.com/shrinivaasanka/kingcobra-github-code/blob/master/
 
 KingCobra64 - https://gitlab.com/shrinivaasanka/kingcobra64-github-code/blob/master/KingCobraDesignNotes.txt
 
+---------------------------------------------------------------------------------------------
+NeuronRain Grafit Virtual Classrooms 
+---------------------------------------------------------------------------------------------
+
+Unified course materials collated from design and commit notes of earlier NeuronRain FOSS repositories - as single .txt file (frequently updated) - https://github.com/shrinivaasanka/Krishna_iResearch_DoxygenDocs/blob/master/text/NeuronRain_Documents/NeuronRainDesign_unified.txt (18466 pages on 16/8/2026 - 50 lines per page) - supersedes erstwhile GitHub Grafit Virtual Classrooms: https://classroom.github.com/classrooms/8086998-https-github-com-shrinivaasanka-grafit
 
 ------------------------------
 Pedagogy
