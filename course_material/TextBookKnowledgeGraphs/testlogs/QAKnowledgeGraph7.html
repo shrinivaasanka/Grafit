@@ -1,0 +1,5431 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Knowledge Graph Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            color-scheme: light;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            height: 100vh;
+            transition: grid-template-columns 0.3s ease;
+        }
+
+        .layout.sidebar-collapsed {
+            grid-template-columns: 0px 1fr;
+        }
+
+        .layout.sidebar-disabled {
+            grid-template-columns: 1fr;
+            width: 100%;
+        }
+
+        .layout.sidebar-disabled .main {
+            width: 100vw !important;
+        }
+
+        .layout.sidebar-disabled .tab-panel {
+            padding: 0 !important;
+            width: 100vw !important;
+        }
+
+        .layout.sidebar-disabled .network-panel {
+            width: 100vw !important;
+            height: 100vh !important;
+            border-radius: 0;
+            border: none;
+            max-width: none !important;
+        }
+
+        .layout.sidebar-disabled #networkCanvas {
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: none !important;
+        }
+
+        /* Force canvas to take full iframe space */
+        canvas#networkCanvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .sidebar {
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            padding: 24px 24px 16px;
+            overflow-y: auto;
+            transition: width 0.3s ease, opacity 0.3s ease;
+            display: block; /* Visible in standalone mode */
+        }
+
+        .sidebar.collapsed {
+            width: 0;
+            padding: 24px 0 16px;
+            overflow: hidden;
+            opacity: 0;
+        }
+
+        .sidebar h1 {
+            margin: 0 0 8px;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .sidebar p {
+            margin: 0 0 20px;
+            color: #475569;
+            font-size: 0.95rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section h2 {
+            font-size: 1rem;
+            margin: 0 0 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #1e293b;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5f5;
+            border-radius: 10px;
+            font-size: 0.95rem;
+        }
+
+        .search-hint {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .list-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .list-item strong {
+            font-weight: 600;
+        }
+
+        .cluster-item,
+        .relation-item {
+            border-left: 4px solid transparent;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .cluster-item:hover,
+        .relation-item:hover {
+            background: #e2e8f0;
+        }
+
+        .cluster-item.active,
+        .relation-item.active {
+            transform: translateX(4px);
+            background: #e2e8f0;
+        }
+
+        .cluster-item .meta,
+        .relation-item .meta {
+            font-size: 0.8rem;
+            color: #475569;
+        }
+
+        .main {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .tab-bar {
+            display: flex;
+            gap: 8px;
+            padding: 16px 20px 0;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .tab {
+            border: none;
+            background: #e2e8f0;
+            color: #1e293b;
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .tab.active {
+            background: #1d4ed8;
+            color: #ffffff;
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: none; /* Hidden when sidebar is disabled */
+        }
+
+        .sidebar-toggle:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .sidebar-toggle::before {
+            content: '☰';
+            margin-right: 6px;
+        }
+
+        .sidebar-toggle.collapsed::before {
+            content: '☰';
+        }
+
+        .tab-panel {
+            flex: 1;
+            display: none;
+            padding: 16px 20px;
+            overflow: hidden;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .network-panel {
+            height: calc(100vh - 74px);
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+
+        #networkCanvas {
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            border-radius: 16px;
+        }
+
+        #networkCanvas {
+            cursor: grab;
+        }
+
+        #networkCanvas:active {
+            cursor: grabbing;
+        }
+
+        .selection-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 0.9rem;
+        }
+
+        .selection-card h3 {
+            margin: 0 0 8px;
+            font-size: 1rem;
+        }
+
+        .selection-card ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .selection-card li {
+            margin-bottom: 4px;
+            color: #475569;
+        }
+
+        .table-container {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            height: calc(100vh - 90px);
+            overflow: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: #f8fafc;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 2px 10px;
+            border-radius: 999px;
+            background: #e2e8f0;
+            font-size: 0.75rem;
+            color: #0f172a;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+
+        .legend-swatch {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(15, 23, 42, 0.25);
+        }
+
+
+        /* Mobile/narrow iframe handling - when sidebar is disabled, use full space */
+        @media (max-width: 800px) {
+            .layout:not(.sidebar-disabled) {
+                grid-template-columns: 1fr;
+            }
+
+            .layout:not(.sidebar-disabled) .sidebar {
+                height: 280px;
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            .layout:not(.sidebar-disabled) .main {
+                height: calc(100vh - 280px);
+            }
+
+            /* When sidebar is disabled (iframe mode), ensure full viewport usage */
+            .layout.sidebar-disabled .main {
+                width: 100% !important;
+                height: 100vh !important;
+            }
+
+            .layout.sidebar-disabled .tab-panel {
+                padding: 0 !important;
+                width: 100% !important;
+                height: 100vh !important;
+            }
+
+            .layout.sidebar-disabled .network-panel {
+                width: 100% !important;
+                height: 100vh !important;
+                border-radius: 0 !important;
+                border: none !important;
+                max-width: none !important;
+            }
+
+            .layout.sidebar-disabled #networkCanvas {
+                width: 100% !important;
+                height: 100vh !important;
+                max-width: none !important;
+            }
+
+            /* Ensure iframe canvas takes full space on mobile */
+            canvas#networkCanvas {
+                width: 100% !important;
+                height: 100% !important;
+                min-width: 100% !important;
+                min-height: 100% !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <h1>Knowledge Graph Explorer</h1>
+            <p>Search, highlight, and inspect entities and relations to understand how the graph fits together.</p>
+            <div class="stats-grid" id="statsGrid"></div>
+            <div class="section">
+                <h2>Search</h2>
+                <input id="searchInput" class="search-input" type="text" placeholder="Search for entities or
+                    relations" />
+                <div class="search-hint">Matches are highlighted. Press Escape to clear.</div>
+            </div>
+            <div class="section" id="selectionSection">
+                <h2>Selection</h2>
+                <div id="selectionDetails" class="selection-card">Click a node or relation in the network to inspect
+                    details.</div>
+            </div>
+            <div class="section">
+                <h2>Entity Clusters</h2>
+                <div id="clusterList" class="list"></div>
+            </div>
+            <div class="section">
+                <h2>Top Entities</h2>
+                <div id="topEntities" class="list"></div>
+            </div>
+            <div class="section">
+                <h2>Top Relations</h2>
+                <div id="topRelations" class="list"></div>
+            </div>
+        </aside>
+        <main class="main">
+            <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar"></button>
+            <div class="tab-bar" style="padding-bottom: 10px; display: none;">
+                <button class="tab active" data-tab="network">Network</button>
+                <!-- <button class="tab" data-tab="relations">Relations</button>
+                <button class="tab" data-tab="insights">Insights</button> -->
+            </div>
+            <section id="network" class="tab-panel active">
+                <div class="network-panel">
+                    <canvas id="networkCanvas"></canvas>
+                </div>
+            </section>
+            <!-- <section id="relations" class="tab-panel">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Relation</th>
+                                <th>Object</th>
+                            </tr>
+                        </thead>
+                        <tbody id="relationsTable"></tbody>
+                    </table>
+                </div>
+            </section>
+            <section id="insights" class="tab-panel">
+                <div class="table-container" style="padding: 20px;">
+                    <div id="insightsContent"></div>
+                </div>
+            </section> -->
+        </main>
+    </div>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script id="viz-data" type="application/json">
+{
+  "nodes": [
+    {
+      "id": "2008–2011 publications",
+      "label": "2008–2011 publications",
+      "cluster": null,
+      "color": "#eb5296",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "author’s academic publication archive"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e25"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "2010",
+      "label": "2010",
+      "cluster": null,
+      "color": "#d5da4b",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+        "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e103",
+          "e104"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "2011",
+      "label": "2011",
+      "cluster": null,
+      "color": "#e1c760",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e102"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "403 access restriction",
+      "label": "403 access restriction",
+      "cluster": null,
+      "color": "#53dd45",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Google Scholar"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e62"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Academic Publications and NeuronRain Theory Drafts documentation",
+      "label": "Academic Publications and NeuronRain Theory Drafts documentation",
+      "cluster": null,
+      "color": "#6fb7dd",
+      "degree": 2,
+      "indegree": 1,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "AcadP Drafts",
+        "K. Srinivasan"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e65"
+        ],
+        "outgoing": [
+          "e59"
+        ]
+      }
+    },
+    {
+      "id": "AcadP Drafts",
+      "label": "AcadP Drafts",
+      "cluster": null,
+      "color": "#9ab834",
+      "degree": 1,
+      "indegree": 0,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Academic Publications and NeuronRain Theory Drafts documentation"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e65"
+        ]
+      }
+    },
+    {
+      "id": "algorithms for constructing a complement",
+      "label": "algorithms for constructing a complement",
+      "cluster": null,
+      "color": "#ca31be",
+      "degree": 3,
+      "indegree": 1,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "complementary function",
+        "Decidability of Existence and Construction of a Complement of a given Function",
+        "existence of a complement"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e73"
+        ],
+        "outgoing": [
+          "e3",
+          "e10"
+        ]
+      }
+    },
+    {
+      "id": "Algorithms for Intrinsic Merit",
+      "label": "Algorithms for Intrinsic Merit",
+      "cluster": null,
+      "color": "#d72b74",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e57"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "arXiv",
+      "label": "arXiv",
+      "cluster": null,
+      "color": "#97cf29",
+      "degree": 3,
+      "indegree": 3,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "arXiv:1006.4458",
+        "arXiv:1106.4102",
+        "three publications associated with the Scholar profile"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e63",
+          "e64",
+          "e105"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "arXiv:1006.4458",
+      "label": "arXiv:1006.4458",
+      "cluster": null,
+      "color": "#56e36a",
+      "degree": 2,
+      "indegree": 1,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "arXiv",
+        "Few Algorithms for Ascertaining Merit of a Document and Their Applications"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e37"
+        ],
+        "outgoing": [
+          "e63"
+        ]
+      }
+    },
+    {
+      "id": "arXiv:1106.4102",
+      "label": "arXiv:1106.4102",
+      "cluster": null,
+      "color": "#754cdf",
+      "degree": 2,
+      "indegree": 1,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "arXiv",
+        "Decidability of Existence and Construction of a Complement of a given Function"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e36"
+        ],
+        "outgoing": [
+          "e64"
+        ]
+      }
+    },
+    {
+      "id": "author’s academic publication archive",
+      "label": "author’s academic publication archive",
+      "cluster": null,
+      "color": "#e962bb",
+      "degree": 6,
+      "indegree": 1,
+      "outdegree": 5,
+      "isRepresentative": false,
+      "radius": 30,
+      "neighbors": [
+        "2008–2011 publications",
+        "Decidability of Existence and Construction of a Complement of a given Function",
+        "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+        "later research drafts",
+        "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+        "three publications associated with the Scholar profile"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e106"
+        ],
+        "outgoing": [
+          "e8",
+          "e9",
+          "e25",
+          "e26",
+          "e49"
+        ]
+      }
+    },
+    {
+      "id": "citation graph",
+      "label": "citation graph",
+      "cluster": null,
+      "color": "#ace843",
+      "degree": 3,
+      "indegree": 1,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "Citation-graph maximum flow",
+        "citations",
+        "directed graph"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e72"
+        ],
+        "outgoing": [
+          "e11",
+          "e56"
+        ]
+      }
+    },
+    {
+      "id": "Citation-graph maximum flow",
+      "label": "Citation-graph maximum flow",
+      "cluster": null,
+      "color": "#6548d0",
+      "degree": 5,
+      "indegree": 2,
+      "outdegree": 3,
+      "isRepresentative": false,
+      "radius": 28,
+      "neighbors": [
+        "citation graph",
+        "citations",
+        "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+        "generic judgement",
+        "intrinsic merit of a document"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e76",
+          "e81"
+        ],
+        "outgoing": [
+          "e28",
+          "e72",
+          "e96"
+        ]
+      }
+    },
+    {
+      "id": "citations",
+      "label": "citations",
+      "cluster": null,
+      "color": "#eea672",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "citation graph",
+        "Citation-graph maximum flow"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e11",
+          "e96"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "complement functions",
+      "label": "complement functions",
+      "cluster": null,
+      "color": "#31a0e6",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "later research drafts"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e14"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "complement of a function",
+      "label": "complement of a function",
+      "cluster": null,
+      "color": "#c3d739",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "formal definition of a complement of a function"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e22"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "complementary function",
+      "label": "complementary function",
+      "cluster": null,
+      "color": "#881eda",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "algorithms for constructing a complement",
+        "construction of a complementary function"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e10",
+          "e74"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "complexity theory",
+      "label": "complexity theory",
+      "cluster": null,
+      "color": "#e96422",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "later research drafts"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e15"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "computational number theory",
+      "label": "computational number theory",
+      "cluster": null,
+      "color": "#d1ec74",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "later research drafts"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e16"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "concepts",
+      "label": "concepts",
+      "cluster": null,
+      "color": "#82d812",
+      "degree": 3,
+      "indegree": 2,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "information needs",
+        "new information",
+        "questions"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e32",
+          "e34"
+        ],
+        "outgoing": [
+          "e79"
+        ]
+      }
+    },
+    {
+      "id": "construction of a complementary function",
+      "label": "construction of a complementary function",
+      "cluster": null,
+      "color": "#6988ee",
+      "degree": 2,
+      "indegree": 1,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "complementary function",
+        "Decidability of Existence and Construction of a Complement of a given Function"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e43"
+        ],
+        "outgoing": [
+          "e74"
+        ]
+      }
+    },
+    {
+      "id": "conventional ranking approaches",
+      "label": "conventional ranking approaches",
+      "cluster": null,
+      "color": "#db8e84",
+      "degree": 3,
+      "indegree": 1,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+        "popularity",
+        "prestige"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e12"
+        ],
+        "outgoing": [
+          "e90",
+          "e91"
+        ]
+      }
+    },
+    {
+      "id": "copyright limits",
+      "label": "copyright limits",
+      "cluster": null,
+      "color": "#e02e64",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "publication-by-publication abstract table"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e108"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "DBLP",
+      "label": "DBLP",
+      "cluster": null,
+      "color": "#e04557",
+      "degree": 2,
+      "indegree": 1,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+        "three publications associated with the Scholar profile"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e107"
+        ],
+        "outgoing": [
+          "e52"
+        ]
+      }
+    },
+    {
+      "id": "decidability",
+      "label": "decidability",
+      "cluster": null,
+      "color": "#eb78e7",
+      "degree": 2,
+      "indegree": 1,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function",
+        "existence of a complement"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e44"
+        ],
+        "outgoing": [
+          "e24"
+        ]
+      }
+    },
+    {
+      "id": "Decidability of Existence and Construction of a Complement of a given Function",
+      "label": "Decidability of Existence and Construction of a Complement of a given Function",
+      "cluster": null,
+      "color": "#33e6e0",
+      "degree": 12,
+      "indegree": 1,
+      "outdegree": 11,
+      "isRepresentative": false,
+      "radius": 34,
+      "neighbors": [
+        "2011",
+        "algorithms for constructing a complement",
+        "arXiv:1106.4102",
+        "author’s academic publication archive",
+        "construction of a complementary function",
+        "decidability",
+        "existence of a complement",
+        "formal definition of a complement of a function",
+        "Ka. Shrinivaasan",
+        "mathematical functions",
+        "three publications associated with the Scholar profile"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e8"
+        ],
+        "outgoing": [
+          "e27",
+          "e36",
+          "e38",
+          "e43",
+          "e44",
+          "e53",
+          "e55",
+          "e66",
+          "e73",
+          "e97",
+          "e102"
+        ]
+      }
+    },
+    {
+      "id": "definitions",
+      "label": "definitions",
+      "cluster": null,
+      "color": "#d28e60",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "semantic relationships"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e45"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "directed graph",
+      "label": "directed graph",
+      "cluster": null,
+      "color": "#d76d65",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "citation graph"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e56"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "document answering",
+      "label": "document answering",
+      "cluster": null,
+      "color": "#e96f66",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e30"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "document collections",
+      "label": "document collections",
+      "cluster": null,
+      "color": "#f161f0",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e42"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "document content",
+      "label": "document content",
+      "cluster": null,
+      "color": "#abe363",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "intrinsic merit of a document"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e84"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "document summarization",
+      "label": "document summarization",
+      "cluster": null,
+      "color": "#cdd417",
+      "degree": 3,
+      "indegree": 1,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "information-selection process",
+        "Interview Algorithm",
+        "interview process"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e92"
+        ],
+        "outgoing": [
+          "e70",
+          "e71"
+        ]
+      }
+    },
+    {
+      "id": "documents",
+      "label": "documents",
+      "cluster": null,
+      "color": "#76c82c",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Few Algorithms for Ascertaining Merit of a Document and Their Applications"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e39"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "existence of a complement",
+      "label": "existence of a complement",
+      "cluster": null,
+      "color": "#e1c023",
+      "degree": 4,
+      "indegree": 4,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 26,
+      "neighbors": [
+        "algorithms for constructing a complement",
+        "decidability",
+        "Decidability of Existence and Construction of a Complement of a given Function"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e3",
+          "e24",
+          "e27",
+          "e55"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "label": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "cluster": null,
+      "color": "#c55ae4",
+      "degree": 14,
+      "indegree": 1,
+      "outdegree": 13,
+      "isRepresentative": false,
+      "radius": 34,
+      "neighbors": [
+        "2010",
+        "arXiv:1006.4458",
+        "author’s academic publication archive",
+        "Citation-graph maximum flow",
+        "conventional ranking approaches",
+        "documents",
+        "generic judgement",
+        "graphs",
+        "Interview Algorithm",
+        "intrinsic merit of a document",
+        "Ka. Shrinivaasan",
+        "Recursive Gloss Overlap",
+        "semantics",
+        "three publications associated with the Scholar profile"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e9"
+        ],
+        "outgoing": [
+          "e0",
+          "e12",
+          "e37",
+          "e39",
+          "e40",
+          "e41",
+          "e54",
+          "e67",
+          "e76",
+          "e77",
+          "e78",
+          "e98",
+          "e103"
+        ]
+      }
+    },
+    {
+      "id": "formal definition of a complement of a function",
+      "label": "formal definition of a complement of a function",
+      "cluster": null,
+      "color": "#ebd01a",
+      "degree": 2,
+      "indegree": 1,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "complement of a function",
+        "Decidability of Existence and Construction of a Complement of a given Function"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e53"
+        ],
+        "outgoing": [
+          "e22"
+        ]
+      }
+    },
+    {
+      "id": "full abstracts",
+      "label": "full abstracts",
+      "cluster": null,
+      "color": "#1d7ada",
+      "degree": 3,
+      "indegree": 0,
+      "outdegree": 3,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "PDFs",
+        "publication-by-publication abstract table",
+        "underlying papers"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e5",
+          "e6",
+          "e7"
+        ]
+      }
+    },
+    {
+      "id": "generic judgement",
+      "label": "generic judgement",
+      "cluster": null,
+      "color": "#d77d71",
+      "degree": 4,
+      "indegree": 1,
+      "outdegree": 3,
+      "isRepresentative": false,
+      "radius": 26,
+      "neighbors": [
+        "Citation-graph maximum flow",
+        "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+        "Interview Algorithm",
+        "Recursive Gloss Overlap"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e54"
+        ],
+        "outgoing": [
+          "e81",
+          "e82",
+          "e83"
+        ]
+      }
+    },
+    {
+      "id": "Google Scholar",
+      "label": "Google Scholar",
+      "cluster": null,
+      "color": "#3072ec",
+      "degree": 2,
+      "indegree": 1,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "403 access restriction",
+        "later research drafts"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e86"
+        ],
+        "outgoing": [
+          "e62"
+        ]
+      }
+    },
+    {
+      "id": "Google Scholar profile",
+      "label": "Google Scholar profile",
+      "cluster": null,
+      "color": "#4edf3e",
+      "degree": 1,
+      "indegree": 0,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "three publications associated with the Scholar profile"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e60"
+        ]
+      }
+    },
+    {
+      "id": "graph-theoretic merit",
+      "label": "graph-theoretic merit",
+      "cluster": null,
+      "color": "#394de9",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "later research drafts"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e17"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "graphs",
+      "label": "graphs",
+      "cluster": null,
+      "color": "#d99623",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Few Algorithms for Ascertaining Merit of a Document and Their Applications"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e40"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "information needs",
+      "label": "information needs",
+      "cluster": null,
+      "color": "#5cd2b0",
+      "degree": 2,
+      "indegree": 0,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "concepts",
+        "sentences"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e32",
+          "e33"
+        ]
+      }
+    },
+    {
+      "id": "information-selection process",
+      "label": "information-selection process",
+      "cluster": null,
+      "color": "#ca3d36",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "document summarization"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e70"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "integer partitions",
+      "label": "integer partitions",
+      "cluster": null,
+      "color": "#2dbb84",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "later research drafts"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e18"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "interactive information-identification procedure",
+      "label": "interactive information-identification procedure",
+      "cluster": null,
+      "color": "#40e567",
+      "degree": 3,
+      "indegree": 1,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "Interview Algorithm",
+        "meritorious information",
+        "relevant information"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e93"
+        ],
+        "outgoing": [
+          "e47",
+          "e48"
+        ]
+      }
+    },
+    {
+      "id": "Interview Algorithm",
+      "label": "Interview Algorithm",
+      "cluster": null,
+      "color": "#ce3c69",
+      "degree": 9,
+      "indegree": 3,
+      "outdegree": 6,
+      "isRepresentative": false,
+      "radius": 34,
+      "neighbors": [
+        "document answering",
+        "document summarization",
+        "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+        "generic judgement",
+        "interactive information-identification procedure",
+        "question answering",
+        "question-driven information acquisition and selection",
+        "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+        "Update Summarization"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e1",
+          "e77",
+          "e82"
+        ],
+        "outgoing": [
+          "e13",
+          "e30",
+          "e31",
+          "e58",
+          "e92",
+          "e93"
+        ]
+      }
+    },
+    {
+      "id": "interview process",
+      "label": "interview process",
+      "cluster": null,
+      "color": "#5a3ae1",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "document summarization"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e71"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "intrinsic merit of a document",
+      "label": "intrinsic merit of a document",
+      "cluster": null,
+      "color": "#dd9320",
+      "degree": 6,
+      "indegree": 2,
+      "outdegree": 4,
+      "isRepresentative": false,
+      "radius": 30,
+      "neighbors": [
+        "Citation-graph maximum flow",
+        "document content",
+        "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+        "popularity",
+        "prestige",
+        "structural relationships"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e0",
+          "e28"
+        ],
+        "outgoing": [
+          "e84",
+          "e85",
+          "e87",
+          "e88"
+        ]
+      }
+    },
+    {
+      "id": "intrinsic merit score",
+      "label": "intrinsic merit score",
+      "cluster": null,
+      "color": "#f0795d",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Recursive Gloss Overlap"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e23"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "K. Srinivasan",
+      "label": "K. Srinivasan",
+      "cluster": null,
+      "color": "#8c3ecf",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Academic Publications and NeuronRain Theory Drafts documentation"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e59"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Ka. Shrinivaasan",
+      "label": "Ka. Shrinivaasan",
+      "cluster": null,
+      "color": "#9fe152",
+      "degree": 3,
+      "indegree": 3,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function",
+        "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+        "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e97",
+          "e98",
+          "e99"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "knowledge graphs",
+      "label": "knowledge graphs",
+      "cluster": null,
+      "color": "#a76dee",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "later research drafts"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e19"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "later research drafts",
+      "label": "later research drafts",
+      "cluster": null,
+      "color": "#1ae596",
+      "degree": 12,
+      "indegree": 1,
+      "outdegree": 11,
+      "isRepresentative": false,
+      "radius": 34,
+      "neighbors": [
+        "author’s academic publication archive",
+        "complement functions",
+        "complexity theory",
+        "computational number theory",
+        "Google Scholar",
+        "graph-theoretic merit",
+        "integer partitions",
+        "knowledge graphs",
+        "question answering",
+        "social choice",
+        "unaffiliated research drafts",
+        "unreviewed research drafts"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e26"
+        ],
+        "outgoing": [
+          "e14",
+          "e15",
+          "e16",
+          "e17",
+          "e18",
+          "e19",
+          "e20",
+          "e21",
+          "e50",
+          "e51",
+          "e86"
+        ]
+      }
+    },
+    {
+      "id": "mathematical functions",
+      "label": "mathematical functions",
+      "cluster": null,
+      "color": "#eade75",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e38"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "meritorious information",
+      "label": "meritorious information",
+      "cluster": null,
+      "color": "#ee59ad",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "interactive information-identification procedure"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e47"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "NeuronRain",
+      "label": "NeuronRain",
+      "cluster": null,
+      "color": "#72dab7",
+      "degree": 0,
+      "indegree": 0,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 18,
+      "neighbors": [],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "new information",
+      "label": "new information",
+      "cluster": null,
+      "color": "#46d9c2",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "concepts",
+        "sentences"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e79",
+          "e80"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "newly available documents",
+      "label": "newly available documents",
+      "cluster": null,
+      "color": "#3d73ed",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Update Summarization"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e75"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "NIST",
+      "label": "NIST",
+      "cluster": null,
+      "color": "#d8e677",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "NIST TAC 2010 evaluation"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e61"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "NIST TAC 2010 evaluation",
+      "label": "NIST TAC 2010 evaluation",
+      "cluster": null,
+      "color": "#e281dc",
+      "degree": 3,
+      "indegree": 1,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "NIST",
+        "TAC 2010 dataset",
+        "Update Summarization"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e100"
+        ],
+        "outgoing": [
+          "e61",
+          "e94"
+        ]
+      }
+    },
+    {
+      "id": "PDFs",
+      "label": "PDFs",
+      "cluster": null,
+      "color": "#22d3a7",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "full abstracts"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e6"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "popularity",
+      "label": "popularity",
+      "cluster": null,
+      "color": "#80c437",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "conventional ranking approaches",
+        "intrinsic merit of a document"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e87",
+          "e90"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "prestige",
+      "label": "prestige",
+      "cluster": null,
+      "color": "#9c5bde",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "conventional ranking approaches",
+        "intrinsic merit of a document"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e88",
+          "e91"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "previously supplied documents",
+      "label": "previously supplied documents",
+      "cluster": null,
+      "color": "#ee6575",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Update Summarization"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e89"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "publication-by-publication abstract table",
+      "label": "publication-by-publication abstract table",
+      "cluster": null,
+      "color": "#db4064",
+      "degree": 2,
+      "indegree": 1,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "copyright limits",
+        "full abstracts"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e5"
+        ],
+        "outgoing": [
+          "e108"
+        ]
+      }
+    },
+    {
+      "id": "question answering",
+      "label": "question answering",
+      "cluster": null,
+      "color": "#71e7e9",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "Interview Algorithm",
+        "later research drafts"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e20",
+          "e31"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "question-driven information acquisition and selection",
+      "label": "question-driven information acquisition and selection",
+      "cluster": null,
+      "color": "#c9dd44",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e13"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "questions",
+      "label": "questions",
+      "cluster": null,
+      "color": "#38afc9",
+      "degree": 2,
+      "indegree": 0,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "concepts",
+        "sentences"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e34",
+          "e35"
+        ]
+      }
+    },
+    {
+      "id": "Recursive Gloss Overlap",
+      "label": "Recursive Gloss Overlap",
+      "cluster": null,
+      "color": "#6dc83b",
+      "degree": 4,
+      "indegree": 2,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 26,
+      "neighbors": [
+        "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+        "generic judgement",
+        "intrinsic merit score",
+        "semantic relationships"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e78",
+          "e83"
+        ],
+        "outgoing": [
+          "e23",
+          "e95"
+        ]
+      }
+    },
+    {
+      "id": "relevant information",
+      "label": "relevant information",
+      "cluster": null,
+      "color": "#d4c45b",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "interactive information-identification procedure"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e48"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "resulting summaries",
+      "label": "resulting summaries",
+      "cluster": null,
+      "color": "#212cca",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e29"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "semantic relationships",
+      "label": "semantic relationships",
+      "cluster": null,
+      "color": "#5830d9",
+      "degree": 3,
+      "indegree": 1,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "definitions",
+        "Recursive Gloss Overlap",
+        "terms"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e95"
+        ],
+        "outgoing": [
+          "e45",
+          "e46"
+        ]
+      }
+    },
+    {
+      "id": "semantics",
+      "label": "semantics",
+      "cluster": null,
+      "color": "#e2787b",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Few Algorithms for Ascertaining Merit of a Document and Their Applications"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e41"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "sentences",
+      "label": "sentences",
+      "cluster": null,
+      "color": "#caed3b",
+      "degree": 3,
+      "indegree": 2,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "information needs",
+        "new information",
+        "questions"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e33",
+          "e35"
+        ],
+        "outgoing": [
+          "e80"
+        ]
+      }
+    },
+    {
+      "id": "social choice",
+      "label": "social choice",
+      "cluster": null,
+      "color": "#57f05e",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "later research drafts"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e21"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "structural relationships",
+      "label": "structural relationships",
+      "cluster": null,
+      "color": "#5ced49",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "intrinsic merit of a document"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e85"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "TAC 2010",
+      "label": "TAC 2010",
+      "cluster": null,
+      "color": "#d467c8",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "TAC 2010 Summarization Track"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e69"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "TAC 2010 dataset",
+      "label": "TAC 2010 dataset",
+      "cluster": null,
+      "color": "#a16ed6",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "NIST TAC 2010 evaluation",
+        "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e2",
+          "e94"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "TAC 2010 Summarization Track",
+      "label": "TAC 2010 Summarization Track",
+      "cluster": null,
+      "color": "#6dd86a",
+      "degree": 2,
+      "indegree": 1,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "TAC 2010",
+        "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e4"
+        ],
+        "outgoing": [
+          "e69"
+        ]
+      }
+    },
+    {
+      "id": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "label": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "cluster": null,
+      "color": "#e09f77",
+      "degree": 12,
+      "indegree": 2,
+      "outdegree": 10,
+      "isRepresentative": false,
+      "radius": 34,
+      "neighbors": [
+        "2010",
+        "Algorithms for Intrinsic Merit",
+        "author’s academic publication archive",
+        "DBLP",
+        "document collections",
+        "Interview Algorithm",
+        "Ka. Shrinivaasan",
+        "resulting summaries",
+        "TAC 2010 dataset",
+        "TAC 2010 Summarization Track",
+        "Text Analysis Conference",
+        "three publications associated with the Scholar profile"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e49",
+          "e52"
+        ],
+        "outgoing": [
+          "e1",
+          "e2",
+          "e4",
+          "e29",
+          "e42",
+          "e57",
+          "e68",
+          "e99",
+          "e101",
+          "e104"
+        ]
+      }
+    },
+    {
+      "id": "terms",
+      "label": "terms",
+      "cluster": null,
+      "color": "#dba82d",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "semantic relationships"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e46"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Text Analysis Conference",
+      "label": "Text Analysis Conference",
+      "cluster": null,
+      "color": "#9f21e0",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e101"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "three publications associated with the Scholar profile",
+      "label": "three publications associated with the Scholar profile",
+      "cluster": null,
+      "color": "#e657c9",
+      "degree": 7,
+      "indegree": 4,
+      "outdegree": 3,
+      "isRepresentative": false,
+      "radius": 32,
+      "neighbors": [
+        "arXiv",
+        "author’s academic publication archive",
+        "DBLP",
+        "Decidability of Existence and Construction of a Complement of a given Function",
+        "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+        "Google Scholar profile",
+        "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e60",
+          "e66",
+          "e67",
+          "e68"
+        ],
+        "outgoing": [
+          "e105",
+          "e106",
+          "e107"
+        ]
+      }
+    },
+    {
+      "id": "unaffiliated research drafts",
+      "label": "unaffiliated research drafts",
+      "cluster": null,
+      "color": "#4813e0",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "later research drafts"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e50"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "underlying papers",
+      "label": "underlying papers",
+      "cluster": null,
+      "color": "#c944d8",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "full abstracts"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e7"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "unreviewed research drafts",
+      "label": "unreviewed research drafts",
+      "cluster": null,
+      "color": "#2da9c4",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "later research drafts"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e51"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Update Summarization",
+      "label": "Update Summarization",
+      "cluster": null,
+      "color": "#5922e6",
+      "degree": 4,
+      "indegree": 1,
+      "outdegree": 3,
+      "isRepresentative": false,
+      "radius": 26,
+      "neighbors": [
+        "Interview Algorithm",
+        "newly available documents",
+        "NIST TAC 2010 evaluation",
+        "previously supplied documents"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e58"
+        ],
+        "outgoing": [
+          "e75",
+          "e89",
+          "e100"
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "target": "intrinsic merit of a document",
+      "predicate": "addresses",
+      "cluster": null,
+      "color": "#4ae18a",
+      "tooltip": "Few Algorithms for Ascertaining Merit of a Document and Their Applications —addresses→ intrinsic merit of a document"
+    },
+    {
+      "id": "e1",
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "target": "Interview Algorithm",
+      "predicate": "applies",
+      "cluster": null,
+      "color": "#33ce23",
+      "tooltip": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm —applies→ Interview Algorithm"
+    },
+    {
+      "id": "e2",
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "target": "TAC 2010 dataset",
+      "predicate": "applies its method to",
+      "cluster": null,
+      "color": "#9674ed",
+      "tooltip": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm —applies its method to→ TAC 2010 dataset"
+    },
+    {
+      "id": "e3",
+      "source": "algorithms for constructing a complement",
+      "target": "existence of a complement",
+      "predicate": "apply when conditions establish",
+      "cluster": null,
+      "color": "#df9f53",
+      "tooltip": "algorithms for constructing a complement —apply when conditions establish→ existence of a complement"
+    },
+    {
+      "id": "e4",
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "target": "TAC 2010 Summarization Track",
+      "predicate": "belongs to",
+      "cluster": null,
+      "color": "#63f09c",
+      "tooltip": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm —belongs to→ TAC 2010 Summarization Track"
+    },
+    {
+      "id": "e5",
+      "source": "full abstracts",
+      "target": "publication-by-publication abstract table",
+      "predicate": "can be presented as",
+      "cluster": null,
+      "color": "#19add7",
+      "tooltip": "full abstracts —can be presented as→ publication-by-publication abstract table"
+    },
+    {
+      "id": "e6",
+      "source": "full abstracts",
+      "target": "PDFs",
+      "predicate": "can be reconstructed from",
+      "cluster": null,
+      "color": "#f09e5b",
+      "tooltip": "full abstracts —can be reconstructed from→ PDFs"
+    },
+    {
+      "id": "e7",
+      "source": "full abstracts",
+      "target": "underlying papers",
+      "predicate": "can be reconstructed from",
+      "cluster": null,
+      "color": "#f09e5b",
+      "tooltip": "full abstracts —can be reconstructed from→ underlying papers"
+    },
+    {
+      "id": "e8",
+      "source": "author’s academic publication archive",
+      "target": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "confirms arXiv publication of",
+      "cluster": null,
+      "color": "#1818de",
+      "tooltip": "author’s academic publication archive —confirms arXiv publication of→ Decidability of Existence and Construction of a Complement of a given Function"
+    },
+    {
+      "id": "e9",
+      "source": "author’s academic publication archive",
+      "target": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "predicate": "confirms arXiv publication of",
+      "cluster": null,
+      "color": "#1818de",
+      "tooltip": "author’s academic publication archive —confirms arXiv publication of→ Few Algorithms for Ascertaining Merit of a Document and Their Applications"
+    },
+    {
+      "id": "e10",
+      "source": "algorithms for constructing a complement",
+      "target": "complementary function",
+      "predicate": "construct",
+      "cluster": null,
+      "color": "#2ec94f",
+      "tooltip": "algorithms for constructing a complement —construct→ complementary function"
+    },
+    {
+      "id": "e11",
+      "source": "citation graph",
+      "target": "citations",
+      "predicate": "contains",
+      "cluster": null,
+      "color": "#6ca6dd",
+      "tooltip": "citation graph —contains→ citations"
+    },
+    {
+      "id": "e12",
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "target": "conventional ranking approaches",
+      "predicate": "contrasts intrinsic merit with",
+      "cluster": null,
+      "color": "#2cd0a0",
+      "tooltip": "Few Algorithms for Ascertaining Merit of a Document and Their Applications —contrasts intrinsic merit with→ conventional ranking approaches"
+    },
+    {
+      "id": "e13",
+      "source": "Interview Algorithm",
+      "target": "question-driven information acquisition and selection",
+      "predicate": "converts document summarization into",
+      "cluster": null,
+      "color": "#be326a",
+      "tooltip": "Interview Algorithm —converts document summarization into→ question-driven information acquisition and selection"
+    },
+    {
+      "id": "e14",
+      "source": "later research drafts",
+      "target": "complement functions",
+      "predicate": "cover",
+      "cluster": null,
+      "color": "#1363da",
+      "tooltip": "later research drafts —cover→ complement functions"
+    },
+    {
+      "id": "e15",
+      "source": "later research drafts",
+      "target": "complexity theory",
+      "predicate": "cover",
+      "cluster": null,
+      "color": "#1363da",
+      "tooltip": "later research drafts —cover→ complexity theory"
+    },
+    {
+      "id": "e16",
+      "source": "later research drafts",
+      "target": "computational number theory",
+      "predicate": "cover",
+      "cluster": null,
+      "color": "#1363da",
+      "tooltip": "later research drafts —cover→ computational number theory"
+    },
+    {
+      "id": "e17",
+      "source": "later research drafts",
+      "target": "graph-theoretic merit",
+      "predicate": "cover",
+      "cluster": null,
+      "color": "#1363da",
+      "tooltip": "later research drafts —cover→ graph-theoretic merit"
+    },
+    {
+      "id": "e18",
+      "source": "later research drafts",
+      "target": "integer partitions",
+      "predicate": "cover",
+      "cluster": null,
+      "color": "#1363da",
+      "tooltip": "later research drafts —cover→ integer partitions"
+    },
+    {
+      "id": "e19",
+      "source": "later research drafts",
+      "target": "knowledge graphs",
+      "predicate": "cover",
+      "cluster": null,
+      "color": "#1363da",
+      "tooltip": "later research drafts —cover→ knowledge graphs"
+    },
+    {
+      "id": "e20",
+      "source": "later research drafts",
+      "target": "question answering",
+      "predicate": "cover",
+      "cluster": null,
+      "color": "#1363da",
+      "tooltip": "later research drafts —cover→ question answering"
+    },
+    {
+      "id": "e21",
+      "source": "later research drafts",
+      "target": "social choice",
+      "predicate": "cover",
+      "cluster": null,
+      "color": "#1363da",
+      "tooltip": "later research drafts —cover→ social choice"
+    },
+    {
+      "id": "e22",
+      "source": "formal definition of a complement of a function",
+      "target": "complement of a function",
+      "predicate": "defines",
+      "cluster": null,
+      "color": "#b25aef",
+      "tooltip": "formal definition of a complement of a function —defines→ complement of a function"
+    },
+    {
+      "id": "e23",
+      "source": "Recursive Gloss Overlap",
+      "target": "intrinsic merit score",
+      "predicate": "derives",
+      "cluster": null,
+      "color": "#e3e779",
+      "tooltip": "Recursive Gloss Overlap —derives→ intrinsic merit score"
+    },
+    {
+      "id": "e24",
+      "source": "decidability",
+      "target": "existence of a complement",
+      "predicate": "determines",
+      "cluster": null,
+      "color": "#a8d13a",
+      "tooltip": "decidability —determines→ existence of a complement"
+    },
+    {
+      "id": "e25",
+      "source": "author’s academic publication archive",
+      "target": "2008–2011 publications",
+      "predicate": "distinguishes",
+      "cluster": null,
+      "color": "#6bcaee",
+      "tooltip": "author’s academic publication archive —distinguishes→ 2008–2011 publications"
+    },
+    {
+      "id": "e26",
+      "source": "author’s academic publication archive",
+      "target": "later research drafts",
+      "predicate": "distinguishes from the 2008–2011 publications",
+      "cluster": null,
+      "color": "#d5e94b",
+      "tooltip": "author’s academic publication archive —distinguishes from the 2008–2011 publications→ later research drafts"
+    },
+    {
+      "id": "e27",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "existence of a complement",
+      "predicate": "establishes conditions governing",
+      "cluster": null,
+      "color": "#35e6ad",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —establishes conditions governing→ existence of a complement"
+    },
+    {
+      "id": "e28",
+      "source": "Citation-graph maximum flow",
+      "target": "intrinsic merit of a document",
+      "predicate": "evaluates",
+      "cluster": null,
+      "color": "#5b44e9",
+      "tooltip": "Citation-graph maximum flow —evaluates→ intrinsic merit of a document"
+    },
+    {
+      "id": "e29",
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "target": "resulting summaries",
+      "predicate": "evaluates",
+      "cluster": null,
+      "color": "#5b44e9",
+      "tooltip": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm —evaluates→ resulting summaries"
+    },
+    {
+      "id": "e30",
+      "source": "Interview Algorithm",
+      "target": "document answering",
+      "predicate": "formulates",
+      "cluster": null,
+      "color": "#2f66e1",
+      "tooltip": "Interview Algorithm —formulates→ document answering"
+    },
+    {
+      "id": "e31",
+      "source": "Interview Algorithm",
+      "target": "question answering",
+      "predicate": "formulates",
+      "cluster": null,
+      "color": "#2f66e1",
+      "tooltip": "Interview Algorithm —formulates→ question answering"
+    },
+    {
+      "id": "e32",
+      "source": "information needs",
+      "target": "concepts",
+      "predicate": "guide identification of",
+      "cluster": null,
+      "color": "#32bfb3",
+      "tooltip": "information needs —guide identification of→ concepts"
+    },
+    {
+      "id": "e33",
+      "source": "information needs",
+      "target": "sentences",
+      "predicate": "guide identification of",
+      "cluster": null,
+      "color": "#32bfb3",
+      "tooltip": "information needs —guide identification of→ sentences"
+    },
+    {
+      "id": "e34",
+      "source": "questions",
+      "target": "concepts",
+      "predicate": "guide identification of",
+      "cluster": null,
+      "color": "#32bfb3",
+      "tooltip": "questions —guide identification of→ concepts"
+    },
+    {
+      "id": "e35",
+      "source": "questions",
+      "target": "sentences",
+      "predicate": "guide identification of",
+      "cluster": null,
+      "color": "#32bfb3",
+      "tooltip": "questions —guide identification of→ sentences"
+    },
+    {
+      "id": "e36",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "arXiv:1106.4102",
+      "predicate": "has arXiv identifier",
+      "cluster": null,
+      "color": "#b334e2",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —has arXiv identifier→ arXiv:1106.4102"
+    },
+    {
+      "id": "e37",
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "target": "arXiv:1006.4458",
+      "predicate": "has arXiv identifier",
+      "cluster": null,
+      "color": "#b334e2",
+      "tooltip": "Few Algorithms for Ascertaining Merit of a Document and Their Applications —has arXiv identifier→ arXiv:1006.4458"
+    },
+    {
+      "id": "e38",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "mathematical functions",
+      "predicate": "has main object",
+      "cluster": null,
+      "color": "#2988ea",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —has main object→ mathematical functions"
+    },
+    {
+      "id": "e39",
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "target": "documents",
+      "predicate": "has main object",
+      "cluster": null,
+      "color": "#2988ea",
+      "tooltip": "Few Algorithms for Ascertaining Merit of a Document and Their Applications —has main object→ documents"
+    },
+    {
+      "id": "e40",
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "target": "graphs",
+      "predicate": "has main object",
+      "cluster": null,
+      "color": "#2988ea",
+      "tooltip": "Few Algorithms for Ascertaining Merit of a Document and Their Applications —has main object→ graphs"
+    },
+    {
+      "id": "e41",
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "target": "semantics",
+      "predicate": "has main object",
+      "cluster": null,
+      "color": "#2988ea",
+      "tooltip": "Few Algorithms for Ascertaining Merit of a Document and Their Applications —has main object→ semantics"
+    },
+    {
+      "id": "e42",
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "target": "document collections",
+      "predicate": "has main object",
+      "cluster": null,
+      "color": "#2988ea",
+      "tooltip": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm —has main object→ document collections"
+    },
+    {
+      "id": "e43",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "construction of a complementary function",
+      "predicate": "has principal component",
+      "cluster": null,
+      "color": "#267fc4",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —has principal component→ construction of a complementary function"
+    },
+    {
+      "id": "e44",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "decidability",
+      "predicate": "has principal component",
+      "cluster": null,
+      "color": "#267fc4",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —has principal component→ decidability"
+    },
+    {
+      "id": "e45",
+      "source": "semantic relationships",
+      "target": "definitions",
+      "predicate": "hold between",
+      "cluster": null,
+      "color": "#6bd878",
+      "tooltip": "semantic relationships —hold between→ definitions"
+    },
+    {
+      "id": "e46",
+      "source": "semantic relationships",
+      "target": "terms",
+      "predicate": "hold between",
+      "cluster": null,
+      "color": "#6bd878",
+      "tooltip": "semantic relationships —hold between→ terms"
+    },
+    {
+      "id": "e47",
+      "source": "interactive information-identification procedure",
+      "target": "meritorious information",
+      "predicate": "identifies",
+      "cluster": null,
+      "color": "#de2caa",
+      "tooltip": "interactive information-identification procedure —identifies→ meritorious information"
+    },
+    {
+      "id": "e48",
+      "source": "interactive information-identification procedure",
+      "target": "relevant information",
+      "predicate": "identifies",
+      "cluster": null,
+      "color": "#de2caa",
+      "tooltip": "interactive information-identification procedure —identifies→ relevant information"
+    },
+    {
+      "id": "e49",
+      "source": "author’s academic publication archive",
+      "target": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "predicate": "identifies as a NIST/TAC application of the Interview Algorithm",
+      "cluster": null,
+      "color": "#298ddb",
+      "tooltip": "author’s academic publication archive —identifies as a NIST/TAC application of the Interview Algorithm→ TAC 2010 Summarization Track – Update Summarization with Interview Algorithm"
+    },
+    {
+      "id": "e50",
+      "source": "later research drafts",
+      "target": "unaffiliated research drafts",
+      "predicate": "include",
+      "cluster": null,
+      "color": "#5adea7",
+      "tooltip": "later research drafts —include→ unaffiliated research drafts"
+    },
+    {
+      "id": "e51",
+      "source": "later research drafts",
+      "target": "unreviewed research drafts",
+      "predicate": "include",
+      "cluster": null,
+      "color": "#5adea7",
+      "tooltip": "later research drafts —include→ unreviewed research drafts"
+    },
+    {
+      "id": "e52",
+      "source": "DBLP",
+      "target": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "predicate": "independently records",
+      "cluster": null,
+      "color": "#6862de",
+      "tooltip": "DBLP —independently records→ TAC 2010 Summarization Track – Update Summarization with Interview Algorithm"
+    },
+    {
+      "id": "e53",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "formal definition of a complement of a function",
+      "predicate": "introduces",
+      "cluster": null,
+      "color": "#52cd63",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —introduces→ formal definition of a complement of a function"
+    },
+    {
+      "id": "e54",
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "target": "generic judgement",
+      "predicate": "introduces a mathematical treatment of",
+      "cluster": null,
+      "color": "#b6f05c",
+      "tooltip": "Few Algorithms for Ascertaining Merit of a Document and Their Applications —introduces a mathematical treatment of→ generic judgement"
+    },
+    {
+      "id": "e55",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "existence of a complement",
+      "predicate": "investigates",
+      "cluster": null,
+      "color": "#a322e0",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —investigates→ existence of a complement"
+    },
+    {
+      "id": "e56",
+      "source": "citation graph",
+      "target": "directed graph",
+      "predicate": "is a",
+      "cluster": null,
+      "color": "#df8d65",
+      "tooltip": "citation graph —is a→ directed graph"
+    },
+    {
+      "id": "e57",
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "target": "Algorithms for Intrinsic Merit",
+      "predicate": "is an extension and evaluation of",
+      "cluster": null,
+      "color": "#ec22ea",
+      "tooltip": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm —is an extension and evaluation of→ Algorithms for Intrinsic Merit"
+    },
+    {
+      "id": "e58",
+      "source": "Interview Algorithm",
+      "target": "Update Summarization",
+      "predicate": "is applied to",
+      "cluster": null,
+      "color": "#6740ca",
+      "tooltip": "Interview Algorithm —is applied to→ Update Summarization"
+    },
+    {
+      "id": "e59",
+      "source": "Academic Publications and NeuronRain Theory Drafts documentation",
+      "target": "K. Srinivasan",
+      "predicate": "is associated with",
+      "cluster": null,
+      "color": "#a6d712",
+      "tooltip": "Academic Publications and NeuronRain Theory Drafts documentation —is associated with→ K. Srinivasan"
+    },
+    {
+      "id": "e60",
+      "source": "Google Scholar profile",
+      "target": "three publications associated with the Scholar profile",
+      "predicate": "is associated with",
+      "cluster": null,
+      "color": "#a6d712",
+      "tooltip": "Google Scholar profile —is associated with→ three publications associated with the Scholar profile"
+    },
+    {
+      "id": "e61",
+      "source": "NIST TAC 2010 evaluation",
+      "target": "NIST",
+      "predicate": "is associated with",
+      "cluster": null,
+      "color": "#a6d712",
+      "tooltip": "NIST TAC 2010 evaluation —is associated with→ NIST"
+    },
+    {
+      "id": "e62",
+      "source": "Google Scholar",
+      "target": "403 access restriction",
+      "predicate": "is currently returning",
+      "cluster": null,
+      "color": "#641bdc",
+      "tooltip": "Google Scholar —is currently returning→ 403 access restriction"
+    },
+    {
+      "id": "e63",
+      "source": "arXiv:1006.4458",
+      "target": "arXiv",
+      "predicate": "is hosted by",
+      "cluster": null,
+      "color": "#8b4aed",
+      "tooltip": "arXiv:1006.4458 —is hosted by→ arXiv"
+    },
+    {
+      "id": "e64",
+      "source": "arXiv:1106.4102",
+      "target": "arXiv",
+      "predicate": "is hosted by",
+      "cluster": null,
+      "color": "#8b4aed",
+      "tooltip": "arXiv:1106.4102 —is hosted by→ arXiv"
+    },
+    {
+      "id": "e65",
+      "source": "AcadP Drafts",
+      "target": "Academic Publications and NeuronRain Theory Drafts documentation",
+      "predicate": "is identified as",
+      "cluster": null,
+      "color": "#c5237f",
+      "tooltip": "AcadP Drafts —is identified as→ Academic Publications and NeuronRain Theory Drafts documentation"
+    },
+    {
+      "id": "e66",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "three publications associated with the Scholar profile",
+      "predicate": "is one of",
+      "cluster": null,
+      "color": "#67d471",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —is one of→ three publications associated with the Scholar profile"
+    },
+    {
+      "id": "e67",
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "target": "three publications associated with the Scholar profile",
+      "predicate": "is one of",
+      "cluster": null,
+      "color": "#67d471",
+      "tooltip": "Few Algorithms for Ascertaining Merit of a Document and Their Applications —is one of→ three publications associated with the Scholar profile"
+    },
+    {
+      "id": "e68",
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "target": "three publications associated with the Scholar profile",
+      "predicate": "is one of",
+      "cluster": null,
+      "color": "#67d471",
+      "tooltip": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm —is one of→ three publications associated with the Scholar profile"
+    },
+    {
+      "id": "e69",
+      "source": "TAC 2010 Summarization Track",
+      "target": "TAC 2010",
+      "predicate": "is part of",
+      "cluster": null,
+      "color": "#2553c9",
+      "tooltip": "TAC 2010 Summarization Track —is part of→ TAC 2010"
+    },
+    {
+      "id": "e70",
+      "source": "document summarization",
+      "target": "information-selection process",
+      "predicate": "is treated as",
+      "cluster": null,
+      "color": "#ead067",
+      "tooltip": "document summarization —is treated as→ information-selection process"
+    },
+    {
+      "id": "e71",
+      "source": "document summarization",
+      "target": "interview process",
+      "predicate": "is treated as",
+      "cluster": null,
+      "color": "#ead067",
+      "tooltip": "document summarization —is treated as→ interview process"
+    },
+    {
+      "id": "e72",
+      "source": "Citation-graph maximum flow",
+      "target": "citation graph",
+      "predicate": "operates on",
+      "cluster": null,
+      "color": "#7fe27b",
+      "tooltip": "Citation-graph maximum flow —operates on→ citation graph"
+    },
+    {
+      "id": "e73",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "algorithms for constructing a complement",
+      "predicate": "presents",
+      "cluster": null,
+      "color": "#35cd92",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —presents→ algorithms for constructing a complement"
+    },
+    {
+      "id": "e74",
+      "source": "construction of a complementary function",
+      "target": "complementary function",
+      "predicate": "produces",
+      "cluster": null,
+      "color": "#8be01e",
+      "tooltip": "construction of a complementary function —produces→ complementary function"
+    },
+    {
+      "id": "e75",
+      "source": "Update Summarization",
+      "target": "newly available documents",
+      "predicate": "produces a summary of",
+      "cluster": null,
+      "color": "#d04a4d",
+      "tooltip": "Update Summarization —produces a summary of→ newly available documents"
+    },
+    {
+      "id": "e76",
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "target": "Citation-graph maximum flow",
+      "predicate": "proposes",
+      "cluster": null,
+      "color": "#ce72e9",
+      "tooltip": "Few Algorithms for Ascertaining Merit of a Document and Their Applications —proposes→ Citation-graph maximum flow"
+    },
+    {
+      "id": "e77",
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "target": "Interview Algorithm",
+      "predicate": "proposes",
+      "cluster": null,
+      "color": "#ce72e9",
+      "tooltip": "Few Algorithms for Ascertaining Merit of a Document and Their Applications —proposes→ Interview Algorithm"
+    },
+    {
+      "id": "e78",
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "target": "Recursive Gloss Overlap",
+      "predicate": "proposes",
+      "cluster": null,
+      "color": "#ce72e9",
+      "tooltip": "Few Algorithms for Ascertaining Merit of a Document and Their Applications —proposes→ Recursive Gloss Overlap"
+    },
+    {
+      "id": "e79",
+      "source": "concepts",
+      "target": "new information",
+      "predicate": "provide",
+      "cluster": null,
+      "color": "#a7e153",
+      "tooltip": "concepts —provide→ new information"
+    },
+    {
+      "id": "e80",
+      "source": "sentences",
+      "target": "new information",
+      "predicate": "provide",
+      "cluster": null,
+      "color": "#a7e153",
+      "tooltip": "sentences —provide→ new information"
+    },
+    {
+      "id": "e81",
+      "source": "generic judgement",
+      "target": "Citation-graph maximum flow",
+      "predicate": "provides the conceptual basis for",
+      "cluster": null,
+      "color": "#9ada2a",
+      "tooltip": "generic judgement —provides the conceptual basis for→ Citation-graph maximum flow"
+    },
+    {
+      "id": "e82",
+      "source": "generic judgement",
+      "target": "Interview Algorithm",
+      "predicate": "provides the conceptual basis for",
+      "cluster": null,
+      "color": "#9ada2a",
+      "tooltip": "generic judgement —provides the conceptual basis for→ Interview Algorithm"
+    },
+    {
+      "id": "e83",
+      "source": "generic judgement",
+      "target": "Recursive Gloss Overlap",
+      "predicate": "provides the conceptual basis for",
+      "cluster": null,
+      "color": "#9ada2a",
+      "tooltip": "generic judgement —provides the conceptual basis for→ Recursive Gloss Overlap"
+    },
+    {
+      "id": "e84",
+      "source": "intrinsic merit of a document",
+      "target": "document content",
+      "predicate": "should be inferred from",
+      "cluster": null,
+      "color": "#e6ee66",
+      "tooltip": "intrinsic merit of a document —should be inferred from→ document content"
+    },
+    {
+      "id": "e85",
+      "source": "intrinsic merit of a document",
+      "target": "structural relationships",
+      "predicate": "should be inferred from",
+      "cluster": null,
+      "color": "#e6ee66",
+      "tooltip": "intrinsic merit of a document —should be inferred from→ structural relationships"
+    },
+    {
+      "id": "e86",
+      "source": "later research drafts",
+      "target": "Google Scholar",
+      "predicate": "should not automatically be treated as publications on",
+      "cluster": null,
+      "color": "#586ad7",
+      "tooltip": "later research drafts —should not automatically be treated as publications on→ Google Scholar"
+    },
+    {
+      "id": "e87",
+      "source": "intrinsic merit of a document",
+      "target": "popularity",
+      "predicate": "should not be inferred merely from",
+      "cluster": null,
+      "color": "#8030c4",
+      "tooltip": "intrinsic merit of a document —should not be inferred merely from→ popularity"
+    },
+    {
+      "id": "e88",
+      "source": "intrinsic merit of a document",
+      "target": "prestige",
+      "predicate": "should not be inferred merely from",
+      "cluster": null,
+      "color": "#8030c4",
+      "tooltip": "intrinsic merit of a document —should not be inferred merely from→ prestige"
+    },
+    {
+      "id": "e89",
+      "source": "Update Summarization",
+      "target": "previously supplied documents",
+      "predicate": "takes into account",
+      "cluster": null,
+      "color": "#9271ef",
+      "tooltip": "Update Summarization —takes into account→ previously supplied documents"
+    },
+    {
+      "id": "e90",
+      "source": "conventional ranking approaches",
+      "target": "popularity",
+      "predicate": "tend to measure",
+      "cluster": null,
+      "color": "#e833c4",
+      "tooltip": "conventional ranking approaches —tend to measure→ popularity"
+    },
+    {
+      "id": "e91",
+      "source": "conventional ranking approaches",
+      "target": "prestige",
+      "predicate": "tend to measure",
+      "cluster": null,
+      "color": "#e833c4",
+      "tooltip": "conventional ranking approaches —tend to measure→ prestige"
+    },
+    {
+      "id": "e92",
+      "source": "Interview Algorithm",
+      "target": "document summarization",
+      "predicate": "treats",
+      "cluster": null,
+      "color": "#9a4de1",
+      "tooltip": "Interview Algorithm —treats→ document summarization"
+    },
+    {
+      "id": "e93",
+      "source": "Interview Algorithm",
+      "target": "interactive information-identification procedure",
+      "predicate": "uses",
+      "cluster": null,
+      "color": "#d271e1",
+      "tooltip": "Interview Algorithm —uses→ interactive information-identification procedure"
+    },
+    {
+      "id": "e94",
+      "source": "NIST TAC 2010 evaluation",
+      "target": "TAC 2010 dataset",
+      "predicate": "uses",
+      "cluster": null,
+      "color": "#d271e1",
+      "tooltip": "NIST TAC 2010 evaluation —uses→ TAC 2010 dataset"
+    },
+    {
+      "id": "e95",
+      "source": "Recursive Gloss Overlap",
+      "target": "semantic relationships",
+      "predicate": "uses",
+      "cluster": null,
+      "color": "#d271e1",
+      "tooltip": "Recursive Gloss Overlap —uses→ semantic relationships"
+    },
+    {
+      "id": "e96",
+      "source": "Citation-graph maximum flow",
+      "target": "citations",
+      "predicate": "uses the structure and flow of",
+      "cluster": null,
+      "color": "#f264f0",
+      "tooltip": "Citation-graph maximum flow —uses the structure and flow of→ citations"
+    },
+    {
+      "id": "e97",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "Ka. Shrinivaasan",
+      "predicate": "was authored by",
+      "cluster": null,
+      "color": "#2ebe50",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —was authored by→ Ka. Shrinivaasan"
+    },
+    {
+      "id": "e98",
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "target": "Ka. Shrinivaasan",
+      "predicate": "was authored by",
+      "cluster": null,
+      "color": "#2ebe50",
+      "tooltip": "Few Algorithms for Ascertaining Merit of a Document and Their Applications —was authored by→ Ka. Shrinivaasan"
+    },
+    {
+      "id": "e99",
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "target": "Ka. Shrinivaasan",
+      "predicate": "was authored by",
+      "cluster": null,
+      "color": "#2ebe50",
+      "tooltip": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm —was authored by→ Ka. Shrinivaasan"
+    },
+    {
+      "id": "e100",
+      "source": "Update Summarization",
+      "target": "NIST TAC 2010 evaluation",
+      "predicate": "was evaluated in",
+      "cluster": null,
+      "color": "#4423d4",
+      "tooltip": "Update Summarization —was evaluated in→ NIST TAC 2010 evaluation"
+    },
+    {
+      "id": "e101",
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "target": "Text Analysis Conference",
+      "predicate": "was presented at",
+      "cluster": null,
+      "color": "#ba1de7",
+      "tooltip": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm —was presented at→ Text Analysis Conference"
+    },
+    {
+      "id": "e102",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "2011",
+      "predicate": "was published in",
+      "cluster": null,
+      "color": "#e213bd",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —was published in→ 2011"
+    },
+    {
+      "id": "e103",
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "target": "2010",
+      "predicate": "was published in",
+      "cluster": null,
+      "color": "#e213bd",
+      "tooltip": "Few Algorithms for Ascertaining Merit of a Document and Their Applications —was published in→ 2010"
+    },
+    {
+      "id": "e104",
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "target": "2010",
+      "predicate": "was published in",
+      "cluster": null,
+      "color": "#e213bd",
+      "tooltip": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm —was published in→ 2010"
+    },
+    {
+      "id": "e105",
+      "source": "three publications associated with the Scholar profile",
+      "target": "arXiv",
+      "predicate": "were cross-checked against",
+      "cluster": null,
+      "color": "#6bb5d7",
+      "tooltip": "three publications associated with the Scholar profile —were cross-checked against→ arXiv"
+    },
+    {
+      "id": "e106",
+      "source": "three publications associated with the Scholar profile",
+      "target": "author’s academic publication archive",
+      "predicate": "were cross-checked against",
+      "cluster": null,
+      "color": "#6bb5d7",
+      "tooltip": "three publications associated with the Scholar profile —were cross-checked against→ author’s academic publication archive"
+    },
+    {
+      "id": "e107",
+      "source": "three publications associated with the Scholar profile",
+      "target": "DBLP",
+      "predicate": "were cross-checked against",
+      "cluster": null,
+      "color": "#6bb5d7",
+      "tooltip": "three publications associated with the Scholar profile —were cross-checked against→ DBLP"
+    },
+    {
+      "id": "e108",
+      "source": "publication-by-publication abstract table",
+      "target": "copyright limits",
+      "predicate": "would observe",
+      "cluster": null,
+      "color": "#e37176",
+      "tooltip": "publication-by-publication abstract table —would observe→ copyright limits"
+    }
+  ],
+  "clusters": [],
+  "edgeClusters": [],
+  "topEntities": [
+    {
+      "label": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "degree": 14,
+      "indegree": 1,
+      "outdegree": 13,
+      "cluster": null
+    },
+    {
+      "label": "Decidability of Existence and Construction of a Complement of a given Function",
+      "degree": 12,
+      "indegree": 1,
+      "outdegree": 11,
+      "cluster": null
+    },
+    {
+      "label": "later research drafts",
+      "degree": 12,
+      "indegree": 1,
+      "outdegree": 11,
+      "cluster": null
+    },
+    {
+      "label": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "degree": 12,
+      "indegree": 2,
+      "outdegree": 10,
+      "cluster": null
+    },
+    {
+      "label": "Interview Algorithm",
+      "degree": 9,
+      "indegree": 3,
+      "outdegree": 6,
+      "cluster": null
+    },
+    {
+      "label": "three publications associated with the Scholar profile",
+      "degree": 7,
+      "indegree": 4,
+      "outdegree": 3,
+      "cluster": null
+    },
+    {
+      "label": "author’s academic publication archive",
+      "degree": 6,
+      "indegree": 1,
+      "outdegree": 5,
+      "cluster": null
+    },
+    {
+      "label": "intrinsic merit of a document",
+      "degree": 6,
+      "indegree": 2,
+      "outdegree": 4,
+      "cluster": null
+    },
+    {
+      "label": "Citation-graph maximum flow",
+      "degree": 5,
+      "indegree": 2,
+      "outdegree": 3,
+      "cluster": null
+    },
+    {
+      "label": "existence of a complement",
+      "degree": 4,
+      "indegree": 4,
+      "outdegree": 0,
+      "cluster": null
+    }
+  ],
+  "topRelations": [
+    {
+      "predicate": "cover",
+      "count": 8,
+      "cluster": null,
+      "color": "#1363da"
+    },
+    {
+      "predicate": "has main object",
+      "count": 5,
+      "cluster": null,
+      "color": "#2988ea"
+    },
+    {
+      "predicate": "guide identification of",
+      "count": 4,
+      "cluster": null,
+      "color": "#32bfb3"
+    },
+    {
+      "predicate": "is associated with",
+      "count": 3,
+      "cluster": null,
+      "color": "#a6d712"
+    },
+    {
+      "predicate": "is one of",
+      "count": 3,
+      "cluster": null,
+      "color": "#67d471"
+    },
+    {
+      "predicate": "proposes",
+      "count": 3,
+      "cluster": null,
+      "color": "#ce72e9"
+    },
+    {
+      "predicate": "provides the conceptual basis for",
+      "count": 3,
+      "cluster": null,
+      "color": "#9ada2a"
+    },
+    {
+      "predicate": "uses",
+      "count": 3,
+      "cluster": null,
+      "color": "#d271e1"
+    },
+    {
+      "predicate": "was authored by",
+      "count": 3,
+      "cluster": null,
+      "color": "#2ebe50"
+    },
+    {
+      "predicate": "was published in",
+      "count": 3,
+      "cluster": null,
+      "color": "#e213bd"
+    }
+  ],
+  "stats": {
+    "entities": 89,
+    "relations": 109,
+    "relationTypes": 64,
+    "entityClusters": 0,
+    "edgeClusters": 0,
+    "isolatedEntities": 1,
+    "components": 5,
+    "averageDegree": 2.45,
+    "density": 0.014
+  },
+  "isolatedEntities": [
+    "NeuronRain"
+  ],
+  "components": [
+    {
+      "size": 75,
+      "members": [
+        "2008–2011 publications",
+        "2010",
+        "2011",
+        "403 access restriction",
+        "algorithms for constructing a complement",
+        "Algorithms for Intrinsic Merit",
+        "arXiv",
+        "arXiv:1006.4458",
+        "arXiv:1106.4102",
+        "author’s academic publication archive",
+        "citation graph",
+        "Citation-graph maximum flow",
+        "citations",
+        "complement functions",
+        "complement of a function",
+        "complementary function",
+        "complexity theory",
+        "computational number theory",
+        "construction of a complementary function",
+        "conventional ranking approaches",
+        "DBLP",
+        "decidability",
+        "Decidability of Existence and Construction of a Complement of a given Function",
+        "definitions",
+        "directed graph",
+        "document answering",
+        "document collections",
+        "document content",
+        "document summarization",
+        "documents",
+        "existence of a complement",
+        "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+        "formal definition of a complement of a function",
+        "generic judgement",
+        "Google Scholar",
+        "Google Scholar profile",
+        "graph-theoretic merit",
+        "graphs",
+        "information-selection process",
+        "integer partitions",
+        "interactive information-identification procedure",
+        "Interview Algorithm",
+        "interview process",
+        "intrinsic merit of a document",
+        "intrinsic merit score",
+        "Ka. Shrinivaasan",
+        "knowledge graphs",
+        "later research drafts",
+        "mathematical functions",
+        "meritorious information",
+        "newly available documents",
+        "NIST",
+        "NIST TAC 2010 evaluation",
+        "popularity",
+        "prestige",
+        "previously supplied documents",
+        "question answering",
+        "question-driven information acquisition and selection",
+        "Recursive Gloss Overlap",
+        "relevant information",
+        "resulting summaries",
+        "semantic relationships",
+        "semantics",
+        "social choice",
+        "structural relationships",
+        "TAC 2010",
+        "TAC 2010 dataset",
+        "TAC 2010 Summarization Track",
+        "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+        "terms",
+        "Text Analysis Conference",
+        "three publications associated with the Scholar profile",
+        "unaffiliated research drafts",
+        "unreviewed research drafts",
+        "Update Summarization"
+      ]
+    },
+    {
+      "size": 5,
+      "members": [
+        "concepts",
+        "information needs",
+        "new information",
+        "questions",
+        "sentences"
+      ]
+    },
+    {
+      "size": 5,
+      "members": [
+        "copyright limits",
+        "full abstracts",
+        "PDFs",
+        "publication-by-publication abstract table",
+        "underlying papers"
+      ]
+    },
+    {
+      "size": 3,
+      "members": [
+        "Academic Publications and NeuronRain Theory Drafts documentation",
+        "AcadP Drafts",
+        "K. Srinivasan"
+      ]
+    },
+    {
+      "size": 1,
+      "members": [
+        "NeuronRain"
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "predicate": "addresses",
+      "target": "intrinsic merit of a document",
+      "edgeId": "e0",
+      "color": "#4ae18a"
+    },
+    {
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "predicate": "applies",
+      "target": "Interview Algorithm",
+      "edgeId": "e1",
+      "color": "#33ce23"
+    },
+    {
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "predicate": "applies its method to",
+      "target": "TAC 2010 dataset",
+      "edgeId": "e2",
+      "color": "#9674ed"
+    },
+    {
+      "source": "algorithms for constructing a complement",
+      "predicate": "apply when conditions establish",
+      "target": "existence of a complement",
+      "edgeId": "e3",
+      "color": "#df9f53"
+    },
+    {
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "predicate": "belongs to",
+      "target": "TAC 2010 Summarization Track",
+      "edgeId": "e4",
+      "color": "#63f09c"
+    },
+    {
+      "source": "full abstracts",
+      "predicate": "can be presented as",
+      "target": "publication-by-publication abstract table",
+      "edgeId": "e5",
+      "color": "#19add7"
+    },
+    {
+      "source": "full abstracts",
+      "predicate": "can be reconstructed from",
+      "target": "PDFs",
+      "edgeId": "e6",
+      "color": "#f09e5b"
+    },
+    {
+      "source": "full abstracts",
+      "predicate": "can be reconstructed from",
+      "target": "underlying papers",
+      "edgeId": "e7",
+      "color": "#f09e5b"
+    },
+    {
+      "source": "author’s academic publication archive",
+      "predicate": "confirms arXiv publication of",
+      "target": "Decidability of Existence and Construction of a Complement of a given Function",
+      "edgeId": "e8",
+      "color": "#1818de"
+    },
+    {
+      "source": "author’s academic publication archive",
+      "predicate": "confirms arXiv publication of",
+      "target": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "edgeId": "e9",
+      "color": "#1818de"
+    },
+    {
+      "source": "algorithms for constructing a complement",
+      "predicate": "construct",
+      "target": "complementary function",
+      "edgeId": "e10",
+      "color": "#2ec94f"
+    },
+    {
+      "source": "citation graph",
+      "predicate": "contains",
+      "target": "citations",
+      "edgeId": "e11",
+      "color": "#6ca6dd"
+    },
+    {
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "predicate": "contrasts intrinsic merit with",
+      "target": "conventional ranking approaches",
+      "edgeId": "e12",
+      "color": "#2cd0a0"
+    },
+    {
+      "source": "Interview Algorithm",
+      "predicate": "converts document summarization into",
+      "target": "question-driven information acquisition and selection",
+      "edgeId": "e13",
+      "color": "#be326a"
+    },
+    {
+      "source": "later research drafts",
+      "predicate": "cover",
+      "target": "complement functions",
+      "edgeId": "e14",
+      "color": "#1363da"
+    },
+    {
+      "source": "later research drafts",
+      "predicate": "cover",
+      "target": "complexity theory",
+      "edgeId": "e15",
+      "color": "#1363da"
+    },
+    {
+      "source": "later research drafts",
+      "predicate": "cover",
+      "target": "computational number theory",
+      "edgeId": "e16",
+      "color": "#1363da"
+    },
+    {
+      "source": "later research drafts",
+      "predicate": "cover",
+      "target": "graph-theoretic merit",
+      "edgeId": "e17",
+      "color": "#1363da"
+    },
+    {
+      "source": "later research drafts",
+      "predicate": "cover",
+      "target": "integer partitions",
+      "edgeId": "e18",
+      "color": "#1363da"
+    },
+    {
+      "source": "later research drafts",
+      "predicate": "cover",
+      "target": "knowledge graphs",
+      "edgeId": "e19",
+      "color": "#1363da"
+    },
+    {
+      "source": "later research drafts",
+      "predicate": "cover",
+      "target": "question answering",
+      "edgeId": "e20",
+      "color": "#1363da"
+    },
+    {
+      "source": "later research drafts",
+      "predicate": "cover",
+      "target": "social choice",
+      "edgeId": "e21",
+      "color": "#1363da"
+    },
+    {
+      "source": "formal definition of a complement of a function",
+      "predicate": "defines",
+      "target": "complement of a function",
+      "edgeId": "e22",
+      "color": "#b25aef"
+    },
+    {
+      "source": "Recursive Gloss Overlap",
+      "predicate": "derives",
+      "target": "intrinsic merit score",
+      "edgeId": "e23",
+      "color": "#e3e779"
+    },
+    {
+      "source": "decidability",
+      "predicate": "determines",
+      "target": "existence of a complement",
+      "edgeId": "e24",
+      "color": "#a8d13a"
+    },
+    {
+      "source": "author’s academic publication archive",
+      "predicate": "distinguishes",
+      "target": "2008–2011 publications",
+      "edgeId": "e25",
+      "color": "#6bcaee"
+    },
+    {
+      "source": "author’s academic publication archive",
+      "predicate": "distinguishes from the 2008–2011 publications",
+      "target": "later research drafts",
+      "edgeId": "e26",
+      "color": "#d5e94b"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "establishes conditions governing",
+      "target": "existence of a complement",
+      "edgeId": "e27",
+      "color": "#35e6ad"
+    },
+    {
+      "source": "Citation-graph maximum flow",
+      "predicate": "evaluates",
+      "target": "intrinsic merit of a document",
+      "edgeId": "e28",
+      "color": "#5b44e9"
+    },
+    {
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "predicate": "evaluates",
+      "target": "resulting summaries",
+      "edgeId": "e29",
+      "color": "#5b44e9"
+    },
+    {
+      "source": "Interview Algorithm",
+      "predicate": "formulates",
+      "target": "document answering",
+      "edgeId": "e30",
+      "color": "#2f66e1"
+    },
+    {
+      "source": "Interview Algorithm",
+      "predicate": "formulates",
+      "target": "question answering",
+      "edgeId": "e31",
+      "color": "#2f66e1"
+    },
+    {
+      "source": "information needs",
+      "predicate": "guide identification of",
+      "target": "concepts",
+      "edgeId": "e32",
+      "color": "#32bfb3"
+    },
+    {
+      "source": "information needs",
+      "predicate": "guide identification of",
+      "target": "sentences",
+      "edgeId": "e33",
+      "color": "#32bfb3"
+    },
+    {
+      "source": "questions",
+      "predicate": "guide identification of",
+      "target": "concepts",
+      "edgeId": "e34",
+      "color": "#32bfb3"
+    },
+    {
+      "source": "questions",
+      "predicate": "guide identification of",
+      "target": "sentences",
+      "edgeId": "e35",
+      "color": "#32bfb3"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "has arXiv identifier",
+      "target": "arXiv:1106.4102",
+      "edgeId": "e36",
+      "color": "#b334e2"
+    },
+    {
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "predicate": "has arXiv identifier",
+      "target": "arXiv:1006.4458",
+      "edgeId": "e37",
+      "color": "#b334e2"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "has main object",
+      "target": "mathematical functions",
+      "edgeId": "e38",
+      "color": "#2988ea"
+    },
+    {
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "predicate": "has main object",
+      "target": "documents",
+      "edgeId": "e39",
+      "color": "#2988ea"
+    },
+    {
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "predicate": "has main object",
+      "target": "graphs",
+      "edgeId": "e40",
+      "color": "#2988ea"
+    },
+    {
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "predicate": "has main object",
+      "target": "semantics",
+      "edgeId": "e41",
+      "color": "#2988ea"
+    },
+    {
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "predicate": "has main object",
+      "target": "document collections",
+      "edgeId": "e42",
+      "color": "#2988ea"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "has principal component",
+      "target": "construction of a complementary function",
+      "edgeId": "e43",
+      "color": "#267fc4"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "has principal component",
+      "target": "decidability",
+      "edgeId": "e44",
+      "color": "#267fc4"
+    },
+    {
+      "source": "semantic relationships",
+      "predicate": "hold between",
+      "target": "definitions",
+      "edgeId": "e45",
+      "color": "#6bd878"
+    },
+    {
+      "source": "semantic relationships",
+      "predicate": "hold between",
+      "target": "terms",
+      "edgeId": "e46",
+      "color": "#6bd878"
+    },
+    {
+      "source": "interactive information-identification procedure",
+      "predicate": "identifies",
+      "target": "meritorious information",
+      "edgeId": "e47",
+      "color": "#de2caa"
+    },
+    {
+      "source": "interactive information-identification procedure",
+      "predicate": "identifies",
+      "target": "relevant information",
+      "edgeId": "e48",
+      "color": "#de2caa"
+    },
+    {
+      "source": "author’s academic publication archive",
+      "predicate": "identifies as a NIST/TAC application of the Interview Algorithm",
+      "target": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "edgeId": "e49",
+      "color": "#298ddb"
+    },
+    {
+      "source": "later research drafts",
+      "predicate": "include",
+      "target": "unaffiliated research drafts",
+      "edgeId": "e50",
+      "color": "#5adea7"
+    },
+    {
+      "source": "later research drafts",
+      "predicate": "include",
+      "target": "unreviewed research drafts",
+      "edgeId": "e51",
+      "color": "#5adea7"
+    },
+    {
+      "source": "DBLP",
+      "predicate": "independently records",
+      "target": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "edgeId": "e52",
+      "color": "#6862de"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "introduces",
+      "target": "formal definition of a complement of a function",
+      "edgeId": "e53",
+      "color": "#52cd63"
+    },
+    {
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "predicate": "introduces a mathematical treatment of",
+      "target": "generic judgement",
+      "edgeId": "e54",
+      "color": "#b6f05c"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "investigates",
+      "target": "existence of a complement",
+      "edgeId": "e55",
+      "color": "#a322e0"
+    },
+    {
+      "source": "citation graph",
+      "predicate": "is a",
+      "target": "directed graph",
+      "edgeId": "e56",
+      "color": "#df8d65"
+    },
+    {
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "predicate": "is an extension and evaluation of",
+      "target": "Algorithms for Intrinsic Merit",
+      "edgeId": "e57",
+      "color": "#ec22ea"
+    },
+    {
+      "source": "Interview Algorithm",
+      "predicate": "is applied to",
+      "target": "Update Summarization",
+      "edgeId": "e58",
+      "color": "#6740ca"
+    },
+    {
+      "source": "Academic Publications and NeuronRain Theory Drafts documentation",
+      "predicate": "is associated with",
+      "target": "K. Srinivasan",
+      "edgeId": "e59",
+      "color": "#a6d712"
+    },
+    {
+      "source": "Google Scholar profile",
+      "predicate": "is associated with",
+      "target": "three publications associated with the Scholar profile",
+      "edgeId": "e60",
+      "color": "#a6d712"
+    },
+    {
+      "source": "NIST TAC 2010 evaluation",
+      "predicate": "is associated with",
+      "target": "NIST",
+      "edgeId": "e61",
+      "color": "#a6d712"
+    },
+    {
+      "source": "Google Scholar",
+      "predicate": "is currently returning",
+      "target": "403 access restriction",
+      "edgeId": "e62",
+      "color": "#641bdc"
+    },
+    {
+      "source": "arXiv:1006.4458",
+      "predicate": "is hosted by",
+      "target": "arXiv",
+      "edgeId": "e63",
+      "color": "#8b4aed"
+    },
+    {
+      "source": "arXiv:1106.4102",
+      "predicate": "is hosted by",
+      "target": "arXiv",
+      "edgeId": "e64",
+      "color": "#8b4aed"
+    },
+    {
+      "source": "AcadP Drafts",
+      "predicate": "is identified as",
+      "target": "Academic Publications and NeuronRain Theory Drafts documentation",
+      "edgeId": "e65",
+      "color": "#c5237f"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "is one of",
+      "target": "three publications associated with the Scholar profile",
+      "edgeId": "e66",
+      "color": "#67d471"
+    },
+    {
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "predicate": "is one of",
+      "target": "three publications associated with the Scholar profile",
+      "edgeId": "e67",
+      "color": "#67d471"
+    },
+    {
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "predicate": "is one of",
+      "target": "three publications associated with the Scholar profile",
+      "edgeId": "e68",
+      "color": "#67d471"
+    },
+    {
+      "source": "TAC 2010 Summarization Track",
+      "predicate": "is part of",
+      "target": "TAC 2010",
+      "edgeId": "e69",
+      "color": "#2553c9"
+    },
+    {
+      "source": "document summarization",
+      "predicate": "is treated as",
+      "target": "information-selection process",
+      "edgeId": "e70",
+      "color": "#ead067"
+    },
+    {
+      "source": "document summarization",
+      "predicate": "is treated as",
+      "target": "interview process",
+      "edgeId": "e71",
+      "color": "#ead067"
+    },
+    {
+      "source": "Citation-graph maximum flow",
+      "predicate": "operates on",
+      "target": "citation graph",
+      "edgeId": "e72",
+      "color": "#7fe27b"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "presents",
+      "target": "algorithms for constructing a complement",
+      "edgeId": "e73",
+      "color": "#35cd92"
+    },
+    {
+      "source": "construction of a complementary function",
+      "predicate": "produces",
+      "target": "complementary function",
+      "edgeId": "e74",
+      "color": "#8be01e"
+    },
+    {
+      "source": "Update Summarization",
+      "predicate": "produces a summary of",
+      "target": "newly available documents",
+      "edgeId": "e75",
+      "color": "#d04a4d"
+    },
+    {
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "predicate": "proposes",
+      "target": "Citation-graph maximum flow",
+      "edgeId": "e76",
+      "color": "#ce72e9"
+    },
+    {
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "predicate": "proposes",
+      "target": "Interview Algorithm",
+      "edgeId": "e77",
+      "color": "#ce72e9"
+    },
+    {
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "predicate": "proposes",
+      "target": "Recursive Gloss Overlap",
+      "edgeId": "e78",
+      "color": "#ce72e9"
+    },
+    {
+      "source": "concepts",
+      "predicate": "provide",
+      "target": "new information",
+      "edgeId": "e79",
+      "color": "#a7e153"
+    },
+    {
+      "source": "sentences",
+      "predicate": "provide",
+      "target": "new information",
+      "edgeId": "e80",
+      "color": "#a7e153"
+    },
+    {
+      "source": "generic judgement",
+      "predicate": "provides the conceptual basis for",
+      "target": "Citation-graph maximum flow",
+      "edgeId": "e81",
+      "color": "#9ada2a"
+    },
+    {
+      "source": "generic judgement",
+      "predicate": "provides the conceptual basis for",
+      "target": "Interview Algorithm",
+      "edgeId": "e82",
+      "color": "#9ada2a"
+    },
+    {
+      "source": "generic judgement",
+      "predicate": "provides the conceptual basis for",
+      "target": "Recursive Gloss Overlap",
+      "edgeId": "e83",
+      "color": "#9ada2a"
+    },
+    {
+      "source": "intrinsic merit of a document",
+      "predicate": "should be inferred from",
+      "target": "document content",
+      "edgeId": "e84",
+      "color": "#e6ee66"
+    },
+    {
+      "source": "intrinsic merit of a document",
+      "predicate": "should be inferred from",
+      "target": "structural relationships",
+      "edgeId": "e85",
+      "color": "#e6ee66"
+    },
+    {
+      "source": "later research drafts",
+      "predicate": "should not automatically be treated as publications on",
+      "target": "Google Scholar",
+      "edgeId": "e86",
+      "color": "#586ad7"
+    },
+    {
+      "source": "intrinsic merit of a document",
+      "predicate": "should not be inferred merely from",
+      "target": "popularity",
+      "edgeId": "e87",
+      "color": "#8030c4"
+    },
+    {
+      "source": "intrinsic merit of a document",
+      "predicate": "should not be inferred merely from",
+      "target": "prestige",
+      "edgeId": "e88",
+      "color": "#8030c4"
+    },
+    {
+      "source": "Update Summarization",
+      "predicate": "takes into account",
+      "target": "previously supplied documents",
+      "edgeId": "e89",
+      "color": "#9271ef"
+    },
+    {
+      "source": "conventional ranking approaches",
+      "predicate": "tend to measure",
+      "target": "popularity",
+      "edgeId": "e90",
+      "color": "#e833c4"
+    },
+    {
+      "source": "conventional ranking approaches",
+      "predicate": "tend to measure",
+      "target": "prestige",
+      "edgeId": "e91",
+      "color": "#e833c4"
+    },
+    {
+      "source": "Interview Algorithm",
+      "predicate": "treats",
+      "target": "document summarization",
+      "edgeId": "e92",
+      "color": "#9a4de1"
+    },
+    {
+      "source": "Interview Algorithm",
+      "predicate": "uses",
+      "target": "interactive information-identification procedure",
+      "edgeId": "e93",
+      "color": "#d271e1"
+    },
+    {
+      "source": "NIST TAC 2010 evaluation",
+      "predicate": "uses",
+      "target": "TAC 2010 dataset",
+      "edgeId": "e94",
+      "color": "#d271e1"
+    },
+    {
+      "source": "Recursive Gloss Overlap",
+      "predicate": "uses",
+      "target": "semantic relationships",
+      "edgeId": "e95",
+      "color": "#d271e1"
+    },
+    {
+      "source": "Citation-graph maximum flow",
+      "predicate": "uses the structure and flow of",
+      "target": "citations",
+      "edgeId": "e96",
+      "color": "#f264f0"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "was authored by",
+      "target": "Ka. Shrinivaasan",
+      "edgeId": "e97",
+      "color": "#2ebe50"
+    },
+    {
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "predicate": "was authored by",
+      "target": "Ka. Shrinivaasan",
+      "edgeId": "e98",
+      "color": "#2ebe50"
+    },
+    {
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "predicate": "was authored by",
+      "target": "Ka. Shrinivaasan",
+      "edgeId": "e99",
+      "color": "#2ebe50"
+    },
+    {
+      "source": "Update Summarization",
+      "predicate": "was evaluated in",
+      "target": "NIST TAC 2010 evaluation",
+      "edgeId": "e100",
+      "color": "#4423d4"
+    },
+    {
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "predicate": "was presented at",
+      "target": "Text Analysis Conference",
+      "edgeId": "e101",
+      "color": "#ba1de7"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "was published in",
+      "target": "2011",
+      "edgeId": "e102",
+      "color": "#e213bd"
+    },
+    {
+      "source": "Few Algorithms for Ascertaining Merit of a Document and Their Applications",
+      "predicate": "was published in",
+      "target": "2010",
+      "edgeId": "e103",
+      "color": "#e213bd"
+    },
+    {
+      "source": "TAC 2010 Summarization Track – Update Summarization with Interview Algorithm",
+      "predicate": "was published in",
+      "target": "2010",
+      "edgeId": "e104",
+      "color": "#e213bd"
+    },
+    {
+      "source": "three publications associated with the Scholar profile",
+      "predicate": "were cross-checked against",
+      "target": "arXiv",
+      "edgeId": "e105",
+      "color": "#6bb5d7"
+    },
+    {
+      "source": "three publications associated with the Scholar profile",
+      "predicate": "were cross-checked against",
+      "target": "author’s academic publication archive",
+      "edgeId": "e106",
+      "color": "#6bb5d7"
+    },
+    {
+      "source": "three publications associated with the Scholar profile",
+      "predicate": "were cross-checked against",
+      "target": "DBLP",
+      "edgeId": "e107",
+      "color": "#6bb5d7"
+    },
+    {
+      "source": "publication-by-publication abstract table",
+      "predicate": "would observe",
+      "target": "copyright limits",
+      "edgeId": "e108",
+      "color": "#e37176"
+    }
+  ]
+}
+    </script>
+    <script>
+        (function () {
+            console.log('[iframe] Script starting - mobile check:', window.innerWidth <= 768);
+            console.log('[iframe] User agent:', navigator.userAgent);
+
+            const dataElement = document.getElementById('viz-data');
+            if (!dataElement) {
+                console.error('[iframe] viz-data element not found!');
+                return;
+            }
+
+            let vizData;
+            try {
+                vizData = JSON.parse(dataElement.textContent);
+                console.log('[iframe] Data parsed successfully:', vizData.nodes?.length, 'nodes');
+            } catch (e) {
+                console.error('[iframe] Failed to parse data:', e);
+                return;
+            }
+
+            const state = {
+                activeElement: null,
+                focusCluster: null,
+                focusPredicate: null,
+                searchTerm: '',
+                sidebarCollapsed: false,
+                sidebarDisabled: false
+            };
+
+            const nodeById = Object.fromEntries(vizData.nodes.map(node => [node.id, node]));
+            const edgeById = Object.fromEntries(vizData.edges.map(edge => [edge.id, edge]));
+            const clusterById = Object.fromEntries(vizData.clusters.map(cluster => [cluster.id, cluster]));
+            const edgesByPredicate = {};
+            vizData.edges.forEach(edge => {
+                if (!edgesByPredicate[edge.predicate]) {
+                    edgesByPredicate[edge.predicate] = [];
+                }
+                edgesByPredicate[edge.predicate].push(edge.id);
+            });
+
+            const nodesByCluster = {};
+            vizData.clusters.forEach(cluster => {
+                cluster.members.forEach(member => {
+                    if (!nodesByCluster[cluster.id]) {
+                        nodesByCluster[cluster.id] = new Set();
+                    }
+                    nodesByCluster[cluster.id].add(member);
+                });
+            });
+
+            function renderStats() {
+                const grid = document.getElementById('statsGrid');
+                const stats = vizData.stats;
+                const entries = [
+                    { label: 'Entities', value: stats.entities },
+                    { label: 'Relations', value: stats.relations },
+                    { label: 'Relation types', value: stats.relationTypes },
+                    { label: 'Entity clusters', value: stats.entityClusters },
+                    { label: 'Edge clusters', value: stats.edgeClusters },
+                    { label: 'Isolated entities', value: stats.isolatedEntities },
+                    { label: 'Components', value: stats.components },
+                    { label: 'Average degree', value: stats.averageDegree }
+                ];
+                grid.innerHTML = entries
+                    .map(entry => `
+                        <div class="stat-card">
+                            <div class="stat-value">${entry.value}</div>
+                            <div>${entry.label}</div>
+                        </div>
+                    `)
+                    .join('');
+            }
+
+            function renderTopLists() {
+                const topEntitiesContainer = document.getElementById('topEntities');
+                const topRelationsContainer = document.getElementById('topRelations');
+
+                const entityItems = vizData.topEntities.map(item => {
+                    const clusterLabel = item.cluster ? `${item.cluster}` : 'Unclustered';
+                    return `
+                        <div class="list-item">
+                            <div>
+                                <strong>${item.label}</strong>
+                                <div class="meta">Cluster: ${clusterLabel}</div>
+                            </div>
+                            <div>${item.degree}</div>
+                        </div>
+                    `;
+                });
+                topEntitiesContainer.innerHTML = entityItems.join('') || '<div class="meta">No entities</div>';
+
+                const relationItems = vizData.topRelations.map(item => `
+                    <div class="list-item relation-item" data-predicate="${item.predicate}">
+                        <div>
+                            <strong>${item.predicate}</strong>
+                            <div class="meta">${item.count} relations</div>
+                        </div>
+                        <div class="pill" style="background: ${item.color}1a; border: 1px solid ${item.color};">${item.count}</div>
+                    </div>
+                `);
+                topRelationsContainer.innerHTML = relationItems.join('') || '<div class="meta">No relations</div>';
+            }
+
+            function renderClusters() {
+                const container = document.getElementById('clusterList');
+                if (!vizData.clusters.length) {
+                    container.innerHTML = '<div class="meta">No cluster information provided.</div>';
+                    return;
+                }
+                container.innerHTML = vizData.clusters
+                    .map(cluster => `
+                        <button class="list-item cluster-item" data-cluster="${cluster.id}" style="border-left-color: ${cluster.color};">
+                            <div>
+                                <strong>${cluster.label}</strong>
+                                <div class="meta">${cluster.size} members</div>
+                            </div>
+                            <span class="legend-swatch" style="background: ${cluster.color};"></span>
+                        </button>
+                    `)
+                    .join('');
+            }
+
+            // function renderRelationsTable() {
+            //     const tbody = document.getElementById('relationsTable');
+            //     tbody.innerHTML = vizData.relations
+            //         .map(rel => `
+            //             <tr data-edge="${rel.edgeId}">
+            //                 <td>${rel.source}</td>
+            //                 <td><span class="pill" style="border: 1px solid ${rel.color}; background: ${rel.color}1a;">${rel.predicate}</span></td>
+            //                 <td>${rel.target}</td>
+            //             </tr>
+            //         `)
+            //         .join('');
+            // }
+
+            // function renderInsights() {
+            //     const insights = document.getElementById('insightsContent');
+            //     const clusters = vizData.clusters
+            //         .map(cluster => `
+            //             <div class="list-item" style="border-left: 4px solid ${cluster.color};">
+            //                 <div>
+            //                     <strong>${cluster.label}</strong>
+            //                     <div class="meta">Members: ${cluster.members.join(', ')}</div>
+            //                 </div>
+            //                 <div>${cluster.size}</div>
+            //             </div>
+            //         `)
+            //         .join('');
+
+            //     const components = vizData.components
+            //         .map((component, index) => `
+            //             <div class="list-item">
+            //                 <div>
+            //                     <strong>Component ${index + 1}</strong>
+            //                     <div class="meta">${component.members.join(', ')}</div>
+            //                 </div>
+            //                 <div>${component.size}</div>
+            //             </div>
+            //         `)
+            //         .join('');
+
+            //     const isolates = vizData.isolatedEntities.length
+            //         ? vizData.isolatedEntities.join(', ')
+            //         : 'None';
+
+            //     insights.innerHTML = `
+            //         <div class="section">
+            //             <h2>Clusters</h2>
+            //             <div class="list">${clusters || '<div class="meta">No clusters</div>'}</div>
+            //         </div>
+            //         <div class="section">
+            //             <h2>Connected components</h2>
+            //             <div class="list">${components || '<div class="meta">Single connected component</div>'}</div>
+            //         </div>
+            //         <div class="section">
+            //             <h2>Isolated entities</h2>
+            //             <div class="meta">${isolates}</div>
+            //         </div>
+            //     `;
+            // }
+
+            function setActiveElement(element) {
+                state.activeElement = element;
+                renderSelectionDetails();
+                updateHighlights();
+
+                // Notify parent about selection change
+                if (window.parent !== window && state.sidebarDisabled) {
+                    const selection = element ? {
+                        type: element.type,
+                        id: element.id,
+                        ...getElementDetails(element)
+                    } : null;
+                    window.parent.postMessage({
+                        type: 'selectionChanged',
+                        selection: selection
+                    }, '*');
+                }
+            }
+
+            function getElementDetails(element) {
+                if (!element) return {};
+
+                if (element.type === 'node') {
+                    const node = nodeById[element.id];
+                    return {
+                        label: node.label,
+                        cluster: node.cluster,
+                        degree: node.degree,
+                        indegree: node.indegree,
+                        outdegree: node.outdegree,
+                        neighbors: node.neighbors
+                    };
+                } else if (element.type === 'edge') {
+                    const edge = edgeById[element.id];
+                    return {
+                        source: edge.source,
+                        target: edge.target,
+                        predicate: edge.predicate,
+                        cluster: edge.cluster
+                    };
+                }
+                return {};
+            }
+
+            function clearActiveElement() {
+                state.activeElement = null;
+                renderSelectionDetails();
+                updateHighlights();
+            }
+
+            function renderSelectionDetails() {
+                const panel = document.getElementById('selectionDetails');
+                const active = state.activeElement;
+                if (!active) {
+                    panel.innerHTML = 'Click a node or relation in the network to inspect details.';
+                    return;
+                }
+
+                if (active.type === 'node') {
+                    const node = nodeById[active.id];
+                    const cluster = node.cluster ? `Cluster: ${node.cluster}` : 'Unclustered';
+                    const neighbors = node.neighbors.length ? node.neighbors.join(', ') : 'None';
+                    panel.innerHTML = `
+                        <h3>${node.label}</h3>
+                        <ul>
+                            <li>${cluster}</li>
+                            <li>Total degree: ${node.degree}</li>
+                            <li>Outgoing: ${node.outdegree}</li>
+                            <li>Incoming: ${node.indegree}</li>
+                            <li>Neighbors: ${neighbors}</li>
+                        </ul>
+                    `;
+                } else if (active.type === 'edge') {
+                    const edge = edgeById[active.id];
+                    const cluster = edge.cluster ? `Cluster: ${edge.cluster}` : 'Unclustered';
+                    panel.innerHTML = `
+                        <h3>${edge.source} → ${edge.target}</h3>
+                        <ul>
+                            <li>Relation: ${edge.predicate}</li>
+                            <li>${cluster}</li>
+                        </ul>
+                    `;
+                }
+            }
+
+            function toggleClusterFocus(clusterId) {
+                if (state.focusCluster === clusterId) {
+                    state.focusCluster = null;
+                } else {
+                    state.focusCluster = clusterId;
+                }
+                updateActiveButtons();
+                updateHighlights();
+            }
+
+            function togglePredicateFocus(predicate) {
+                if (state.focusPredicate === predicate) {
+                    state.focusPredicate = null;
+                } else {
+                    state.focusPredicate = predicate;
+                }
+                updateActiveButtons();
+                updateHighlights();
+            }
+
+            function updateActiveButtons() {
+                document.querySelectorAll('.cluster-item').forEach(item => {
+                    const clusterId = item.getAttribute('data-cluster');
+                    item.classList.toggle('active', state.focusCluster === clusterId);
+                });
+                document.querySelectorAll('.relation-item').forEach(item => {
+                    const predicate = item.getAttribute('data-predicate');
+                    item.classList.toggle('active', state.focusPredicate === predicate);
+                });
+            }
+
+            // Canvas-based network visualization
+            let canvas, ctx, transform, simulation;
+            let nodes, edges;
+            let highlightedNodes = new Set();
+            let highlightedEdges = new Set();
+            let isFiltering = false;
+
+            function createNetwork() {
+                console.log('[iframe] createNetwork starting...');
+
+                if (typeof d3 === 'undefined') {
+                    console.error('[iframe] D3.js not loaded!');
+                    return;
+                }
+                console.log('[iframe] D3.js version:', d3.version);
+
+                canvas = document.getElementById('networkCanvas');
+                if (!canvas) {
+                    console.error('[iframe] Canvas element not found!');
+                    return;
+                }
+
+                ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    console.error('[iframe] Canvas context not available!');
+                    return;
+                }
+
+                // Force a layout recalculation to ensure proper sizing
+                canvas.offsetHeight; // Trigger reflow
+
+                // Set canvas size with device pixel ratio for crisp rendering
+                const rect = canvas.getBoundingClientRect();
+                console.log('[iframe] Canvas rect:', rect.width, 'x', rect.height);
+
+                // Ensure minimum size for mobile/narrow viewports
+                const width = Math.max(rect.width, 320);
+                const height = Math.max(rect.height, 200);
+
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                ctx.scale(dpr, dpr);
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+
+                // Initialize transform for zooming/panning
+                transform = d3.zoomIdentity;
+
+                // Clone data for simulation
+                nodes = vizData.nodes.map(node => ({ ...node }));
+                edges = vizData.edges.map(edge => ({ ...edge }));
+
+                // Create D3 force simulation
+                simulation = d3
+                    .forceSimulation(nodes)
+                    .force('link', d3.forceLink(edges).id(d => d.id).distance(120).strength(0.3))
+                    .force('charge', d3.forceManyBody().strength(-280))
+                    .force('center', d3.forceCenter(width / 2, height / 2))
+                    .force('collision', d3.forceCollide().radius(d => d.radius + 12));
+
+                // Set up zoom behavior
+                const zoom = d3.zoom()
+                    .scaleExtent([0.25, 3])
+                    .on('zoom', (event) => {
+                        transform = event.transform;
+                        render();
+                    });
+
+                d3.select(canvas).call(zoom);
+
+                // Mouse interaction handling
+                let draggedNode = null;
+                let mouseX, mouseY;
+
+                function getMousePos(event) {
+                    const rect = canvas.getBoundingClientRect();
+                    return {
+                        x: (event.clientX - rect.left - transform.x) / transform.k,
+                        y: (event.clientY - rect.top - transform.y) / transform.k
+                    };
+                }
+
+                function findNode(x, y) {
+                    for (let i = nodes.length - 1; i >= 0; i--) {
+                        const node = nodes[i];
+                        const dx = x - node.x;
+                        const dy = y - node.y;
+                        if (dx * dx + dy * dy < node.radius * node.radius) {
+                            return node;
+                        }
+                    }
+                    return null;
+                }
+
+                function findEdge(x, y) {
+                    for (let i = edges.length - 1; i >= 0; i--) {
+                        const edge = edges[i];
+                        if (!edge.source || !edge.target) continue;
+
+                        // Check if click is near the edge line
+                        const dx = edge.target.x - edge.source.x;
+                        const dy = edge.target.y - edge.source.y;
+                        const length = Math.sqrt(dx * dx + dy * dy);
+                        if (length === 0) continue;
+
+                        const dot = ((x - edge.source.x) * dx + (y - edge.source.y) * dy) / (length * length);
+                        if (dot < 0 || dot > 1) continue;
+
+                        const projX = edge.source.x + dot * dx;
+                        const projY = edge.source.y + dot * dy;
+                        const distSq = (x - projX) * (x - projX) + (y - projY) * (y - projY);
+
+                        if (distSq < 25) { // 5px threshold
+                            return edge;
+                        }
+                    }
+                    return null;
+                }
+
+                canvas.addEventListener('mousedown', (event) => {
+                    const pos = getMousePos(event);
+                    mouseX = pos.x;
+                    mouseY = pos.y;
+                    draggedNode = findNode(pos.x, pos.y);
+
+                    if (draggedNode) {
+                        simulation.alphaTarget(0.3).restart();
+                        draggedNode.fx = draggedNode.x;
+                        draggedNode.fy = draggedNode.y;
+                        canvas.style.cursor = 'grabbing';
+                    }
+                });
+
+                canvas.addEventListener('mousemove', (event) => {
+                    const pos = getMousePos(event);
+
+                    if (draggedNode) {
+                        draggedNode.fx = pos.x;
+                        draggedNode.fy = pos.y;
+                    } else {
+                        // Update cursor based on what's under mouse
+                        const node = findNode(pos.x, pos.y);
+                        const edge = findEdge(pos.x, pos.y);
+                        canvas.style.cursor = (node || edge) ? 'pointer' : 'grab';
+                    }
+                });
+
+                canvas.addEventListener('mouseup', (event) => {
+                    if (draggedNode) {
+                        simulation.alphaTarget(0);
+                        draggedNode.fx = null;
+                        draggedNode.fy = null;
+                        draggedNode = null;
+                        canvas.style.cursor = 'grab';
+                    }
+                });
+
+                canvas.addEventListener('click', (event) => {
+                    const pos = getMousePos(event);
+                    const node = findNode(pos.x, pos.y);
+                    const edge = findEdge(pos.x, pos.y);
+
+                    if (node) {
+                        setActiveElement({ type: 'node', id: node.id });
+                    } else if (edge) {
+                        setActiveElement({ type: 'edge', id: edge.id });
+                    } else {
+                        clearActiveElement();
+                    }
+                });
+
+                // Animation loop
+                simulation.on('tick', () => {
+                    render();
+                });
+
+                // Handle window resize
+                window.addEventListener('resize', resizeCanvas);
+
+                render();
+            }
+
+            function resizeCanvas() {
+                if (!canvas || !ctx) return;
+
+                // Force canvas to take full container size
+                if (state.sidebarDisabled) {
+                    canvas.style.width = '100%';
+                    canvas.style.height = '100%';
+                }
+
+                const rect = canvas.getBoundingClientRect();
+                console.log('Canvas resize - rect:', rect.width, 'x', rect.height);
+
+                // Ensure minimum size for mobile
+                const width = Math.max(rect.width, 320);
+                const height = Math.max(rect.height, 200);
+
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                ctx.scale(dpr, dpr);
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+
+                // Update simulation center
+                if (simulation) {
+                    simulation.force('center', d3.forceCenter(width / 2, height / 2));
+                    simulation.alpha(0.3).restart();
+                }
+
+                render();
+            }
+
+
+            function render() {
+                if (!ctx || !canvas) return;
+
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width / (window.devicePixelRatio || 1),
+                             canvas.height / (window.devicePixelRatio || 1));
+
+                // Apply transform
+                ctx.save();
+                ctx.translate(transform.x, transform.y);
+                ctx.scale(transform.k, transform.k);
+
+                // Set text properties
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = '12px Inter, system-ui, sans-serif';
+
+                // Draw edges first
+                edges.forEach(edge => {
+                    if (!edge.source || !edge.target) return;
+
+                    const isHighlighted = highlightedEdges.has(edge.id);
+                    const isDimmed = isFiltering && !isHighlighted;
+
+                    // Calculate edge endpoints accounting for node radius
+                    const dx = edge.target.x - edge.source.x;
+                    const dy = edge.target.y - edge.source.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy) || 1;
+                    const normX = dx / distance;
+                    const normY = dy / distance;
+
+                    const sourcePadding = edge.source.radius + 2;
+                    const targetPadding = edge.target.radius + 8;
+                    const sourceX = edge.source.x + normX * sourcePadding;
+                    const sourceY = edge.source.y + normY * sourcePadding;
+                    const targetX = edge.target.x - normX * targetPadding;
+                    const targetY = edge.target.y - normY * targetPadding;
+
+                    // Draw edge line
+                    ctx.strokeStyle = edge.color;
+                    ctx.globalAlpha = isDimmed ? 0.15 : (isHighlighted ? 1.0 : 0.55);
+                    ctx.lineWidth = 1.4;
+                    ctx.beginPath();
+                    ctx.moveTo(sourceX, sourceY);
+                    ctx.lineTo(targetX, targetY);
+                    ctx.stroke();
+
+                    // Draw arrowhead
+                    const arrowLength = 10;
+                    const arrowWidth = 5;
+                    const angle = Math.atan2(dy, dx);
+
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.beginPath();
+                    ctx.moveTo(targetX, targetY);
+                    ctx.lineTo(
+                        targetX - arrowLength * Math.cos(angle - arrowWidth * Math.PI / 180),
+                        targetY - arrowLength * Math.sin(angle - arrowWidth * Math.PI / 180)
+                    );
+                    ctx.lineTo(
+                        targetX - arrowLength * Math.cos(angle + arrowWidth * Math.PI / 180),
+                        targetY - arrowLength * Math.sin(angle + arrowWidth * Math.PI / 180)
+                    );
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Draw edge label if zoom level is appropriate
+                    if (transform.k > 0.8) {
+                        const labelX = (sourceX + targetX) / 2;
+                        const labelY = (sourceY + targetY) / 2;
+
+                        ctx.fillStyle = isDimmed ? 'rgba(30, 41, 59, 0.15)' : 'rgba(30, 41, 59, 0.8)';
+                        ctx.font = '10px Inter, system-ui, sans-serif';
+                        ctx.fillText(edge.predicate, labelX, labelY);
+                    }
+                });
+
+                // Draw nodes
+                nodes.forEach(node => {
+                    const isHighlighted = highlightedNodes.has(node.id);
+                    const isDimmed = isFiltering && !isHighlighted;
+
+                    // Draw node circle
+                    ctx.fillStyle = node.color;
+                    ctx.globalAlpha = isDimmed ? 0.15 : 1.0;
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, node.radius, 0, 2 * Math.PI);
+                    ctx.fill();
+
+                    // Draw node border
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.lineWidth = isHighlighted ? 2.4 : 1.2;
+                    ctx.stroke();
+
+                    // Draw node label
+                    if (transform.k > 0.5) {
+                        ctx.fillStyle = isDimmed ? 'rgba(15, 23, 42, 0.15)' : '#0f172a';
+                        ctx.font = '12px Inter, system-ui, sans-serif';
+                        ctx.fillText(node.label, node.x, node.y + node.radius + 14);
+                    }
+                });
+
+                ctx.restore();
+                ctx.globalAlpha = 1.0;
+            }
+
+            function updateHighlights() {
+                // Clear previous highlights
+                highlightedNodes.clear();
+                highlightedEdges.clear();
+                isFiltering = false;
+
+                const addNode = id => {
+                    if (id) {
+                        highlightedNodes.add(id);
+                    }
+                };
+                const addEdge = id => {
+                    if (id) {
+                        highlightedEdges.add(id);
+                    }
+                };
+
+                if (state.activeElement) {
+                    isFiltering = true;
+                    if (state.activeElement.type === 'node') {
+                        const node = nodeById[state.activeElement.id];
+                        addNode(node.id);
+                        node.neighbors.forEach(addNode);
+                        (node.edgeIds.outgoing || []).forEach(addEdge);
+                        (node.edgeIds.incoming || []).forEach(addEdge);
+                    } else if (state.activeElement.type === 'edge') {
+                        const edge = edgeById[state.activeElement.id];
+                        addEdge(edge.id);
+                        addNode(edge.source);
+                        addNode(edge.target);
+                    }
+                }
+
+                if (state.focusCluster && nodesByCluster[state.focusCluster]) {
+                    isFiltering = true;
+                    nodesByCluster[state.focusCluster].forEach(addNode);
+                    vizData.edges.forEach(edge => {
+                        if (
+                            nodesByCluster[state.focusCluster].has(edge.source) &&
+                            nodesByCluster[state.focusCluster].has(edge.target)
+                        ) {
+                            addEdge(edge.id);
+                        }
+                    });
+                }
+
+                if (state.focusPredicate && edgesByPredicate[state.focusPredicate]) {
+                    isFiltering = true;
+                    edgesByPredicate[state.focusPredicate].forEach(edgeId => {
+                        addEdge(edgeId);
+                        const edge = edgeById[edgeId];
+                        addNode(edge.source);
+                        addNode(edge.target);
+                    });
+                }
+
+                if (state.searchTerm) {
+                    const term = state.searchTerm.toLowerCase();
+                    isFiltering = true;
+                    vizData.nodes.forEach(node => {
+                        if (node.label.toLowerCase().includes(term)) {
+                            addNode(node.id);
+                            node.neighbors.forEach(addNode);
+                        }
+                    });
+                    vizData.edges.forEach(edge => {
+                        if (edge.predicate.toLowerCase().includes(term)) {
+                            addEdge(edge.id);
+                            addNode(edge.source);
+                            addNode(edge.target);
+                        }
+                    });
+                }
+
+                // Trigger re-render with updated highlights
+                render();
+            }
+
+            function toggleSidebar() {
+                if (state.sidebarDisabled) return;
+
+                state.sidebarCollapsed = !state.sidebarCollapsed;
+                const layout = document.querySelector('.layout');
+                const sidebar = document.querySelector('.sidebar');
+                const toggleButton = document.getElementById('sidebarToggle');
+
+                layout.classList.toggle('sidebar-collapsed', state.sidebarCollapsed);
+                sidebar.classList.toggle('collapsed', state.sidebarCollapsed);
+                toggleButton.classList.toggle('collapsed', state.sidebarCollapsed);
+
+                // Trigger canvas resize when sidebar toggles
+                setTimeout(() => {
+                    resizeCanvas();
+                }, 300); // Wait for transition to complete
+            }
+
+            function disableSidebar() {
+                state.sidebarDisabled = true;
+
+                const layout = document.querySelector('.layout');
+                const sidebar = document.querySelector('.sidebar');
+                const toggleButton = document.getElementById('sidebarToggle');
+                const main = document.querySelector('.main');
+                const tabPanel = document.querySelector('.tab-panel');
+                const networkPanel = document.querySelector('.network-panel');
+
+                layout.classList.add('sidebar-disabled');
+                sidebar.style.display = 'none';
+                toggleButton.style.display = 'none';
+
+                // Force styles directly for iframe context
+                main.style.width = '100%';
+                main.style.height = '100vh';
+                tabPanel.style.padding = '0';
+                tabPanel.style.width = '100%';
+                tabPanel.style.height = '100vh';
+                networkPanel.style.width = '100%';
+                networkPanel.style.height = '100vh';
+                networkPanel.style.borderRadius = '0';
+                networkPanel.style.border = 'none';
+
+                console.log('Sidebar disabled, forcing full width styles');
+
+                // Multiple resize attempts with forced reflow
+                setTimeout(() => {
+                    canvas.offsetHeight; // Trigger reflow
+                    console.log('First resize attempt after 200ms');
+                    resizeCanvas();
+                }, 200);
+
+                setTimeout(() => {
+                    canvas.offsetHeight; // Trigger reflow
+                    console.log('Second resize attempt after 500ms');
+                    resizeCanvas();
+                }, 500);
+
+                setTimeout(() => {
+                    canvas.offsetHeight; // Trigger reflow
+                    console.log('Final resize attempt after 800ms');
+                    resizeCanvas();
+                }, 800);
+
+                // Notify parent about graph data
+                if (window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'graphDataReady',
+                        data: vizData
+                    }, '*');
+                }
+            }
+
+            function bindInteractions() {
+                document.querySelectorAll('.cluster-item').forEach(item => {
+                    item.addEventListener('click', () => toggleClusterFocus(item.getAttribute('data-cluster')));
+                });
+
+                document.querySelectorAll('.relation-item').forEach(item => {
+                    item.addEventListener('click', () => togglePredicateFocus(item.getAttribute('data-predicate')));
+                });
+
+                // document.getElementById('relationsTable').addEventListener('click', event => {
+                //     const row = event.target.closest('tr');
+                //     if (!row) {
+                //         return;
+                //     }
+                //     const edgeId = row.getAttribute('data-edge');
+                //     if (edgeId) {
+                //         setActiveElement({ type: 'edge', id: edgeId });
+                //     }
+                // });
+
+                const searchInput = document.getElementById('searchInput');
+                searchInput.addEventListener('input', () => {
+                    state.searchTerm = searchInput.value.trim();
+                    updateHighlights();
+
+                    // Notify parent about search change
+                    if (window.parent !== window && state.sidebarDisabled) {
+                        window.parent.postMessage({
+                            type: 'searchChanged',
+                            searchTerm: state.searchTerm
+                        }, '*');
+                    }
+                });
+                searchInput.addEventListener('keydown', event => {
+                    if (event.key === 'Escape') {
+                        searchInput.value = '';
+                        state.searchTerm = '';
+                        updateHighlights();
+                    }
+                });
+
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', event => {
+                        const target = event.currentTarget;
+                        document.querySelectorAll('.tab').forEach(button => button.classList.remove('active'));
+                        target.classList.add('active');
+                        const tabId = target.getAttribute('data-tab');
+                        document.querySelectorAll('.tab-panel').forEach(panel => {
+                            panel.classList.toggle('active', panel.id === tabId);
+                        });
+                    });
+                });
+
+                document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
+
+                // Listen for messages from parent
+                window.addEventListener('message', (event) => {
+                    if (event.data.type === 'disableInternalSidebar') {
+                        disableSidebar();
+                    } else if (event.data.type === 'search') {
+                        state.searchTerm = event.data.term || '';
+                        updateHighlights();
+                    } else if (event.data.type === 'focusCluster') {
+                        toggleClusterFocus(event.data.clusterId);
+                    } else if (event.data.type === 'focusPredicate') {
+                        togglePredicateFocus(event.data.predicate);
+                    }
+                });
+
+            }
+
+            renderStats();
+            renderTopLists();
+            renderClusters();
+            // renderRelationsTable();
+            // renderInsights();
+
+            // Delay network creation to ensure proper layout
+            setTimeout(() => {
+                createNetwork();
+                bindInteractions();
+            }, 100);
+        })();
+    </script>
+</body>
+
+</html>

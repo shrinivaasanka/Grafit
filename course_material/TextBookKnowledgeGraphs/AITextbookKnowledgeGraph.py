@@ -12,6 +12,12 @@ def langchain_rag(concept="",model="openai:gpt-5.6"):
     print(result["messages"][-1].text)
     return result["messages"][-1].text
 
+def academic_publications_proofnet_knowledgegraph(publication,kgid=1):
+    publicationfile=open(publication,"r")
+    publicationtext=publicationfile.read()
+    #resulttext=langchain_rag(concept=publicationtext)
+    kggen_knowledge_graph(publicationtext,kgid=kgid)
+
 def examination_question_answer_knowledgegraph(examination="UPSC",formattedquery="",kgid=1):
     resulttext=langchain_rag(concept=formattedquery)
     kggen_knowledge_graph(resulttext,kgid=kgid)
@@ -39,13 +45,16 @@ if __name__=="__main__":
     #langchain_rag(concept="Choose a set of 5 random questions from Tamilnadu state board class 12 physics syllabus (english medium) and solve them from textbooks.")
     #langchain_rag(concept="Choose a set of 5 random NEET questions and solve them from textbooks.")
     #langchain_rag(concept="Choose a set of 2 random UPSC Civil Services Examination questions and solve them from textbooks.")
-    query=f"Create a knowledge graph for a random question and answer from IIT-JEE and quantify the meaningfulness of knowledge graph"
-    langchain_rag(concept=query,model="openai:gpt-5.6")
-    exam="UPSC"
-    examination_question_answer_knowledgegraph(examination=exam,formattedquery=f"Choose a random question from {exam} and answer it",kgid=1)
-    exam="NEET"
-    examination_question_answer_knowledgegraph(examination=exam,formattedquery=f"Choose a random question from {exam} and answer it",kgid=2)
-    exam="IIT-JEE"
-    examination_question_answer_knowledgegraph(examination=exam,formattedquery=f"Choose a random question from {exam} and answer it",kgid=3)
-    exam="Tamilnadu state board class 12 physics english medium"
-    examination_question_answer_knowledgegraph(examination=exam,formattedquery=f"Choose a random question from {exam} and answer it",kgid=4)
+    #query=f"Create a knowledge graph for a random question and answer from IIT-JEE and quantify the meaningfulness of knowledge graph"
+    #langchain_rag(concept=query,model="openai:gpt-5.6")
+    #exam="UPSC"
+    #examination_question_answer_knowledgegraph(examination=exam,formattedquery=f"Choose a random question from {exam} and answer it",kgid=1)
+    #exam="NEET"
+    #examination_question_answer_knowledgegraph(examination=exam,formattedquery=f"Choose a random question from {exam} and answer it",kgid=2)
+    #exam="IIT-JEE"
+    #examination_question_answer_knowledgegraph(examination=exam,formattedquery=f"Choose a random question from {exam} and answer it",kgid=3)
+    #exam="Tamilnadu state board class 12 physics english medium"
+    #examination_question_answer_knowledgegraph(examination=exam,formattedquery=f"Choose a random question from {exam} and answer it",kgid=4)
+    academic_publications_proofnet_knowledgegraph("../NeuronRain/LinuxKernelAndCloud/code/Spark_Word2Vec_Bibliography.txt",kgid=5)
+    academic_publications_proofnet_knowledgegraph("../NeuronRain/LinuxKernelAndCloud/code/Spark_Word2Vec_SemanticScholar.txt",kgid=6)
+    academic_publications_proofnet_knowledgegraph("./GoogleScholarPublicationsAbstract.txt",kgid=7)

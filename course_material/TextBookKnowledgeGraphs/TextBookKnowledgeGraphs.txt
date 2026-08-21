@@ -104,3 +104,17 @@ References:
 1679.7. GraphRAG - Microsoft - https://microsoft.github.io/graphrag/
 1679.8. LangGraph - https://www.langchain.com/langgraph
 1679.9. KG-Gen - NeurIPS 2025 poster - https://neurips.cc/virtual/2025/loc/san-diego/poster/117386
+
+------------------------------------------------------------------------------------------
+1682. Bibliometrics - Academic Publications ProofNet-Knowledge Graph - KG-Gen Knowledge Graph extracted from text of academic publications - related to sections 827,839,1595 and all sections on merit of academic publications, Knowledge Graphs, Theorem Discovery from Knowledge Graphs (similar to Drug Discovery in Medicine Knowledge Graph), ProofNet-Girard GoI - 21 August 2026
+------------------------------------------------------------------------------------------
+1682.1 course_material/TextBookKnowledgeGraphs/AITextbookKnowledgeGraph.py has been updated to define new function def academic_publications_proofnet_knowledgegraph(publication,kgid=1) that reads a file containing text of an academic publication and invokes kggen_knowledge_graph() to create a KGGen ProofNet-Knowledge Graph of lemmas-proofs-definitions in the publication. 
+1682.2 Following 3 textfiles containing bibliography of publications in (1) Google Scholar - https://scholar.google.com/citations?user=eLZY7CIAAAAJ&hl=en&authuser=1 , DBLP - http://dblp.dagstuhl.de/pers/hd/s/Shrinivaasan:Ka= (2) Semantic Scholar - https://www.semanticscholar.org/author/Ka.-Shrinivaasan/1861803 (3) ChatGPT abstract summary for earlier publications written to GoogleScholarPublicationsAbstract.txt from prompt https://chatgpt.com/c/6a87f402-c528-83e8-bfdc-2fcaaa579252 - have been ingested as KGGen ProofNet-Knowledge Graphs rendered in HTML graphics: 
+    academic_publications_proofnet_knowledgegraph("../NeuronRain/LinuxKernelAndCloud/code/Spark_Word2Vec_Bibliography.txt",kgid=5)
+    academic_publications_proofnet_knowledgegraph("../NeuronRain/LinuxKernelAndCloud/code/Spark_Word2Vec_SemanticScholar.txt",kgid=6)
+    academic_publications_proofnet_knowledgegraph("./GoogleScholarPublicationsAbstract.txt",kgid=7)
+1682.3 Following are the logs and Knowledge Graph HTML graphics for earlier 3 publications suffixed by unique id(s) supplied in kgid argument earlier:
+	testlogs/AITextbookKnowledgeGraph.log.21August2026
+	testlogs/QAKnowledgeGraph5.html
+	testlogs/QAKnowledgeGraph6.html
+	testlogs/QAKnowledgeGraph7.html

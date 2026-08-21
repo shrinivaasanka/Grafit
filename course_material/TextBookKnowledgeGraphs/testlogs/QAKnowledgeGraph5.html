@@ -1,0 +1,4577 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Knowledge Graph Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            color-scheme: light;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            height: 100vh;
+            transition: grid-template-columns 0.3s ease;
+        }
+
+        .layout.sidebar-collapsed {
+            grid-template-columns: 0px 1fr;
+        }
+
+        .layout.sidebar-disabled {
+            grid-template-columns: 1fr;
+            width: 100%;
+        }
+
+        .layout.sidebar-disabled .main {
+            width: 100vw !important;
+        }
+
+        .layout.sidebar-disabled .tab-panel {
+            padding: 0 !important;
+            width: 100vw !important;
+        }
+
+        .layout.sidebar-disabled .network-panel {
+            width: 100vw !important;
+            height: 100vh !important;
+            border-radius: 0;
+            border: none;
+            max-width: none !important;
+        }
+
+        .layout.sidebar-disabled #networkCanvas {
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: none !important;
+        }
+
+        /* Force canvas to take full iframe space */
+        canvas#networkCanvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .sidebar {
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            padding: 24px 24px 16px;
+            overflow-y: auto;
+            transition: width 0.3s ease, opacity 0.3s ease;
+            display: block; /* Visible in standalone mode */
+        }
+
+        .sidebar.collapsed {
+            width: 0;
+            padding: 24px 0 16px;
+            overflow: hidden;
+            opacity: 0;
+        }
+
+        .sidebar h1 {
+            margin: 0 0 8px;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .sidebar p {
+            margin: 0 0 20px;
+            color: #475569;
+            font-size: 0.95rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section h2 {
+            font-size: 1rem;
+            margin: 0 0 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #1e293b;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5f5;
+            border-radius: 10px;
+            font-size: 0.95rem;
+        }
+
+        .search-hint {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .list-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .list-item strong {
+            font-weight: 600;
+        }
+
+        .cluster-item,
+        .relation-item {
+            border-left: 4px solid transparent;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .cluster-item:hover,
+        .relation-item:hover {
+            background: #e2e8f0;
+        }
+
+        .cluster-item.active,
+        .relation-item.active {
+            transform: translateX(4px);
+            background: #e2e8f0;
+        }
+
+        .cluster-item .meta,
+        .relation-item .meta {
+            font-size: 0.8rem;
+            color: #475569;
+        }
+
+        .main {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .tab-bar {
+            display: flex;
+            gap: 8px;
+            padding: 16px 20px 0;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .tab {
+            border: none;
+            background: #e2e8f0;
+            color: #1e293b;
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .tab.active {
+            background: #1d4ed8;
+            color: #ffffff;
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: none; /* Hidden when sidebar is disabled */
+        }
+
+        .sidebar-toggle:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .sidebar-toggle::before {
+            content: '☰';
+            margin-right: 6px;
+        }
+
+        .sidebar-toggle.collapsed::before {
+            content: '☰';
+        }
+
+        .tab-panel {
+            flex: 1;
+            display: none;
+            padding: 16px 20px;
+            overflow: hidden;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .network-panel {
+            height: calc(100vh - 74px);
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+
+        #networkCanvas {
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            border-radius: 16px;
+        }
+
+        #networkCanvas {
+            cursor: grab;
+        }
+
+        #networkCanvas:active {
+            cursor: grabbing;
+        }
+
+        .selection-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 0.9rem;
+        }
+
+        .selection-card h3 {
+            margin: 0 0 8px;
+            font-size: 1rem;
+        }
+
+        .selection-card ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .selection-card li {
+            margin-bottom: 4px;
+            color: #475569;
+        }
+
+        .table-container {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            height: calc(100vh - 90px);
+            overflow: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: #f8fafc;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 2px 10px;
+            border-radius: 999px;
+            background: #e2e8f0;
+            font-size: 0.75rem;
+            color: #0f172a;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+
+        .legend-swatch {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(15, 23, 42, 0.25);
+        }
+
+
+        /* Mobile/narrow iframe handling - when sidebar is disabled, use full space */
+        @media (max-width: 800px) {
+            .layout:not(.sidebar-disabled) {
+                grid-template-columns: 1fr;
+            }
+
+            .layout:not(.sidebar-disabled) .sidebar {
+                height: 280px;
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            .layout:not(.sidebar-disabled) .main {
+                height: calc(100vh - 280px);
+            }
+
+            /* When sidebar is disabled (iframe mode), ensure full viewport usage */
+            .layout.sidebar-disabled .main {
+                width: 100% !important;
+                height: 100vh !important;
+            }
+
+            .layout.sidebar-disabled .tab-panel {
+                padding: 0 !important;
+                width: 100% !important;
+                height: 100vh !important;
+            }
+
+            .layout.sidebar-disabled .network-panel {
+                width: 100% !important;
+                height: 100vh !important;
+                border-radius: 0 !important;
+                border: none !important;
+                max-width: none !important;
+            }
+
+            .layout.sidebar-disabled #networkCanvas {
+                width: 100% !important;
+                height: 100vh !important;
+                max-width: none !important;
+            }
+
+            /* Ensure iframe canvas takes full space on mobile */
+            canvas#networkCanvas {
+                width: 100% !important;
+                height: 100% !important;
+                min-width: 100% !important;
+                min-height: 100% !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <h1>Knowledge Graph Explorer</h1>
+            <p>Search, highlight, and inspect entities and relations to understand how the graph fits together.</p>
+            <div class="stats-grid" id="statsGrid"></div>
+            <div class="section">
+                <h2>Search</h2>
+                <input id="searchInput" class="search-input" type="text" placeholder="Search for entities or
+                    relations" />
+                <div class="search-hint">Matches are highlighted. Press Escape to clear.</div>
+            </div>
+            <div class="section" id="selectionSection">
+                <h2>Selection</h2>
+                <div id="selectionDetails" class="selection-card">Click a node or relation in the network to inspect
+                    details.</div>
+            </div>
+            <div class="section">
+                <h2>Entity Clusters</h2>
+                <div id="clusterList" class="list"></div>
+            </div>
+            <div class="section">
+                <h2>Top Entities</h2>
+                <div id="topEntities" class="list"></div>
+            </div>
+            <div class="section">
+                <h2>Top Relations</h2>
+                <div id="topRelations" class="list"></div>
+            </div>
+        </aside>
+        <main class="main">
+            <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar"></button>
+            <div class="tab-bar" style="padding-bottom: 10px; display: none;">
+                <button class="tab active" data-tab="network">Network</button>
+                <!-- <button class="tab" data-tab="relations">Relations</button>
+                <button class="tab" data-tab="insights">Insights</button> -->
+            </div>
+            <section id="network" class="tab-panel active">
+                <div class="network-panel">
+                    <canvas id="networkCanvas"></canvas>
+                </div>
+            </section>
+            <!-- <section id="relations" class="tab-panel">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Relation</th>
+                                <th>Object</th>
+                            </tr>
+                        </thead>
+                        <tbody id="relationsTable"></tbody>
+                    </table>
+                </div>
+            </section>
+            <section id="insights" class="tab-panel">
+                <div class="table-container" style="padding: 20px;">
+                    <div id="insightsContent"></div>
+                </div>
+            </section> -->
+        </main>
+    </div>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script id="viz-data" type="application/json">
+{
+  "nodes": [
+    {
+      "id": "abs/1006.4458",
+      "label": "abs/1006.4458",
+      "cluster": null,
+      "color": "#bb72ef",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Few Algorithms for ascertaining merit of a document and their applications"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e11"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "abs/1106.4102",
+      "label": "abs/1106.4102",
+      "cluster": null,
+      "color": "#e6c853",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e10"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "algorithms for constructing a complement",
+      "label": "algorithms for constructing a complement",
+      "cluster": null,
+      "color": "#ca31be",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e70"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "arXiv",
+      "label": "arXiv",
+      "cluster": null,
+      "color": "#97cf29",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function",
+        "Few Algorithms for ascertaining merit of a document and their applications"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e63",
+          "e65"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "arXiv:1006.4458",
+      "label": "arXiv:1006.4458",
+      "cluster": null,
+      "color": "#56e36a",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Few Algorithms for ascertaining merit of a document and their applications"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e9"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "arXiv:1106.4102",
+      "label": "arXiv:1106.4102",
+      "cluster": null,
+      "color": "#754cdf",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e8"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Axiom of Choice",
+      "label": "Axiom of Choice",
+      "cluster": null,
+      "color": "#ee5a38",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC)",
+        "ZFC"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e28",
+          "e75"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Balaraman Ravindran",
+      "label": "Balaraman Ravindran",
+      "cluster": null,
+      "color": "#34d4a5",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "Few Algorithms for ascertaining merit of a document and their applications",
+        "Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e44",
+          "e50"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Chennai Mathematical Institute",
+      "label": "Chennai Mathematical Institute",
+      "cluster": null,
+      "color": "#dadb53",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Madhavan Mukund"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e37"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "citation graph",
+      "label": "citation graph",
+      "cluster": null,
+      "color": "#ace843",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Few Algorithms for ascertaining merit of a document and their applications"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e72"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "CiteSeerX",
+      "label": "CiteSeerX",
+      "cluster": null,
+      "color": "#69e256",
+      "degree": 4,
+      "indegree": 0,
+      "outdegree": 4,
+      "isRepresentative": false,
+      "radius": 26,
+      "neighbors": [
+        "Few Algorithms for ascertaining merit of a document and their applications",
+        "MetaCart",
+        "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+        "The College of Information Sciences and Technology"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e30",
+          "e31",
+          "e55",
+          "e79"
+        ]
+      }
+    },
+    {
+      "id": "complement function",
+      "label": "complement function",
+      "cluster": null,
+      "color": "#31d16a",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e78"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "complement of a function",
+      "label": "complement of a function",
+      "cluster": null,
+      "color": "#c3d739",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e6"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Computer Science",
+      "label": "Computer Science",
+      "cluster": null,
+      "color": "#f067f2",
+      "degree": 3,
+      "indegree": 3,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function",
+        "Few Algorithms for ascertaining merit of a document and their applications",
+        "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e12",
+          "e14",
+          "e15"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "CoRR",
+      "label": "CoRR",
+      "cluster": null,
+      "color": "#2e40c6",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function",
+        "Few Algorithms for ascertaining merit of a document and their applications"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e64",
+          "e66"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "cs.IR",
+      "label": "cs.IR",
+      "cluster": null,
+      "color": "#e57b99",
+      "degree": 2,
+      "indegree": 1,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "Few Algorithms for ascertaining merit of a document and their applications",
+        "Information Retrieval"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e17"
+        ],
+        "outgoing": [
+          "e53"
+        ]
+      }
+    },
+    {
+      "id": "cs.LO",
+      "label": "cs.LO",
+      "cluster": null,
+      "color": "#ccc43b",
+      "degree": 2,
+      "indegree": 1,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function",
+        "Logic in Computer Science"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e16"
+        ],
+        "outgoing": [
+          "e54"
+        ]
+      }
+    },
+    {
+      "id": "Data mining",
+      "label": "Data mining",
+      "cluster": null,
+      "color": "#edb36f",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e24"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "DBLP",
+      "label": "DBLP",
+      "cluster": null,
+      "color": "#e04557",
+      "degree": 4,
+      "indegree": 0,
+      "outdegree": 4,
+      "isRepresentative": false,
+      "radius": 26,
+      "neighbors": [
+        "DBLP computer science bibliography",
+        "Decidability of Existence and Construction of a Complement of a given Function",
+        "Few Algorithms for ascertaining merit of a document and their applications",
+        "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e32",
+          "e33",
+          "e34",
+          "e56"
+        ]
+      }
+    },
+    {
+      "id": "DBLP computer science bibliography",
+      "label": "DBLP computer science bibliography",
+      "cluster": null,
+      "color": "#5080ec",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "DBLP"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e56"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Decidability",
+      "label": "Decidability",
+      "cluster": null,
+      "color": "#8845e3",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e18"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Decidability of Existence and Construction of a Complement of a given Function",
+      "label": "Decidability of Existence and Construction of a Complement of a given Function",
+      "cluster": null,
+      "color": "#33e6e0",
+      "degree": 18,
+      "indegree": 3,
+      "outdegree": 15,
+      "isRepresentative": false,
+      "radius": 34,
+      "neighbors": [
+        "abs/1106.4102",
+        "algorithms for constructing a complement",
+        "arXiv",
+        "arXiv:1106.4102",
+        "complement function",
+        "complement of a function",
+        "Computer Science",
+        "CoRR",
+        "cs.LO",
+        "DBLP",
+        "Decidability",
+        "Discrete mathematics",
+        "K Shrinivaasan",
+        "Ka. Shrinivaasan",
+        "Logic in Computer Science",
+        "Mathematics",
+        "Microsoft Academic",
+        "SAO/NASA Astrophysics Data System"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e32",
+          "e67",
+          "e73"
+        ],
+        "outgoing": [
+          "e6",
+          "e8",
+          "e10",
+          "e12",
+          "e13",
+          "e16",
+          "e18",
+          "e19",
+          "e20",
+          "e42",
+          "e43",
+          "e63",
+          "e64",
+          "e70",
+          "e78"
+        ]
+      }
+    },
+    {
+      "id": "Discrete mathematics",
+      "label": "Discrete mathematics",
+      "cluster": null,
+      "color": "#bf20d2",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e19"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "document merit",
+      "label": "document merit",
+      "cluster": null,
+      "color": "#61ee4a",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "Few Algorithms for ascertaining merit of a document and their applications",
+        "graph-theoretic schemes"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e4",
+          "e21"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "document ranking",
+      "label": "document ranking",
+      "cluster": null,
+      "color": "#d040d2",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "Few Algorithms for ascertaining merit of a document and their applications",
+        "prestige-based ranking models"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e0",
+          "e3"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Few Algorithms for ascertaining merit of a document and their applications",
+      "label": "Few Algorithms for ascertaining merit of a document and their applications",
+      "cluster": null,
+      "color": "#3de07e",
+      "degree": 22,
+      "indegree": 4,
+      "outdegree": 18,
+      "isRepresentative": false,
+      "radius": 34,
+      "neighbors": [
+        "abs/1006.4458",
+        "arXiv",
+        "arXiv:1006.4458",
+        "Balaraman Ravindran",
+        "citation graph",
+        "CiteSeerX",
+        "Computer Science",
+        "CoRR",
+        "cs.IR",
+        "DBLP",
+        "document merit",
+        "document ranking",
+        "graph-theoretic schemes",
+        "Information Retrieval",
+        "June 23, 2010",
+        "K Shrinivaasan",
+        "Ka. Shrinivaasan",
+        "Madhavan Mukund",
+        "Microsoft Academic",
+        "prestige-based ranking models",
+        "SAO/NASA Astrophysics Data System",
+        "World Wide Web"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e30",
+          "e33",
+          "e68",
+          "e74"
+        ],
+        "outgoing": [
+          "e0",
+          "e7",
+          "e9",
+          "e11",
+          "e14",
+          "e17",
+          "e21",
+          "e22",
+          "e23",
+          "e44",
+          "e45",
+          "e46",
+          "e47",
+          "e65",
+          "e66",
+          "e71",
+          "e72",
+          "e83"
+        ]
+      }
+    },
+    {
+      "id": "Gaithersburg",
+      "label": "Gaithersburg",
+      "cluster": null,
+      "color": "#c7623b",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Third Text Analysis Conference"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e84"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "graph-theoretic schemes",
+      "label": "graph-theoretic schemes",
+      "cluster": null,
+      "color": "#e0b141",
+      "degree": 2,
+      "indegree": 1,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "document merit",
+        "Few Algorithms for ascertaining merit of a document and their applications"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e71"
+        ],
+        "outgoing": [
+          "e4"
+        ]
+      }
+    },
+    {
+      "id": "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC)",
+      "label": "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC)",
+      "cluster": null,
+      "color": "#e0514d",
+      "degree": 5,
+      "indegree": 0,
+      "outdegree": 5,
+      "isRepresentative": false,
+      "radius": 28,
+      "neighbors": [
+        "Axiom of Choice",
+        "Ka. Shrinivaasan",
+        "Majority Voting",
+        "Zermelo-Fraenkel Set Theory",
+        "ZFC"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e1",
+          "e48",
+          "e75",
+          "e76",
+          "e77"
+        ]
+      }
+    },
+    {
+      "id": "Information Retrieval",
+      "label": "Information Retrieval",
+      "cluster": null,
+      "color": "#afe273",
+      "degree": 3,
+      "indegree": 3,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "cs.IR",
+        "Few Algorithms for ascertaining merit of a document and their applications",
+        "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e22",
+          "e25",
+          "e53"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Institute of Mathematical Sciences",
+      "label": "Institute of Mathematical Sciences",
+      "cluster": null,
+      "color": "#777ae8",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Meena Mahajan"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e38"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Interview Algorithm",
+      "label": "Interview Algorithm",
+      "cluster": null,
+      "color": "#ce3c69",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+        "Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e80",
+          "e81"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "June 23, 2010",
+      "label": "June 23, 2010",
+      "cluster": null,
+      "color": "#edbf76",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Few Algorithms for ascertaining merit of a document and their applications"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e83"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "K Shrinivaasan",
+      "label": "K Shrinivaasan",
+      "cluster": null,
+      "color": "#95dc1a",
+      "degree": 4,
+      "indegree": 3,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 26,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function",
+        "Few Algorithms for ascertaining merit of a document and their applications",
+        "Ka. Shrinivaasan",
+        "Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e42",
+          "e45",
+          "e51"
+        ],
+        "outgoing": [
+          "e57"
+        ]
+      }
+    },
+    {
+      "id": "Ka. Shrinivaasan",
+      "label": "Ka. Shrinivaasan",
+      "cluster": null,
+      "color": "#9fe152",
+      "degree": 6,
+      "indegree": 5,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 30,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function",
+        "Few Algorithms for ascertaining merit of a document and their applications",
+        "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC)",
+        "K Shrinivaasan",
+        "Meena Mahajan",
+        "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e43",
+          "e46",
+          "e48",
+          "e49",
+          "e57"
+        ],
+        "outgoing": [
+          "e82"
+        ]
+      }
+    },
+    {
+      "id": "link graph",
+      "label": "link graph",
+      "cluster": null,
+      "color": "#57d3c0",
+      "degree": 0,
+      "indegree": 0,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 18,
+      "neighbors": [],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Logic in Computer Science",
+      "label": "Logic in Computer Science",
+      "cluster": null,
+      "color": "#cdde3e",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "cs.LO",
+        "Decidability of Existence and Construction of a Complement of a given Function"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e20",
+          "e54"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Madhavan Mukund",
+      "label": "Madhavan Mukund",
+      "cluster": null,
+      "color": "#5dd891",
+      "degree": 3,
+      "indegree": 2,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "Chennai Mathematical Institute",
+        "Few Algorithms for ascertaining merit of a document and their applications",
+        "Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e47",
+          "e52"
+        ],
+        "outgoing": [
+          "e37"
+        ]
+      }
+    },
+    {
+      "id": "Majority Voting",
+      "label": "Majority Voting",
+      "cluster": null,
+      "color": "#e875b9",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC)"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e1"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Maryland",
+      "label": "Maryland",
+      "cluster": null,
+      "color": "#c88720",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Third Text Analysis Conference"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e85"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Mathematics",
+      "label": "Mathematics",
+      "cluster": null,
+      "color": "#e0ca50",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e13"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Meena Mahajan",
+      "label": "Meena Mahajan",
+      "cluster": null,
+      "color": "#a17fda",
+      "degree": 2,
+      "indegree": 1,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "Institute of Mathematical Sciences",
+        "Ka. Shrinivaasan"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e82"
+        ],
+        "outgoing": [
+          "e38"
+        ]
+      }
+    },
+    {
+      "id": "MetaCart",
+      "label": "MetaCart",
+      "cluster": null,
+      "color": "#e71a15",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "CiteSeerX"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e79"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Microsoft",
+      "label": "Microsoft",
+      "cluster": null,
+      "color": "#e85e13",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Microsoft Academic"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e58"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Microsoft Academic",
+      "label": "Microsoft Academic",
+      "cluster": null,
+      "color": "#d8249a",
+      "degree": 4,
+      "indegree": 0,
+      "outdegree": 4,
+      "isRepresentative": false,
+      "radius": 26,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function",
+        "Few Algorithms for ascertaining merit of a document and their applications",
+        "Microsoft",
+        "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e58",
+          "e67",
+          "e68",
+          "e69"
+        ]
+      }
+    },
+    {
+      "id": "National Institute of Standards and Technology",
+      "label": "National Institute of Standards and Technology",
+      "cluster": null,
+      "color": "#8172f0",
+      "degree": 0,
+      "indegree": 0,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 18,
+      "neighbors": [],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "NIST",
+      "label": "NIST",
+      "cluster": null,
+      "color": "#d8e677",
+      "degree": 3,
+      "indegree": 3,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "NIST TAC 2010",
+        "Proceedings of the Third Text Analysis Conference, TAC 2010",
+        "Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e39",
+          "e41",
+          "e62"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "NIST TAC 2010",
+      "label": "NIST TAC 2010",
+      "cluster": null,
+      "color": "#7288db",
+      "degree": 3,
+      "indegree": 1,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "NIST",
+        "TAC",
+        "Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e88"
+        ],
+        "outgoing": [
+          "e39",
+          "e40"
+        ]
+      }
+    },
+    {
+      "id": "November 15-16, 2010",
+      "label": "November 15-16, 2010",
+      "cluster": null,
+      "color": "#334dba",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Third Text Analysis Conference"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e87"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "prestige-based ranking models",
+      "label": "prestige-based ranking models",
+      "cluster": null,
+      "color": "#38e726",
+      "degree": 2,
+      "indegree": 1,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "document ranking",
+        "Few Algorithms for ascertaining merit of a document and their applications"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e7"
+        ],
+        "outgoing": [
+          "e3"
+        ]
+      }
+    },
+    {
+      "id": "probabilistic inference",
+      "label": "probabilistic inference",
+      "cluster": null,
+      "color": "#de77ea",
+      "degree": 0,
+      "indegree": 0,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 18,
+      "neighbors": [],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Proceedings of the Third Text Analysis Conference, TAC 2010",
+      "label": "Proceedings of the Third Text Analysis Conference, TAC 2010",
+      "cluster": null,
+      "color": "#12dac5",
+      "degree": 4,
+      "indegree": 1,
+      "outdegree": 3,
+      "isRepresentative": false,
+      "radius": 26,
+      "neighbors": [
+        "NIST",
+        "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+        "Third Text Analysis Conference"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e2"
+        ],
+        "outgoing": [
+          "e5",
+          "e61",
+          "e62"
+        ]
+      }
+    },
+    {
+      "id": "SAO/NASA Astrophysics Data System",
+      "label": "SAO/NASA Astrophysics Data System",
+      "cluster": null,
+      "color": "#1cda5f",
+      "degree": 2,
+      "indegree": 0,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "Decidability of Existence and Construction of a Complement of a given Function",
+        "Few Algorithms for ascertaining merit of a document and their applications"
+      ],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": [
+          "e73",
+          "e74"
+        ]
+      }
+    },
+    {
+      "id": "TAC",
+      "label": "TAC",
+      "cluster": null,
+      "color": "#27d8a8",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "NIST TAC 2010",
+        "Third Text Analysis Conference"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e36",
+          "e40"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "label": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "cluster": null,
+      "color": "#77d0d8",
+      "degree": 12,
+      "indegree": 4,
+      "outdegree": 8,
+      "isRepresentative": false,
+      "radius": 34,
+      "neighbors": [
+        "CiteSeerX",
+        "Computer Science",
+        "Data mining",
+        "DBLP",
+        "Information Retrieval",
+        "Interview Algorithm",
+        "Ka. Shrinivaasan",
+        "Microsoft Academic",
+        "Proceedings of the Third Text Analysis Conference, TAC 2010",
+        "update summarization",
+        "Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e5",
+          "e31",
+          "e34",
+          "e69"
+        ],
+        "outgoing": [
+          "e2",
+          "e15",
+          "e24",
+          "e25",
+          "e26",
+          "e35",
+          "e49",
+          "e80"
+        ]
+      }
+    },
+    {
+      "id": "Text Analysis Conference",
+      "label": "Text Analysis Conference",
+      "cluster": null,
+      "color": "#9f21e0",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Third Text Analysis Conference"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e60"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "The College of Information Sciences and Technology",
+      "label": "The College of Information Sciences and Technology",
+      "cluster": null,
+      "color": "#e8d77b",
+      "degree": 2,
+      "indegree": 1,
+      "outdegree": 1,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "CiteSeerX",
+        "The Pennsylvania State University"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e55"
+        ],
+        "outgoing": [
+          "e59"
+        ]
+      }
+    },
+    {
+      "id": "The Pennsylvania State University",
+      "label": "The Pennsylvania State University",
+      "cluster": null,
+      "color": "#cc3b6b",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "The College of Information Sciences and Technology"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e59"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Theory and Applications of Categories",
+      "label": "Theory and Applications of Categories",
+      "cluster": null,
+      "color": "#da3d5e",
+      "degree": 0,
+      "indegree": 0,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 18,
+      "neighbors": [],
+      "edgeIds": {
+        "incoming": [],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Third Text Analysis Conference",
+      "label": "Third Text Analysis Conference",
+      "cluster": null,
+      "color": "#e75af0",
+      "degree": 7,
+      "indegree": 1,
+      "outdegree": 6,
+      "isRepresentative": false,
+      "radius": 32,
+      "neighbors": [
+        "Gaithersburg",
+        "Maryland",
+        "November 15-16, 2010",
+        "Proceedings of the Third Text Analysis Conference, TAC 2010",
+        "TAC",
+        "Text Analysis Conference",
+        "USA"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e61"
+        ],
+        "outgoing": [
+          "e36",
+          "e60",
+          "e84",
+          "e85",
+          "e86",
+          "e87"
+        ]
+      }
+    },
+    {
+      "id": "update summarization",
+      "label": "update summarization",
+      "cluster": null,
+      "color": "#d3c761",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+        "Update Summarization with Interview Algorithm"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e26",
+          "e27"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Update Summarization with Interview Algorithm",
+      "label": "Update Summarization with Interview Algorithm",
+      "cluster": null,
+      "color": "#eb852b",
+      "degree": 8,
+      "indegree": 1,
+      "outdegree": 7,
+      "isRepresentative": false,
+      "radius": 34,
+      "neighbors": [
+        "Balaraman Ravindran",
+        "Interview Algorithm",
+        "K Shrinivaasan",
+        "Madhavan Mukund",
+        "NIST",
+        "NIST TAC 2010",
+        "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+        "update summarization"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e35"
+        ],
+        "outgoing": [
+          "e27",
+          "e41",
+          "e50",
+          "e51",
+          "e52",
+          "e81",
+          "e88"
+        ]
+      }
+    },
+    {
+      "id": "USA",
+      "label": "USA",
+      "cluster": null,
+      "color": "#6dd5c0",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Third Text Analysis Conference"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e86"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "World Wide Web",
+      "label": "World Wide Web",
+      "cluster": null,
+      "color": "#dc6c9e",
+      "degree": 1,
+      "indegree": 1,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 20,
+      "neighbors": [
+        "Few Algorithms for ascertaining merit of a document and their applications"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e23"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "Zermelo-Fraenkel Set Theory",
+      "label": "Zermelo-Fraenkel Set Theory",
+      "cluster": null,
+      "color": "#6a8fe5",
+      "degree": 2,
+      "indegree": 2,
+      "outdegree": 0,
+      "isRepresentative": false,
+      "radius": 22,
+      "neighbors": [
+        "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC)",
+        "ZFC"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e29",
+          "e76"
+        ],
+        "outgoing": []
+      }
+    },
+    {
+      "id": "ZFC",
+      "label": "ZFC",
+      "cluster": null,
+      "color": "#e37634",
+      "degree": 3,
+      "indegree": 1,
+      "outdegree": 2,
+      "isRepresentative": false,
+      "radius": 24,
+      "neighbors": [
+        "Axiom of Choice",
+        "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC)",
+        "Zermelo-Fraenkel Set Theory"
+      ],
+      "edgeIds": {
+        "incoming": [
+          "e77"
+        ],
+        "outgoing": [
+          "e28",
+          "e29"
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "target": "document ranking",
+      "predicate": "addresses",
+      "cluster": null,
+      "color": "#4ae18a",
+      "tooltip": "Few Algorithms for ascertaining merit of a document and their applications —addresses→ document ranking"
+    },
+    {
+      "id": "e1",
+      "source": "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC)",
+      "target": "Majority Voting",
+      "predicate": "analyzes a variant of",
+      "cluster": null,
+      "color": "#9678ec",
+      "tooltip": "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC) —analyzes a variant of→ Majority Voting"
+    },
+    {
+      "id": "e2",
+      "source": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "target": "Proceedings of the Third Text Analysis Conference, TAC 2010",
+      "predicate": "appears in",
+      "cluster": null,
+      "color": "#24c3c1",
+      "tooltip": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm —appears in→ Proceedings of the Third Text Analysis Conference, TAC 2010"
+    },
+    {
+      "id": "e3",
+      "source": "prestige-based ranking models",
+      "target": "document ranking",
+      "predicate": "are models for",
+      "cluster": null,
+      "color": "#e062c7",
+      "tooltip": "prestige-based ranking models —are models for→ document ranking"
+    },
+    {
+      "id": "e4",
+      "source": "graph-theoretic schemes",
+      "target": "document merit",
+      "predicate": "are used to judge",
+      "cluster": null,
+      "color": "#3dcc44",
+      "tooltip": "graph-theoretic schemes —are used to judge→ document merit"
+    },
+    {
+      "id": "e5",
+      "source": "Proceedings of the Third Text Analysis Conference, TAC 2010",
+      "target": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "predicate": "contains",
+      "cluster": null,
+      "color": "#6ca6dd",
+      "tooltip": "Proceedings of the Third Text Analysis Conference, TAC 2010 —contains→ TAC 2010 Summarization Track - Update Summarization with Interview Algorithm"
+    },
+    {
+      "id": "e6",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "complement of a function",
+      "predicate": "defines",
+      "cluster": null,
+      "color": "#b25aef",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —defines→ complement of a function"
+    },
+    {
+      "id": "e7",
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "target": "prestige-based ranking models",
+      "predicate": "discusses",
+      "cluster": null,
+      "color": "#d0dc64",
+      "tooltip": "Few Algorithms for ascertaining merit of a document and their applications —discusses→ prestige-based ranking models"
+    },
+    {
+      "id": "e8",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "arXiv:1106.4102",
+      "predicate": "has arXiv identifier",
+      "cluster": null,
+      "color": "#b334e2",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —has arXiv identifier→ arXiv:1106.4102"
+    },
+    {
+      "id": "e9",
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "target": "arXiv:1006.4458",
+      "predicate": "has arXiv identifier",
+      "cluster": null,
+      "color": "#b334e2",
+      "tooltip": "Few Algorithms for ascertaining merit of a document and their applications —has arXiv identifier→ arXiv:1006.4458"
+    },
+    {
+      "id": "e10",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "abs/1106.4102",
+      "predicate": "has CoRR volume",
+      "cluster": null,
+      "color": "#dc7a45",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —has CoRR volume→ abs/1106.4102"
+    },
+    {
+      "id": "e11",
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "target": "abs/1006.4458",
+      "predicate": "has CoRR volume",
+      "cluster": null,
+      "color": "#dc7a45",
+      "tooltip": "Few Algorithms for ascertaining merit of a document and their applications —has CoRR volume→ abs/1006.4458"
+    },
+    {
+      "id": "e12",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "Computer Science",
+      "predicate": "has field",
+      "cluster": null,
+      "color": "#74ea2c",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —has field→ Computer Science"
+    },
+    {
+      "id": "e13",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "Mathematics",
+      "predicate": "has field",
+      "cluster": null,
+      "color": "#74ea2c",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —has field→ Mathematics"
+    },
+    {
+      "id": "e14",
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "target": "Computer Science",
+      "predicate": "has field",
+      "cluster": null,
+      "color": "#74ea2c",
+      "tooltip": "Few Algorithms for ascertaining merit of a document and their applications —has field→ Computer Science"
+    },
+    {
+      "id": "e15",
+      "source": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "target": "Computer Science",
+      "predicate": "has field",
+      "cluster": null,
+      "color": "#74ea2c",
+      "tooltip": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm —has field→ Computer Science"
+    },
+    {
+      "id": "e16",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "cs.LO",
+      "predicate": "has primary classification",
+      "cluster": null,
+      "color": "#cede83",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —has primary classification→ cs.LO"
+    },
+    {
+      "id": "e17",
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "target": "cs.IR",
+      "predicate": "has primary classification",
+      "cluster": null,
+      "color": "#cede83",
+      "tooltip": "Few Algorithms for ascertaining merit of a document and their applications —has primary classification→ cs.IR"
+    },
+    {
+      "id": "e18",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "Decidability",
+      "predicate": "has topic",
+      "cluster": null,
+      "color": "#ea5555",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —has topic→ Decidability"
+    },
+    {
+      "id": "e19",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "Discrete mathematics",
+      "predicate": "has topic",
+      "cluster": null,
+      "color": "#ea5555",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —has topic→ Discrete mathematics"
+    },
+    {
+      "id": "e20",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "Logic in Computer Science",
+      "predicate": "has topic",
+      "cluster": null,
+      "color": "#ea5555",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —has topic→ Logic in Computer Science"
+    },
+    {
+      "id": "e21",
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "target": "document merit",
+      "predicate": "has topic",
+      "cluster": null,
+      "color": "#ea5555",
+      "tooltip": "Few Algorithms for ascertaining merit of a document and their applications —has topic→ document merit"
+    },
+    {
+      "id": "e22",
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "target": "Information Retrieval",
+      "predicate": "has topic",
+      "cluster": null,
+      "color": "#ea5555",
+      "tooltip": "Few Algorithms for ascertaining merit of a document and their applications —has topic→ Information Retrieval"
+    },
+    {
+      "id": "e23",
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "target": "World Wide Web",
+      "predicate": "has topic",
+      "cluster": null,
+      "color": "#ea5555",
+      "tooltip": "Few Algorithms for ascertaining merit of a document and their applications —has topic→ World Wide Web"
+    },
+    {
+      "id": "e24",
+      "source": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "target": "Data mining",
+      "predicate": "has topic",
+      "cluster": null,
+      "color": "#ea5555",
+      "tooltip": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm —has topic→ Data mining"
+    },
+    {
+      "id": "e25",
+      "source": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "target": "Information Retrieval",
+      "predicate": "has topic",
+      "cluster": null,
+      "color": "#ea5555",
+      "tooltip": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm —has topic→ Information Retrieval"
+    },
+    {
+      "id": "e26",
+      "source": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "target": "update summarization",
+      "predicate": "has topic",
+      "cluster": null,
+      "color": "#ea5555",
+      "tooltip": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm —has topic→ update summarization"
+    },
+    {
+      "id": "e27",
+      "source": "Update Summarization with Interview Algorithm",
+      "target": "update summarization",
+      "predicate": "has topic",
+      "cluster": null,
+      "color": "#ea5555",
+      "tooltip": "Update Summarization with Interview Algorithm —has topic→ update summarization"
+    },
+    {
+      "id": "e28",
+      "source": "ZFC",
+      "target": "Axiom of Choice",
+      "predicate": "includes",
+      "cluster": null,
+      "color": "#26c2bd",
+      "tooltip": "ZFC —includes→ Axiom of Choice"
+    },
+    {
+      "id": "e29",
+      "source": "ZFC",
+      "target": "Zermelo-Fraenkel Set Theory",
+      "predicate": "includes",
+      "cluster": null,
+      "color": "#26c2bd",
+      "tooltip": "ZFC —includes→ Zermelo-Fraenkel Set Theory"
+    },
+    {
+      "id": "e30",
+      "source": "CiteSeerX",
+      "target": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "indexes",
+      "cluster": null,
+      "color": "#e1b97f",
+      "tooltip": "CiteSeerX —indexes→ Few Algorithms for ascertaining merit of a document and their applications"
+    },
+    {
+      "id": "e31",
+      "source": "CiteSeerX",
+      "target": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "predicate": "indexes",
+      "cluster": null,
+      "color": "#e1b97f",
+      "tooltip": "CiteSeerX —indexes→ TAC 2010 Summarization Track - Update Summarization with Interview Algorithm"
+    },
+    {
+      "id": "e32",
+      "source": "DBLP",
+      "target": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "indexes",
+      "cluster": null,
+      "color": "#e1b97f",
+      "tooltip": "DBLP —indexes→ Decidability of Existence and Construction of a Complement of a given Function"
+    },
+    {
+      "id": "e33",
+      "source": "DBLP",
+      "target": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "indexes",
+      "cluster": null,
+      "color": "#e1b97f",
+      "tooltip": "DBLP —indexes→ Few Algorithms for ascertaining merit of a document and their applications"
+    },
+    {
+      "id": "e34",
+      "source": "DBLP",
+      "target": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "predicate": "indexes",
+      "cluster": null,
+      "color": "#e1b97f",
+      "tooltip": "DBLP —indexes→ TAC 2010 Summarization Track - Update Summarization with Interview Algorithm"
+    },
+    {
+      "id": "e35",
+      "source": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "target": "Update Summarization with Interview Algorithm",
+      "predicate": "is a title variant of",
+      "cluster": null,
+      "color": "#9932b3",
+      "tooltip": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm —is a title variant of→ Update Summarization with Interview Algorithm"
+    },
+    {
+      "id": "e36",
+      "source": "Third Text Analysis Conference",
+      "target": "TAC",
+      "predicate": "is also designated",
+      "cluster": null,
+      "color": "#d55e72",
+      "tooltip": "Third Text Analysis Conference —is also designated→ TAC"
+    },
+    {
+      "id": "e37",
+      "source": "Madhavan Mukund",
+      "target": "Chennai Mathematical Institute",
+      "predicate": "is associated with",
+      "cluster": null,
+      "color": "#a6d712",
+      "tooltip": "Madhavan Mukund —is associated with→ Chennai Mathematical Institute"
+    },
+    {
+      "id": "e38",
+      "source": "Meena Mahajan",
+      "target": "Institute of Mathematical Sciences",
+      "predicate": "is associated with",
+      "cluster": null,
+      "color": "#a6d712",
+      "tooltip": "Meena Mahajan —is associated with→ Institute of Mathematical Sciences"
+    },
+    {
+      "id": "e39",
+      "source": "NIST TAC 2010",
+      "target": "NIST",
+      "predicate": "is associated with",
+      "cluster": null,
+      "color": "#a6d712",
+      "tooltip": "NIST TAC 2010 —is associated with→ NIST"
+    },
+    {
+      "id": "e40",
+      "source": "NIST TAC 2010",
+      "target": "TAC",
+      "predicate": "is associated with",
+      "cluster": null,
+      "color": "#a6d712",
+      "tooltip": "NIST TAC 2010 —is associated with→ TAC"
+    },
+    {
+      "id": "e41",
+      "source": "Update Summarization with Interview Algorithm",
+      "target": "NIST",
+      "predicate": "is associated with",
+      "cluster": null,
+      "color": "#a6d712",
+      "tooltip": "Update Summarization with Interview Algorithm —is associated with→ NIST"
+    },
+    {
+      "id": "e42",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "K Shrinivaasan",
+      "predicate": "is authored by",
+      "cluster": null,
+      "color": "#d99833",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —is authored by→ K Shrinivaasan"
+    },
+    {
+      "id": "e43",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "Ka. Shrinivaasan",
+      "predicate": "is authored by",
+      "cluster": null,
+      "color": "#d99833",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —is authored by→ Ka. Shrinivaasan"
+    },
+    {
+      "id": "e44",
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "target": "Balaraman Ravindran",
+      "predicate": "is authored by",
+      "cluster": null,
+      "color": "#d99833",
+      "tooltip": "Few Algorithms for ascertaining merit of a document and their applications —is authored by→ Balaraman Ravindran"
+    },
+    {
+      "id": "e45",
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "target": "K Shrinivaasan",
+      "predicate": "is authored by",
+      "cluster": null,
+      "color": "#d99833",
+      "tooltip": "Few Algorithms for ascertaining merit of a document and their applications —is authored by→ K Shrinivaasan"
+    },
+    {
+      "id": "e46",
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "target": "Ka. Shrinivaasan",
+      "predicate": "is authored by",
+      "cluster": null,
+      "color": "#d99833",
+      "tooltip": "Few Algorithms for ascertaining merit of a document and their applications —is authored by→ Ka. Shrinivaasan"
+    },
+    {
+      "id": "e47",
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "target": "Madhavan Mukund",
+      "predicate": "is authored by",
+      "cluster": null,
+      "color": "#d99833",
+      "tooltip": "Few Algorithms for ascertaining merit of a document and their applications —is authored by→ Madhavan Mukund"
+    },
+    {
+      "id": "e48",
+      "source": "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC)",
+      "target": "Ka. Shrinivaasan",
+      "predicate": "is authored by",
+      "cluster": null,
+      "color": "#d99833",
+      "tooltip": "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC) —is authored by→ Ka. Shrinivaasan"
+    },
+    {
+      "id": "e49",
+      "source": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "target": "Ka. Shrinivaasan",
+      "predicate": "is authored by",
+      "cluster": null,
+      "color": "#d99833",
+      "tooltip": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm —is authored by→ Ka. Shrinivaasan"
+    },
+    {
+      "id": "e50",
+      "source": "Update Summarization with Interview Algorithm",
+      "target": "Balaraman Ravindran",
+      "predicate": "is authored by",
+      "cluster": null,
+      "color": "#d99833",
+      "tooltip": "Update Summarization with Interview Algorithm —is authored by→ Balaraman Ravindran"
+    },
+    {
+      "id": "e51",
+      "source": "Update Summarization with Interview Algorithm",
+      "target": "K Shrinivaasan",
+      "predicate": "is authored by",
+      "cluster": null,
+      "color": "#d99833",
+      "tooltip": "Update Summarization with Interview Algorithm —is authored by→ K Shrinivaasan"
+    },
+    {
+      "id": "e52",
+      "source": "Update Summarization with Interview Algorithm",
+      "target": "Madhavan Mukund",
+      "predicate": "is authored by",
+      "cluster": null,
+      "color": "#d99833",
+      "tooltip": "Update Summarization with Interview Algorithm —is authored by→ Madhavan Mukund"
+    },
+    {
+      "id": "e53",
+      "source": "cs.IR",
+      "target": "Information Retrieval",
+      "predicate": "is classification for",
+      "cluster": null,
+      "color": "#db5034",
+      "tooltip": "cs.IR —is classification for→ Information Retrieval"
+    },
+    {
+      "id": "e54",
+      "source": "cs.LO",
+      "target": "Logic in Computer Science",
+      "predicate": "is classification for",
+      "cluster": null,
+      "color": "#db5034",
+      "tooltip": "cs.LO —is classification for→ Logic in Computer Science"
+    },
+    {
+      "id": "e55",
+      "source": "CiteSeerX",
+      "target": "The College of Information Sciences and Technology",
+      "predicate": "is developed and hosted by",
+      "cluster": null,
+      "color": "#485cd7",
+      "tooltip": "CiteSeerX —is developed and hosted by→ The College of Information Sciences and Technology"
+    },
+    {
+      "id": "e56",
+      "source": "DBLP",
+      "target": "DBLP computer science bibliography",
+      "predicate": "is identified as",
+      "cluster": null,
+      "color": "#c5237f",
+      "tooltip": "DBLP —is identified as→ DBLP computer science bibliography"
+    },
+    {
+      "id": "e57",
+      "source": "K Shrinivaasan",
+      "target": "Ka. Shrinivaasan",
+      "predicate": "is name variant of",
+      "cluster": null,
+      "color": "#d4d23d",
+      "tooltip": "K Shrinivaasan —is name variant of→ Ka. Shrinivaasan"
+    },
+    {
+      "id": "e58",
+      "source": "Microsoft Academic",
+      "target": "Microsoft",
+      "predicate": "is operated by",
+      "cluster": null,
+      "color": "#54dc64",
+      "tooltip": "Microsoft Academic —is operated by→ Microsoft"
+    },
+    {
+      "id": "e59",
+      "source": "The College of Information Sciences and Technology",
+      "target": "The Pennsylvania State University",
+      "predicate": "is part of",
+      "cluster": null,
+      "color": "#2553c9",
+      "tooltip": "The College of Information Sciences and Technology —is part of→ The Pennsylvania State University"
+    },
+    {
+      "id": "e60",
+      "source": "Third Text Analysis Conference",
+      "target": "Text Analysis Conference",
+      "predicate": "is part of",
+      "cluster": null,
+      "color": "#2553c9",
+      "tooltip": "Third Text Analysis Conference —is part of→ Text Analysis Conference"
+    },
+    {
+      "id": "e61",
+      "source": "Proceedings of the Third Text Analysis Conference, TAC 2010",
+      "target": "Third Text Analysis Conference",
+      "predicate": "is proceedings of",
+      "cluster": null,
+      "color": "#df7150",
+      "tooltip": "Proceedings of the Third Text Analysis Conference, TAC 2010 —is proceedings of→ Third Text Analysis Conference"
+    },
+    {
+      "id": "e62",
+      "source": "Proceedings of the Third Text Analysis Conference, TAC 2010",
+      "target": "NIST",
+      "predicate": "is published by",
+      "cluster": null,
+      "color": "#e26f7d",
+      "tooltip": "Proceedings of the Third Text Analysis Conference, TAC 2010 —is published by→ NIST"
+    },
+    {
+      "id": "e63",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "arXiv",
+      "predicate": "is published in",
+      "cluster": null,
+      "color": "#6ae09f",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —is published in→ arXiv"
+    },
+    {
+      "id": "e64",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "CoRR",
+      "predicate": "is published in",
+      "cluster": null,
+      "color": "#6ae09f",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —is published in→ CoRR"
+    },
+    {
+      "id": "e65",
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "target": "arXiv",
+      "predicate": "is published in",
+      "cluster": null,
+      "color": "#6ae09f",
+      "tooltip": "Few Algorithms for ascertaining merit of a document and their applications —is published in→ arXiv"
+    },
+    {
+      "id": "e66",
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "target": "CoRR",
+      "predicate": "is published in",
+      "cluster": null,
+      "color": "#6ae09f",
+      "tooltip": "Few Algorithms for ascertaining merit of a document and their applications —is published in→ CoRR"
+    },
+    {
+      "id": "e67",
+      "source": "Microsoft Academic",
+      "target": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "lists",
+      "cluster": null,
+      "color": "#d81872",
+      "tooltip": "Microsoft Academic —lists→ Decidability of Existence and Construction of a Complement of a given Function"
+    },
+    {
+      "id": "e68",
+      "source": "Microsoft Academic",
+      "target": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "lists",
+      "cluster": null,
+      "color": "#d81872",
+      "tooltip": "Microsoft Academic —lists→ Few Algorithms for ascertaining merit of a document and their applications"
+    },
+    {
+      "id": "e69",
+      "source": "Microsoft Academic",
+      "target": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "predicate": "lists",
+      "cluster": null,
+      "color": "#d81872",
+      "tooltip": "Microsoft Academic —lists→ TAC 2010 Summarization Track - Update Summarization with Interview Algorithm"
+    },
+    {
+      "id": "e70",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "algorithms for constructing a complement",
+      "predicate": "presents",
+      "cluster": null,
+      "color": "#35cd92",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —presents→ algorithms for constructing a complement"
+    },
+    {
+      "id": "e71",
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "target": "graph-theoretic schemes",
+      "predicate": "proposes",
+      "cluster": null,
+      "color": "#ce72e9",
+      "tooltip": "Few Algorithms for ascertaining merit of a document and their applications —proposes→ graph-theoretic schemes"
+    },
+    {
+      "id": "e72",
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "target": "citation graph",
+      "predicate": "proposes an algorithm based on",
+      "cluster": null,
+      "color": "#e29f7f",
+      "tooltip": "Few Algorithms for ascertaining merit of a document and their applications —proposes an algorithm based on→ citation graph"
+    },
+    {
+      "id": "e73",
+      "source": "SAO/NASA Astrophysics Data System",
+      "target": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "provides a record for",
+      "cluster": null,
+      "color": "#db7e9c",
+      "tooltip": "SAO/NASA Astrophysics Data System —provides a record for→ Decidability of Existence and Construction of a Complement of a given Function"
+    },
+    {
+      "id": "e74",
+      "source": "SAO/NASA Astrophysics Data System",
+      "target": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "provides a record for",
+      "cluster": null,
+      "color": "#db7e9c",
+      "tooltip": "SAO/NASA Astrophysics Data System —provides a record for→ Few Algorithms for ascertaining merit of a document and their applications"
+    },
+    {
+      "id": "e75",
+      "source": "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC)",
+      "target": "Axiom of Choice",
+      "predicate": "relates to",
+      "cluster": null,
+      "color": "#da384f",
+      "tooltip": "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC) —relates to→ Axiom of Choice"
+    },
+    {
+      "id": "e76",
+      "source": "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC)",
+      "target": "Zermelo-Fraenkel Set Theory",
+      "predicate": "relates to",
+      "cluster": null,
+      "color": "#da384f",
+      "tooltip": "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC) —relates to→ Zermelo-Fraenkel Set Theory"
+    },
+    {
+      "id": "e77",
+      "source": "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC)",
+      "target": "ZFC",
+      "predicate": "relates to",
+      "cluster": null,
+      "color": "#da384f",
+      "tooltip": "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC) —relates to→ ZFC"
+    },
+    {
+      "id": "e78",
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "target": "complement function",
+      "predicate": "studies existence of",
+      "cluster": null,
+      "color": "#9cf05e",
+      "tooltip": "Decidability of Existence and Construction of a Complement of a given Function —studies existence of→ complement function"
+    },
+    {
+      "id": "e79",
+      "source": "CiteSeerX",
+      "target": "MetaCart",
+      "predicate": "supports adding results to",
+      "cluster": null,
+      "color": "#dfce72",
+      "tooltip": "CiteSeerX —supports adding results to→ MetaCart"
+    },
+    {
+      "id": "e80",
+      "source": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "target": "Interview Algorithm",
+      "predicate": "uses",
+      "cluster": null,
+      "color": "#d271e1",
+      "tooltip": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm —uses→ Interview Algorithm"
+    },
+    {
+      "id": "e81",
+      "source": "Update Summarization with Interview Algorithm",
+      "target": "Interview Algorithm",
+      "predicate": "uses",
+      "cluster": null,
+      "color": "#d271e1",
+      "tooltip": "Update Summarization with Interview Algorithm —uses→ Interview Algorithm"
+    },
+    {
+      "id": "e82",
+      "source": "Ka. Shrinivaasan",
+      "target": "Meena Mahajan",
+      "predicate": "was advised by",
+      "cluster": null,
+      "color": "#80da8c",
+      "tooltip": "Ka. Shrinivaasan —was advised by→ Meena Mahajan"
+    },
+    {
+      "id": "e83",
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "target": "June 23, 2010",
+      "predicate": "was first published on",
+      "cluster": null,
+      "color": "#d1ed35",
+      "tooltip": "Few Algorithms for ascertaining merit of a document and their applications —was first published on→ June 23, 2010"
+    },
+    {
+      "id": "e84",
+      "source": "Third Text Analysis Conference",
+      "target": "Gaithersburg",
+      "predicate": "was held in",
+      "cluster": null,
+      "color": "#60f193",
+      "tooltip": "Third Text Analysis Conference —was held in→ Gaithersburg"
+    },
+    {
+      "id": "e85",
+      "source": "Third Text Analysis Conference",
+      "target": "Maryland",
+      "predicate": "was held in",
+      "cluster": null,
+      "color": "#60f193",
+      "tooltip": "Third Text Analysis Conference —was held in→ Maryland"
+    },
+    {
+      "id": "e86",
+      "source": "Third Text Analysis Conference",
+      "target": "USA",
+      "predicate": "was held in",
+      "cluster": null,
+      "color": "#60f193",
+      "tooltip": "Third Text Analysis Conference —was held in→ USA"
+    },
+    {
+      "id": "e87",
+      "source": "Third Text Analysis Conference",
+      "target": "November 15-16, 2010",
+      "predicate": "was held on",
+      "cluster": null,
+      "color": "#74df16",
+      "tooltip": "Third Text Analysis Conference —was held on→ November 15-16, 2010"
+    },
+    {
+      "id": "e88",
+      "source": "Update Summarization with Interview Algorithm",
+      "target": "NIST TAC 2010",
+      "predicate": "was presented at",
+      "cluster": null,
+      "color": "#ba1de7",
+      "tooltip": "Update Summarization with Interview Algorithm —was presented at→ NIST TAC 2010"
+    }
+  ],
+  "clusters": [],
+  "edgeClusters": [],
+  "topEntities": [
+    {
+      "label": "Few Algorithms for ascertaining merit of a document and their applications",
+      "degree": 22,
+      "indegree": 4,
+      "outdegree": 18,
+      "cluster": null
+    },
+    {
+      "label": "Decidability of Existence and Construction of a Complement of a given Function",
+      "degree": 18,
+      "indegree": 3,
+      "outdegree": 15,
+      "cluster": null
+    },
+    {
+      "label": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "degree": 12,
+      "indegree": 4,
+      "outdegree": 8,
+      "cluster": null
+    },
+    {
+      "label": "Update Summarization with Interview Algorithm",
+      "degree": 8,
+      "indegree": 1,
+      "outdegree": 7,
+      "cluster": null
+    },
+    {
+      "label": "Third Text Analysis Conference",
+      "degree": 7,
+      "indegree": 1,
+      "outdegree": 6,
+      "cluster": null
+    },
+    {
+      "label": "Ka. Shrinivaasan",
+      "degree": 6,
+      "indegree": 5,
+      "outdegree": 1,
+      "cluster": null
+    },
+    {
+      "label": "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC)",
+      "degree": 5,
+      "indegree": 0,
+      "outdegree": 5,
+      "cluster": null
+    },
+    {
+      "label": "CiteSeerX",
+      "degree": 4,
+      "indegree": 0,
+      "outdegree": 4,
+      "cluster": null
+    },
+    {
+      "label": "DBLP",
+      "degree": 4,
+      "indegree": 0,
+      "outdegree": 4,
+      "cluster": null
+    },
+    {
+      "label": "K Shrinivaasan",
+      "degree": 4,
+      "indegree": 3,
+      "outdegree": 1,
+      "cluster": null
+    }
+  ],
+  "topRelations": [
+    {
+      "predicate": "is authored by",
+      "count": 11,
+      "cluster": null,
+      "color": "#d99833"
+    },
+    {
+      "predicate": "has topic",
+      "count": 10,
+      "cluster": null,
+      "color": "#ea5555"
+    },
+    {
+      "predicate": "indexes",
+      "count": 5,
+      "cluster": null,
+      "color": "#e1b97f"
+    },
+    {
+      "predicate": "is associated with",
+      "count": 5,
+      "cluster": null,
+      "color": "#a6d712"
+    },
+    {
+      "predicate": "has field",
+      "count": 4,
+      "cluster": null,
+      "color": "#74ea2c"
+    },
+    {
+      "predicate": "is published in",
+      "count": 4,
+      "cluster": null,
+      "color": "#6ae09f"
+    },
+    {
+      "predicate": "lists",
+      "count": 3,
+      "cluster": null,
+      "color": "#d81872"
+    },
+    {
+      "predicate": "relates to",
+      "count": 3,
+      "cluster": null,
+      "color": "#da384f"
+    },
+    {
+      "predicate": "was held in",
+      "count": 3,
+      "cluster": null,
+      "color": "#60f193"
+    },
+    {
+      "predicate": "has arXiv identifier",
+      "count": 2,
+      "cluster": null,
+      "color": "#b334e2"
+    }
+  ],
+  "stats": {
+    "entities": 66,
+    "relations": 89,
+    "relationTypes": 42,
+    "entityClusters": 0,
+    "edgeClusters": 0,
+    "isolatedEntities": 4,
+    "components": 5,
+    "averageDegree": 2.7,
+    "density": 0.021
+  },
+  "isolatedEntities": [
+    "link graph",
+    "National Institute of Standards and Technology",
+    "probabilistic inference",
+    "Theory and Applications of Categories"
+  ],
+  "components": [
+    {
+      "size": 62,
+      "members": [
+        "abs/1006.4458",
+        "abs/1106.4102",
+        "algorithms for constructing a complement",
+        "arXiv",
+        "arXiv:1006.4458",
+        "arXiv:1106.4102",
+        "Axiom of Choice",
+        "Balaraman Ravindran",
+        "Chennai Mathematical Institute",
+        "citation graph",
+        "CiteSeerX",
+        "complement function",
+        "complement of a function",
+        "Computer Science",
+        "CoRR",
+        "cs.IR",
+        "cs.LO",
+        "Data mining",
+        "DBLP",
+        "DBLP computer science bibliography",
+        "Decidability",
+        "Decidability of Existence and Construction of a Complement of a given Function",
+        "Discrete mathematics",
+        "document merit",
+        "document ranking",
+        "Few Algorithms for ascertaining merit of a document and their applications",
+        "Gaithersburg",
+        "graph-theoretic schemes",
+        "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC)",
+        "Information Retrieval",
+        "Institute of Mathematical Sciences",
+        "Interview Algorithm",
+        "June 23, 2010",
+        "K Shrinivaasan",
+        "Ka. Shrinivaasan",
+        "Logic in Computer Science",
+        "Madhavan Mukund",
+        "Majority Voting",
+        "Maryland",
+        "Mathematics",
+        "Meena Mahajan",
+        "MetaCart",
+        "Microsoft",
+        "Microsoft Academic",
+        "NIST",
+        "NIST TAC 2010",
+        "November 15-16, 2010",
+        "prestige-based ranking models",
+        "Proceedings of the Third Text Analysis Conference, TAC 2010",
+        "SAO/NASA Astrophysics Data System",
+        "TAC",
+        "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+        "Text Analysis Conference",
+        "The College of Information Sciences and Technology",
+        "The Pennsylvania State University",
+        "Third Text Analysis Conference",
+        "update summarization",
+        "Update Summarization with Interview Algorithm",
+        "USA",
+        "World Wide Web",
+        "Zermelo-Fraenkel Set Theory",
+        "ZFC"
+      ]
+    },
+    {
+      "size": 1,
+      "members": [
+        "National Institute of Standards and Technology"
+      ]
+    },
+    {
+      "size": 1,
+      "members": [
+        "Theory and Applications of Categories"
+      ]
+    },
+    {
+      "size": 1,
+      "members": [
+        "link graph"
+      ]
+    },
+    {
+      "size": 1,
+      "members": [
+        "probabilistic inference"
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "addresses",
+      "target": "document ranking",
+      "edgeId": "e0",
+      "color": "#4ae18a"
+    },
+    {
+      "source": "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC)",
+      "predicate": "analyzes a variant of",
+      "target": "Majority Voting",
+      "edgeId": "e1",
+      "color": "#9678ec"
+    },
+    {
+      "source": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "predicate": "appears in",
+      "target": "Proceedings of the Third Text Analysis Conference, TAC 2010",
+      "edgeId": "e2",
+      "color": "#24c3c1"
+    },
+    {
+      "source": "prestige-based ranking models",
+      "predicate": "are models for",
+      "target": "document ranking",
+      "edgeId": "e3",
+      "color": "#e062c7"
+    },
+    {
+      "source": "graph-theoretic schemes",
+      "predicate": "are used to judge",
+      "target": "document merit",
+      "edgeId": "e4",
+      "color": "#3dcc44"
+    },
+    {
+      "source": "Proceedings of the Third Text Analysis Conference, TAC 2010",
+      "predicate": "contains",
+      "target": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "edgeId": "e5",
+      "color": "#6ca6dd"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "defines",
+      "target": "complement of a function",
+      "edgeId": "e6",
+      "color": "#b25aef"
+    },
+    {
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "discusses",
+      "target": "prestige-based ranking models",
+      "edgeId": "e7",
+      "color": "#d0dc64"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "has arXiv identifier",
+      "target": "arXiv:1106.4102",
+      "edgeId": "e8",
+      "color": "#b334e2"
+    },
+    {
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "has arXiv identifier",
+      "target": "arXiv:1006.4458",
+      "edgeId": "e9",
+      "color": "#b334e2"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "has CoRR volume",
+      "target": "abs/1106.4102",
+      "edgeId": "e10",
+      "color": "#dc7a45"
+    },
+    {
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "has CoRR volume",
+      "target": "abs/1006.4458",
+      "edgeId": "e11",
+      "color": "#dc7a45"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "has field",
+      "target": "Computer Science",
+      "edgeId": "e12",
+      "color": "#74ea2c"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "has field",
+      "target": "Mathematics",
+      "edgeId": "e13",
+      "color": "#74ea2c"
+    },
+    {
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "has field",
+      "target": "Computer Science",
+      "edgeId": "e14",
+      "color": "#74ea2c"
+    },
+    {
+      "source": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "predicate": "has field",
+      "target": "Computer Science",
+      "edgeId": "e15",
+      "color": "#74ea2c"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "has primary classification",
+      "target": "cs.LO",
+      "edgeId": "e16",
+      "color": "#cede83"
+    },
+    {
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "has primary classification",
+      "target": "cs.IR",
+      "edgeId": "e17",
+      "color": "#cede83"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "has topic",
+      "target": "Decidability",
+      "edgeId": "e18",
+      "color": "#ea5555"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "has topic",
+      "target": "Discrete mathematics",
+      "edgeId": "e19",
+      "color": "#ea5555"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "has topic",
+      "target": "Logic in Computer Science",
+      "edgeId": "e20",
+      "color": "#ea5555"
+    },
+    {
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "has topic",
+      "target": "document merit",
+      "edgeId": "e21",
+      "color": "#ea5555"
+    },
+    {
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "has topic",
+      "target": "Information Retrieval",
+      "edgeId": "e22",
+      "color": "#ea5555"
+    },
+    {
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "has topic",
+      "target": "World Wide Web",
+      "edgeId": "e23",
+      "color": "#ea5555"
+    },
+    {
+      "source": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "predicate": "has topic",
+      "target": "Data mining",
+      "edgeId": "e24",
+      "color": "#ea5555"
+    },
+    {
+      "source": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "predicate": "has topic",
+      "target": "Information Retrieval",
+      "edgeId": "e25",
+      "color": "#ea5555"
+    },
+    {
+      "source": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "predicate": "has topic",
+      "target": "update summarization",
+      "edgeId": "e26",
+      "color": "#ea5555"
+    },
+    {
+      "source": "Update Summarization with Interview Algorithm",
+      "predicate": "has topic",
+      "target": "update summarization",
+      "edgeId": "e27",
+      "color": "#ea5555"
+    },
+    {
+      "source": "ZFC",
+      "predicate": "includes",
+      "target": "Axiom of Choice",
+      "edgeId": "e28",
+      "color": "#26c2bd"
+    },
+    {
+      "source": "ZFC",
+      "predicate": "includes",
+      "target": "Zermelo-Fraenkel Set Theory",
+      "edgeId": "e29",
+      "color": "#26c2bd"
+    },
+    {
+      "source": "CiteSeerX",
+      "predicate": "indexes",
+      "target": "Few Algorithms for ascertaining merit of a document and their applications",
+      "edgeId": "e30",
+      "color": "#e1b97f"
+    },
+    {
+      "source": "CiteSeerX",
+      "predicate": "indexes",
+      "target": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "edgeId": "e31",
+      "color": "#e1b97f"
+    },
+    {
+      "source": "DBLP",
+      "predicate": "indexes",
+      "target": "Decidability of Existence and Construction of a Complement of a given Function",
+      "edgeId": "e32",
+      "color": "#e1b97f"
+    },
+    {
+      "source": "DBLP",
+      "predicate": "indexes",
+      "target": "Few Algorithms for ascertaining merit of a document and their applications",
+      "edgeId": "e33",
+      "color": "#e1b97f"
+    },
+    {
+      "source": "DBLP",
+      "predicate": "indexes",
+      "target": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "edgeId": "e34",
+      "color": "#e1b97f"
+    },
+    {
+      "source": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "predicate": "is a title variant of",
+      "target": "Update Summarization with Interview Algorithm",
+      "edgeId": "e35",
+      "color": "#9932b3"
+    },
+    {
+      "source": "Third Text Analysis Conference",
+      "predicate": "is also designated",
+      "target": "TAC",
+      "edgeId": "e36",
+      "color": "#d55e72"
+    },
+    {
+      "source": "Madhavan Mukund",
+      "predicate": "is associated with",
+      "target": "Chennai Mathematical Institute",
+      "edgeId": "e37",
+      "color": "#a6d712"
+    },
+    {
+      "source": "Meena Mahajan",
+      "predicate": "is associated with",
+      "target": "Institute of Mathematical Sciences",
+      "edgeId": "e38",
+      "color": "#a6d712"
+    },
+    {
+      "source": "NIST TAC 2010",
+      "predicate": "is associated with",
+      "target": "NIST",
+      "edgeId": "e39",
+      "color": "#a6d712"
+    },
+    {
+      "source": "NIST TAC 2010",
+      "predicate": "is associated with",
+      "target": "TAC",
+      "edgeId": "e40",
+      "color": "#a6d712"
+    },
+    {
+      "source": "Update Summarization with Interview Algorithm",
+      "predicate": "is associated with",
+      "target": "NIST",
+      "edgeId": "e41",
+      "color": "#a6d712"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "is authored by",
+      "target": "K Shrinivaasan",
+      "edgeId": "e42",
+      "color": "#d99833"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "is authored by",
+      "target": "Ka. Shrinivaasan",
+      "edgeId": "e43",
+      "color": "#d99833"
+    },
+    {
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "is authored by",
+      "target": "Balaraman Ravindran",
+      "edgeId": "e44",
+      "color": "#d99833"
+    },
+    {
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "is authored by",
+      "target": "K Shrinivaasan",
+      "edgeId": "e45",
+      "color": "#d99833"
+    },
+    {
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "is authored by",
+      "target": "Ka. Shrinivaasan",
+      "edgeId": "e46",
+      "color": "#d99833"
+    },
+    {
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "is authored by",
+      "target": "Madhavan Mukund",
+      "edgeId": "e47",
+      "color": "#d99833"
+    },
+    {
+      "source": "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC)",
+      "predicate": "is authored by",
+      "target": "Ka. Shrinivaasan",
+      "edgeId": "e48",
+      "color": "#d99833"
+    },
+    {
+      "source": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "predicate": "is authored by",
+      "target": "Ka. Shrinivaasan",
+      "edgeId": "e49",
+      "color": "#d99833"
+    },
+    {
+      "source": "Update Summarization with Interview Algorithm",
+      "predicate": "is authored by",
+      "target": "Balaraman Ravindran",
+      "edgeId": "e50",
+      "color": "#d99833"
+    },
+    {
+      "source": "Update Summarization with Interview Algorithm",
+      "predicate": "is authored by",
+      "target": "K Shrinivaasan",
+      "edgeId": "e51",
+      "color": "#d99833"
+    },
+    {
+      "source": "Update Summarization with Interview Algorithm",
+      "predicate": "is authored by",
+      "target": "Madhavan Mukund",
+      "edgeId": "e52",
+      "color": "#d99833"
+    },
+    {
+      "source": "cs.IR",
+      "predicate": "is classification for",
+      "target": "Information Retrieval",
+      "edgeId": "e53",
+      "color": "#db5034"
+    },
+    {
+      "source": "cs.LO",
+      "predicate": "is classification for",
+      "target": "Logic in Computer Science",
+      "edgeId": "e54",
+      "color": "#db5034"
+    },
+    {
+      "source": "CiteSeerX",
+      "predicate": "is developed and hosted by",
+      "target": "The College of Information Sciences and Technology",
+      "edgeId": "e55",
+      "color": "#485cd7"
+    },
+    {
+      "source": "DBLP",
+      "predicate": "is identified as",
+      "target": "DBLP computer science bibliography",
+      "edgeId": "e56",
+      "color": "#c5237f"
+    },
+    {
+      "source": "K Shrinivaasan",
+      "predicate": "is name variant of",
+      "target": "Ka. Shrinivaasan",
+      "edgeId": "e57",
+      "color": "#d4d23d"
+    },
+    {
+      "source": "Microsoft Academic",
+      "predicate": "is operated by",
+      "target": "Microsoft",
+      "edgeId": "e58",
+      "color": "#54dc64"
+    },
+    {
+      "source": "The College of Information Sciences and Technology",
+      "predicate": "is part of",
+      "target": "The Pennsylvania State University",
+      "edgeId": "e59",
+      "color": "#2553c9"
+    },
+    {
+      "source": "Third Text Analysis Conference",
+      "predicate": "is part of",
+      "target": "Text Analysis Conference",
+      "edgeId": "e60",
+      "color": "#2553c9"
+    },
+    {
+      "source": "Proceedings of the Third Text Analysis Conference, TAC 2010",
+      "predicate": "is proceedings of",
+      "target": "Third Text Analysis Conference",
+      "edgeId": "e61",
+      "color": "#df7150"
+    },
+    {
+      "source": "Proceedings of the Third Text Analysis Conference, TAC 2010",
+      "predicate": "is published by",
+      "target": "NIST",
+      "edgeId": "e62",
+      "color": "#e26f7d"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "is published in",
+      "target": "arXiv",
+      "edgeId": "e63",
+      "color": "#6ae09f"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "is published in",
+      "target": "CoRR",
+      "edgeId": "e64",
+      "color": "#6ae09f"
+    },
+    {
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "is published in",
+      "target": "arXiv",
+      "edgeId": "e65",
+      "color": "#6ae09f"
+    },
+    {
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "is published in",
+      "target": "CoRR",
+      "edgeId": "e66",
+      "color": "#6ae09f"
+    },
+    {
+      "source": "Microsoft Academic",
+      "predicate": "lists",
+      "target": "Decidability of Existence and Construction of a Complement of a given Function",
+      "edgeId": "e67",
+      "color": "#d81872"
+    },
+    {
+      "source": "Microsoft Academic",
+      "predicate": "lists",
+      "target": "Few Algorithms for ascertaining merit of a document and their applications",
+      "edgeId": "e68",
+      "color": "#d81872"
+    },
+    {
+      "source": "Microsoft Academic",
+      "predicate": "lists",
+      "target": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "edgeId": "e69",
+      "color": "#d81872"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "presents",
+      "target": "algorithms for constructing a complement",
+      "edgeId": "e70",
+      "color": "#35cd92"
+    },
+    {
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "proposes",
+      "target": "graph-theoretic schemes",
+      "edgeId": "e71",
+      "color": "#ce72e9"
+    },
+    {
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "proposes an algorithm based on",
+      "target": "citation graph",
+      "edgeId": "e72",
+      "color": "#e29f7f"
+    },
+    {
+      "source": "SAO/NASA Astrophysics Data System",
+      "predicate": "provides a record for",
+      "target": "Decidability of Existence and Construction of a Complement of a given Function",
+      "edgeId": "e73",
+      "color": "#db7e9c"
+    },
+    {
+      "source": "SAO/NASA Astrophysics Data System",
+      "predicate": "provides a record for",
+      "target": "Few Algorithms for ascertaining merit of a document and their applications",
+      "edgeId": "e74",
+      "color": "#db7e9c"
+    },
+    {
+      "source": "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC)",
+      "predicate": "relates to",
+      "target": "Axiom of Choice",
+      "edgeId": "e75",
+      "color": "#da384f"
+    },
+    {
+      "source": "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC)",
+      "predicate": "relates to",
+      "target": "Zermelo-Fraenkel Set Theory",
+      "edgeId": "e76",
+      "color": "#da384f"
+    },
+    {
+      "source": "Indepth analysis of a variant of Majority Voting and relation to Zermelo-Fraenkel Set Theory With Axiom of Choice (ZFC)",
+      "predicate": "relates to",
+      "target": "ZFC",
+      "edgeId": "e77",
+      "color": "#da384f"
+    },
+    {
+      "source": "Decidability of Existence and Construction of a Complement of a given Function",
+      "predicate": "studies existence of",
+      "target": "complement function",
+      "edgeId": "e78",
+      "color": "#9cf05e"
+    },
+    {
+      "source": "CiteSeerX",
+      "predicate": "supports adding results to",
+      "target": "MetaCart",
+      "edgeId": "e79",
+      "color": "#dfce72"
+    },
+    {
+      "source": "TAC 2010 Summarization Track - Update Summarization with Interview Algorithm",
+      "predicate": "uses",
+      "target": "Interview Algorithm",
+      "edgeId": "e80",
+      "color": "#d271e1"
+    },
+    {
+      "source": "Update Summarization with Interview Algorithm",
+      "predicate": "uses",
+      "target": "Interview Algorithm",
+      "edgeId": "e81",
+      "color": "#d271e1"
+    },
+    {
+      "source": "Ka. Shrinivaasan",
+      "predicate": "was advised by",
+      "target": "Meena Mahajan",
+      "edgeId": "e82",
+      "color": "#80da8c"
+    },
+    {
+      "source": "Few Algorithms for ascertaining merit of a document and their applications",
+      "predicate": "was first published on",
+      "target": "June 23, 2010",
+      "edgeId": "e83",
+      "color": "#d1ed35"
+    },
+    {
+      "source": "Third Text Analysis Conference",
+      "predicate": "was held in",
+      "target": "Gaithersburg",
+      "edgeId": "e84",
+      "color": "#60f193"
+    },
+    {
+      "source": "Third Text Analysis Conference",
+      "predicate": "was held in",
+      "target": "Maryland",
+      "edgeId": "e85",
+      "color": "#60f193"
+    },
+    {
+      "source": "Third Text Analysis Conference",
+      "predicate": "was held in",
+      "target": "USA",
+      "edgeId": "e86",
+      "color": "#60f193"
+    },
+    {
+      "source": "Third Text Analysis Conference",
+      "predicate": "was held on",
+      "target": "November 15-16, 2010",
+      "edgeId": "e87",
+      "color": "#74df16"
+    },
+    {
+      "source": "Update Summarization with Interview Algorithm",
+      "predicate": "was presented at",
+      "target": "NIST TAC 2010",
+      "edgeId": "e88",
+      "color": "#ba1de7"
+    }
+  ]
+}
+    </script>
+    <script>
+        (function () {
+            console.log('[iframe] Script starting - mobile check:', window.innerWidth <= 768);
+            console.log('[iframe] User agent:', navigator.userAgent);
+
+            const dataElement = document.getElementById('viz-data');
+            if (!dataElement) {
+                console.error('[iframe] viz-data element not found!');
+                return;
+            }
+
+            let vizData;
+            try {
+                vizData = JSON.parse(dataElement.textContent);
+                console.log('[iframe] Data parsed successfully:', vizData.nodes?.length, 'nodes');
+            } catch (e) {
+                console.error('[iframe] Failed to parse data:', e);
+                return;
+            }
+
+            const state = {
+                activeElement: null,
+                focusCluster: null,
+                focusPredicate: null,
+                searchTerm: '',
+                sidebarCollapsed: false,
+                sidebarDisabled: false
+            };
+
+            const nodeById = Object.fromEntries(vizData.nodes.map(node => [node.id, node]));
+            const edgeById = Object.fromEntries(vizData.edges.map(edge => [edge.id, edge]));
+            const clusterById = Object.fromEntries(vizData.clusters.map(cluster => [cluster.id, cluster]));
+            const edgesByPredicate = {};
+            vizData.edges.forEach(edge => {
+                if (!edgesByPredicate[edge.predicate]) {
+                    edgesByPredicate[edge.predicate] = [];
+                }
+                edgesByPredicate[edge.predicate].push(edge.id);
+            });
+
+            const nodesByCluster = {};
+            vizData.clusters.forEach(cluster => {
+                cluster.members.forEach(member => {
+                    if (!nodesByCluster[cluster.id]) {
+                        nodesByCluster[cluster.id] = new Set();
+                    }
+                    nodesByCluster[cluster.id].add(member);
+                });
+            });
+
+            function renderStats() {
+                const grid = document.getElementById('statsGrid');
+                const stats = vizData.stats;
+                const entries = [
+                    { label: 'Entities', value: stats.entities },
+                    { label: 'Relations', value: stats.relations },
+                    { label: 'Relation types', value: stats.relationTypes },
+                    { label: 'Entity clusters', value: stats.entityClusters },
+                    { label: 'Edge clusters', value: stats.edgeClusters },
+                    { label: 'Isolated entities', value: stats.isolatedEntities },
+                    { label: 'Components', value: stats.components },
+                    { label: 'Average degree', value: stats.averageDegree }
+                ];
+                grid.innerHTML = entries
+                    .map(entry => `
+                        <div class="stat-card">
+                            <div class="stat-value">${entry.value}</div>
+                            <div>${entry.label}</div>
+                        </div>
+                    `)
+                    .join('');
+            }
+
+            function renderTopLists() {
+                const topEntitiesContainer = document.getElementById('topEntities');
+                const topRelationsContainer = document.getElementById('topRelations');
+
+                const entityItems = vizData.topEntities.map(item => {
+                    const clusterLabel = item.cluster ? `${item.cluster}` : 'Unclustered';
+                    return `
+                        <div class="list-item">
+                            <div>
+                                <strong>${item.label}</strong>
+                                <div class="meta">Cluster: ${clusterLabel}</div>
+                            </div>
+                            <div>${item.degree}</div>
+                        </div>
+                    `;
+                });
+                topEntitiesContainer.innerHTML = entityItems.join('') || '<div class="meta">No entities</div>';
+
+                const relationItems = vizData.topRelations.map(item => `
+                    <div class="list-item relation-item" data-predicate="${item.predicate}">
+                        <div>
+                            <strong>${item.predicate}</strong>
+                            <div class="meta">${item.count} relations</div>
+                        </div>
+                        <div class="pill" style="background: ${item.color}1a; border: 1px solid ${item.color};">${item.count}</div>
+                    </div>
+                `);
+                topRelationsContainer.innerHTML = relationItems.join('') || '<div class="meta">No relations</div>';
+            }
+
+            function renderClusters() {
+                const container = document.getElementById('clusterList');
+                if (!vizData.clusters.length) {
+                    container.innerHTML = '<div class="meta">No cluster information provided.</div>';
+                    return;
+                }
+                container.innerHTML = vizData.clusters
+                    .map(cluster => `
+                        <button class="list-item cluster-item" data-cluster="${cluster.id}" style="border-left-color: ${cluster.color};">
+                            <div>
+                                <strong>${cluster.label}</strong>
+                                <div class="meta">${cluster.size} members</div>
+                            </div>
+                            <span class="legend-swatch" style="background: ${cluster.color};"></span>
+                        </button>
+                    `)
+                    .join('');
+            }
+
+            // function renderRelationsTable() {
+            //     const tbody = document.getElementById('relationsTable');
+            //     tbody.innerHTML = vizData.relations
+            //         .map(rel => `
+            //             <tr data-edge="${rel.edgeId}">
+            //                 <td>${rel.source}</td>
+            //                 <td><span class="pill" style="border: 1px solid ${rel.color}; background: ${rel.color}1a;">${rel.predicate}</span></td>
+            //                 <td>${rel.target}</td>
+            //             </tr>
+            //         `)
+            //         .join('');
+            // }
+
+            // function renderInsights() {
+            //     const insights = document.getElementById('insightsContent');
+            //     const clusters = vizData.clusters
+            //         .map(cluster => `
+            //             <div class="list-item" style="border-left: 4px solid ${cluster.color};">
+            //                 <div>
+            //                     <strong>${cluster.label}</strong>
+            //                     <div class="meta">Members: ${cluster.members.join(', ')}</div>
+            //                 </div>
+            //                 <div>${cluster.size}</div>
+            //             </div>
+            //         `)
+            //         .join('');
+
+            //     const components = vizData.components
+            //         .map((component, index) => `
+            //             <div class="list-item">
+            //                 <div>
+            //                     <strong>Component ${index + 1}</strong>
+            //                     <div class="meta">${component.members.join(', ')}</div>
+            //                 </div>
+            //                 <div>${component.size}</div>
+            //             </div>
+            //         `)
+            //         .join('');
+
+            //     const isolates = vizData.isolatedEntities.length
+            //         ? vizData.isolatedEntities.join(', ')
+            //         : 'None';
+
+            //     insights.innerHTML = `
+            //         <div class="section">
+            //             <h2>Clusters</h2>
+            //             <div class="list">${clusters || '<div class="meta">No clusters</div>'}</div>
+            //         </div>
+            //         <div class="section">
+            //             <h2>Connected components</h2>
+            //             <div class="list">${components || '<div class="meta">Single connected component</div>'}</div>
+            //         </div>
+            //         <div class="section">
+            //             <h2>Isolated entities</h2>
+            //             <div class="meta">${isolates}</div>
+            //         </div>
+            //     `;
+            // }
+
+            function setActiveElement(element) {
+                state.activeElement = element;
+                renderSelectionDetails();
+                updateHighlights();
+
+                // Notify parent about selection change
+                if (window.parent !== window && state.sidebarDisabled) {
+                    const selection = element ? {
+                        type: element.type,
+                        id: element.id,
+                        ...getElementDetails(element)
+                    } : null;
+                    window.parent.postMessage({
+                        type: 'selectionChanged',
+                        selection: selection
+                    }, '*');
+                }
+            }
+
+            function getElementDetails(element) {
+                if (!element) return {};
+
+                if (element.type === 'node') {
+                    const node = nodeById[element.id];
+                    return {
+                        label: node.label,
+                        cluster: node.cluster,
+                        degree: node.degree,
+                        indegree: node.indegree,
+                        outdegree: node.outdegree,
+                        neighbors: node.neighbors
+                    };
+                } else if (element.type === 'edge') {
+                    const edge = edgeById[element.id];
+                    return {
+                        source: edge.source,
+                        target: edge.target,
+                        predicate: edge.predicate,
+                        cluster: edge.cluster
+                    };
+                }
+                return {};
+            }
+
+            function clearActiveElement() {
+                state.activeElement = null;
+                renderSelectionDetails();
+                updateHighlights();
+            }
+
+            function renderSelectionDetails() {
+                const panel = document.getElementById('selectionDetails');
+                const active = state.activeElement;
+                if (!active) {
+                    panel.innerHTML = 'Click a node or relation in the network to inspect details.';
+                    return;
+                }
+
+                if (active.type === 'node') {
+                    const node = nodeById[active.id];
+                    const cluster = node.cluster ? `Cluster: ${node.cluster}` : 'Unclustered';
+                    const neighbors = node.neighbors.length ? node.neighbors.join(', ') : 'None';
+                    panel.innerHTML = `
+                        <h3>${node.label}</h3>
+                        <ul>
+                            <li>${cluster}</li>
+                            <li>Total degree: ${node.degree}</li>
+                            <li>Outgoing: ${node.outdegree}</li>
+                            <li>Incoming: ${node.indegree}</li>
+                            <li>Neighbors: ${neighbors}</li>
+                        </ul>
+                    `;
+                } else if (active.type === 'edge') {
+                    const edge = edgeById[active.id];
+                    const cluster = edge.cluster ? `Cluster: ${edge.cluster}` : 'Unclustered';
+                    panel.innerHTML = `
+                        <h3>${edge.source} → ${edge.target}</h3>
+                        <ul>
+                            <li>Relation: ${edge.predicate}</li>
+                            <li>${cluster}</li>
+                        </ul>
+                    `;
+                }
+            }
+
+            function toggleClusterFocus(clusterId) {
+                if (state.focusCluster === clusterId) {
+                    state.focusCluster = null;
+                } else {
+                    state.focusCluster = clusterId;
+                }
+                updateActiveButtons();
+                updateHighlights();
+            }
+
+            function togglePredicateFocus(predicate) {
+                if (state.focusPredicate === predicate) {
+                    state.focusPredicate = null;
+                } else {
+                    state.focusPredicate = predicate;
+                }
+                updateActiveButtons();
+                updateHighlights();
+            }
+
+            function updateActiveButtons() {
+                document.querySelectorAll('.cluster-item').forEach(item => {
+                    const clusterId = item.getAttribute('data-cluster');
+                    item.classList.toggle('active', state.focusCluster === clusterId);
+                });
+                document.querySelectorAll('.relation-item').forEach(item => {
+                    const predicate = item.getAttribute('data-predicate');
+                    item.classList.toggle('active', state.focusPredicate === predicate);
+                });
+            }
+
+            // Canvas-based network visualization
+            let canvas, ctx, transform, simulation;
+            let nodes, edges;
+            let highlightedNodes = new Set();
+            let highlightedEdges = new Set();
+            let isFiltering = false;
+
+            function createNetwork() {
+                console.log('[iframe] createNetwork starting...');
+
+                if (typeof d3 === 'undefined') {
+                    console.error('[iframe] D3.js not loaded!');
+                    return;
+                }
+                console.log('[iframe] D3.js version:', d3.version);
+
+                canvas = document.getElementById('networkCanvas');
+                if (!canvas) {
+                    console.error('[iframe] Canvas element not found!');
+                    return;
+                }
+
+                ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    console.error('[iframe] Canvas context not available!');
+                    return;
+                }
+
+                // Force a layout recalculation to ensure proper sizing
+                canvas.offsetHeight; // Trigger reflow
+
+                // Set canvas size with device pixel ratio for crisp rendering
+                const rect = canvas.getBoundingClientRect();
+                console.log('[iframe] Canvas rect:', rect.width, 'x', rect.height);
+
+                // Ensure minimum size for mobile/narrow viewports
+                const width = Math.max(rect.width, 320);
+                const height = Math.max(rect.height, 200);
+
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                ctx.scale(dpr, dpr);
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+
+                // Initialize transform for zooming/panning
+                transform = d3.zoomIdentity;
+
+                // Clone data for simulation
+                nodes = vizData.nodes.map(node => ({ ...node }));
+                edges = vizData.edges.map(edge => ({ ...edge }));
+
+                // Create D3 force simulation
+                simulation = d3
+                    .forceSimulation(nodes)
+                    .force('link', d3.forceLink(edges).id(d => d.id).distance(120).strength(0.3))
+                    .force('charge', d3.forceManyBody().strength(-280))
+                    .force('center', d3.forceCenter(width / 2, height / 2))
+                    .force('collision', d3.forceCollide().radius(d => d.radius + 12));
+
+                // Set up zoom behavior
+                const zoom = d3.zoom()
+                    .scaleExtent([0.25, 3])
+                    .on('zoom', (event) => {
+                        transform = event.transform;
+                        render();
+                    });
+
+                d3.select(canvas).call(zoom);
+
+                // Mouse interaction handling
+                let draggedNode = null;
+                let mouseX, mouseY;
+
+                function getMousePos(event) {
+                    const rect = canvas.getBoundingClientRect();
+                    return {
+                        x: (event.clientX - rect.left - transform.x) / transform.k,
+                        y: (event.clientY - rect.top - transform.y) / transform.k
+                    };
+                }
+
+                function findNode(x, y) {
+                    for (let i = nodes.length - 1; i >= 0; i--) {
+                        const node = nodes[i];
+                        const dx = x - node.x;
+                        const dy = y - node.y;
+                        if (dx * dx + dy * dy < node.radius * node.radius) {
+                            return node;
+                        }
+                    }
+                    return null;
+                }
+
+                function findEdge(x, y) {
+                    for (let i = edges.length - 1; i >= 0; i--) {
+                        const edge = edges[i];
+                        if (!edge.source || !edge.target) continue;
+
+                        // Check if click is near the edge line
+                        const dx = edge.target.x - edge.source.x;
+                        const dy = edge.target.y - edge.source.y;
+                        const length = Math.sqrt(dx * dx + dy * dy);
+                        if (length === 0) continue;
+
+                        const dot = ((x - edge.source.x) * dx + (y - edge.source.y) * dy) / (length * length);
+                        if (dot < 0 || dot > 1) continue;
+
+                        const projX = edge.source.x + dot * dx;
+                        const projY = edge.source.y + dot * dy;
+                        const distSq = (x - projX) * (x - projX) + (y - projY) * (y - projY);
+
+                        if (distSq < 25) { // 5px threshold
+                            return edge;
+                        }
+                    }
+                    return null;
+                }
+
+                canvas.addEventListener('mousedown', (event) => {
+                    const pos = getMousePos(event);
+                    mouseX = pos.x;
+                    mouseY = pos.y;
+                    draggedNode = findNode(pos.x, pos.y);
+
+                    if (draggedNode) {
+                        simulation.alphaTarget(0.3).restart();
+                        draggedNode.fx = draggedNode.x;
+                        draggedNode.fy = draggedNode.y;
+                        canvas.style.cursor = 'grabbing';
+                    }
+                });
+
+                canvas.addEventListener('mousemove', (event) => {
+                    const pos = getMousePos(event);
+
+                    if (draggedNode) {
+                        draggedNode.fx = pos.x;
+                        draggedNode.fy = pos.y;
+                    } else {
+                        // Update cursor based on what's under mouse
+                        const node = findNode(pos.x, pos.y);
+                        const edge = findEdge(pos.x, pos.y);
+                        canvas.style.cursor = (node || edge) ? 'pointer' : 'grab';
+                    }
+                });
+
+                canvas.addEventListener('mouseup', (event) => {
+                    if (draggedNode) {
+                        simulation.alphaTarget(0);
+                        draggedNode.fx = null;
+                        draggedNode.fy = null;
+                        draggedNode = null;
+                        canvas.style.cursor = 'grab';
+                    }
+                });
+
+                canvas.addEventListener('click', (event) => {
+                    const pos = getMousePos(event);
+                    const node = findNode(pos.x, pos.y);
+                    const edge = findEdge(pos.x, pos.y);
+
+                    if (node) {
+                        setActiveElement({ type: 'node', id: node.id });
+                    } else if (edge) {
+                        setActiveElement({ type: 'edge', id: edge.id });
+                    } else {
+                        clearActiveElement();
+                    }
+                });
+
+                // Animation loop
+                simulation.on('tick', () => {
+                    render();
+                });
+
+                // Handle window resize
+                window.addEventListener('resize', resizeCanvas);
+
+                render();
+            }
+
+            function resizeCanvas() {
+                if (!canvas || !ctx) return;
+
+                // Force canvas to take full container size
+                if (state.sidebarDisabled) {
+                    canvas.style.width = '100%';
+                    canvas.style.height = '100%';
+                }
+
+                const rect = canvas.getBoundingClientRect();
+                console.log('Canvas resize - rect:', rect.width, 'x', rect.height);
+
+                // Ensure minimum size for mobile
+                const width = Math.max(rect.width, 320);
+                const height = Math.max(rect.height, 200);
+
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                ctx.scale(dpr, dpr);
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+
+                // Update simulation center
+                if (simulation) {
+                    simulation.force('center', d3.forceCenter(width / 2, height / 2));
+                    simulation.alpha(0.3).restart();
+                }
+
+                render();
+            }
+
+
+            function render() {
+                if (!ctx || !canvas) return;
+
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width / (window.devicePixelRatio || 1),
+                             canvas.height / (window.devicePixelRatio || 1));
+
+                // Apply transform
+                ctx.save();
+                ctx.translate(transform.x, transform.y);
+                ctx.scale(transform.k, transform.k);
+
+                // Set text properties
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = '12px Inter, system-ui, sans-serif';
+
+                // Draw edges first
+                edges.forEach(edge => {
+                    if (!edge.source || !edge.target) return;
+
+                    const isHighlighted = highlightedEdges.has(edge.id);
+                    const isDimmed = isFiltering && !isHighlighted;
+
+                    // Calculate edge endpoints accounting for node radius
+                    const dx = edge.target.x - edge.source.x;
+                    const dy = edge.target.y - edge.source.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy) || 1;
+                    const normX = dx / distance;
+                    const normY = dy / distance;
+
+                    const sourcePadding = edge.source.radius + 2;
+                    const targetPadding = edge.target.radius + 8;
+                    const sourceX = edge.source.x + normX * sourcePadding;
+                    const sourceY = edge.source.y + normY * sourcePadding;
+                    const targetX = edge.target.x - normX * targetPadding;
+                    const targetY = edge.target.y - normY * targetPadding;
+
+                    // Draw edge line
+                    ctx.strokeStyle = edge.color;
+                    ctx.globalAlpha = isDimmed ? 0.15 : (isHighlighted ? 1.0 : 0.55);
+                    ctx.lineWidth = 1.4;
+                    ctx.beginPath();
+                    ctx.moveTo(sourceX, sourceY);
+                    ctx.lineTo(targetX, targetY);
+                    ctx.stroke();
+
+                    // Draw arrowhead
+                    const arrowLength = 10;
+                    const arrowWidth = 5;
+                    const angle = Math.atan2(dy, dx);
+
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.beginPath();
+                    ctx.moveTo(targetX, targetY);
+                    ctx.lineTo(
+                        targetX - arrowLength * Math.cos(angle - arrowWidth * Math.PI / 180),
+                        targetY - arrowLength * Math.sin(angle - arrowWidth * Math.PI / 180)
+                    );
+                    ctx.lineTo(
+                        targetX - arrowLength * Math.cos(angle + arrowWidth * Math.PI / 180),
+                        targetY - arrowLength * Math.sin(angle + arrowWidth * Math.PI / 180)
+                    );
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Draw edge label if zoom level is appropriate
+                    if (transform.k > 0.8) {
+                        const labelX = (sourceX + targetX) / 2;
+                        const labelY = (sourceY + targetY) / 2;
+
+                        ctx.fillStyle = isDimmed ? 'rgba(30, 41, 59, 0.15)' : 'rgba(30, 41, 59, 0.8)';
+                        ctx.font = '10px Inter, system-ui, sans-serif';
+                        ctx.fillText(edge.predicate, labelX, labelY);
+                    }
+                });
+
+                // Draw nodes
+                nodes.forEach(node => {
+                    const isHighlighted = highlightedNodes.has(node.id);
+                    const isDimmed = isFiltering && !isHighlighted;
+
+                    // Draw node circle
+                    ctx.fillStyle = node.color;
+                    ctx.globalAlpha = isDimmed ? 0.15 : 1.0;
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, node.radius, 0, 2 * Math.PI);
+                    ctx.fill();
+
+                    // Draw node border
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.lineWidth = isHighlighted ? 2.4 : 1.2;
+                    ctx.stroke();
+
+                    // Draw node label
+                    if (transform.k > 0.5) {
+                        ctx.fillStyle = isDimmed ? 'rgba(15, 23, 42, 0.15)' : '#0f172a';
+                        ctx.font = '12px Inter, system-ui, sans-serif';
+                        ctx.fillText(node.label, node.x, node.y + node.radius + 14);
+                    }
+                });
+
+                ctx.restore();
+                ctx.globalAlpha = 1.0;
+            }
+
+            function updateHighlights() {
+                // Clear previous highlights
+                highlightedNodes.clear();
+                highlightedEdges.clear();
+                isFiltering = false;
+
+                const addNode = id => {
+                    if (id) {
+                        highlightedNodes.add(id);
+                    }
+                };
+                const addEdge = id => {
+                    if (id) {
+                        highlightedEdges.add(id);
+                    }
+                };
+
+                if (state.activeElement) {
+                    isFiltering = true;
+                    if (state.activeElement.type === 'node') {
+                        const node = nodeById[state.activeElement.id];
+                        addNode(node.id);
+                        node.neighbors.forEach(addNode);
+                        (node.edgeIds.outgoing || []).forEach(addEdge);
+                        (node.edgeIds.incoming || []).forEach(addEdge);
+                    } else if (state.activeElement.type === 'edge') {
+                        const edge = edgeById[state.activeElement.id];
+                        addEdge(edge.id);
+                        addNode(edge.source);
+                        addNode(edge.target);
+                    }
+                }
+
+                if (state.focusCluster && nodesByCluster[state.focusCluster]) {
+                    isFiltering = true;
+                    nodesByCluster[state.focusCluster].forEach(addNode);
+                    vizData.edges.forEach(edge => {
+                        if (
+                            nodesByCluster[state.focusCluster].has(edge.source) &&
+                            nodesByCluster[state.focusCluster].has(edge.target)
+                        ) {
+                            addEdge(edge.id);
+                        }
+                    });
+                }
+
+                if (state.focusPredicate && edgesByPredicate[state.focusPredicate]) {
+                    isFiltering = true;
+                    edgesByPredicate[state.focusPredicate].forEach(edgeId => {
+                        addEdge(edgeId);
+                        const edge = edgeById[edgeId];
+                        addNode(edge.source);
+                        addNode(edge.target);
+                    });
+                }
+
+                if (state.searchTerm) {
+                    const term = state.searchTerm.toLowerCase();
+                    isFiltering = true;
+                    vizData.nodes.forEach(node => {
+                        if (node.label.toLowerCase().includes(term)) {
+                            addNode(node.id);
+                            node.neighbors.forEach(addNode);
+                        }
+                    });
+                    vizData.edges.forEach(edge => {
+                        if (edge.predicate.toLowerCase().includes(term)) {
+                            addEdge(edge.id);
+                            addNode(edge.source);
+                            addNode(edge.target);
+                        }
+                    });
+                }
+
+                // Trigger re-render with updated highlights
+                render();
+            }
+
+            function toggleSidebar() {
+                if (state.sidebarDisabled) return;
+
+                state.sidebarCollapsed = !state.sidebarCollapsed;
+                const layout = document.querySelector('.layout');
+                const sidebar = document.querySelector('.sidebar');
+                const toggleButton = document.getElementById('sidebarToggle');
+
+                layout.classList.toggle('sidebar-collapsed', state.sidebarCollapsed);
+                sidebar.classList.toggle('collapsed', state.sidebarCollapsed);
+                toggleButton.classList.toggle('collapsed', state.sidebarCollapsed);
+
+                // Trigger canvas resize when sidebar toggles
+                setTimeout(() => {
+                    resizeCanvas();
+                }, 300); // Wait for transition to complete
+            }
+
+            function disableSidebar() {
+                state.sidebarDisabled = true;
+
+                const layout = document.querySelector('.layout');
+                const sidebar = document.querySelector('.sidebar');
+                const toggleButton = document.getElementById('sidebarToggle');
+                const main = document.querySelector('.main');
+                const tabPanel = document.querySelector('.tab-panel');
+                const networkPanel = document.querySelector('.network-panel');
+
+                layout.classList.add('sidebar-disabled');
+                sidebar.style.display = 'none';
+                toggleButton.style.display = 'none';
+
+                // Force styles directly for iframe context
+                main.style.width = '100%';
+                main.style.height = '100vh';
+                tabPanel.style.padding = '0';
+                tabPanel.style.width = '100%';
+                tabPanel.style.height = '100vh';
+                networkPanel.style.width = '100%';
+                networkPanel.style.height = '100vh';
+                networkPanel.style.borderRadius = '0';
+                networkPanel.style.border = 'none';
+
+                console.log('Sidebar disabled, forcing full width styles');
+
+                // Multiple resize attempts with forced reflow
+                setTimeout(() => {
+                    canvas.offsetHeight; // Trigger reflow
+                    console.log('First resize attempt after 200ms');
+                    resizeCanvas();
+                }, 200);
+
+                setTimeout(() => {
+                    canvas.offsetHeight; // Trigger reflow
+                    console.log('Second resize attempt after 500ms');
+                    resizeCanvas();
+                }, 500);
+
+                setTimeout(() => {
+                    canvas.offsetHeight; // Trigger reflow
+                    console.log('Final resize attempt after 800ms');
+                    resizeCanvas();
+                }, 800);
+
+                // Notify parent about graph data
+                if (window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'graphDataReady',
+                        data: vizData
+                    }, '*');
+                }
+            }
+
+            function bindInteractions() {
+                document.querySelectorAll('.cluster-item').forEach(item => {
+                    item.addEventListener('click', () => toggleClusterFocus(item.getAttribute('data-cluster')));
+                });
+
+                document.querySelectorAll('.relation-item').forEach(item => {
+                    item.addEventListener('click', () => togglePredicateFocus(item.getAttribute('data-predicate')));
+                });
+
+                // document.getElementById('relationsTable').addEventListener('click', event => {
+                //     const row = event.target.closest('tr');
+                //     if (!row) {
+                //         return;
+                //     }
+                //     const edgeId = row.getAttribute('data-edge');
+                //     if (edgeId) {
+                //         setActiveElement({ type: 'edge', id: edgeId });
+                //     }
+                // });
+
+                const searchInput = document.getElementById('searchInput');
+                searchInput.addEventListener('input', () => {
+                    state.searchTerm = searchInput.value.trim();
+                    updateHighlights();
+
+                    // Notify parent about search change
+                    if (window.parent !== window && state.sidebarDisabled) {
+                        window.parent.postMessage({
+                            type: 'searchChanged',
+                            searchTerm: state.searchTerm
+                        }, '*');
+                    }
+                });
+                searchInput.addEventListener('keydown', event => {
+                    if (event.key === 'Escape') {
+                        searchInput.value = '';
+                        state.searchTerm = '';
+                        updateHighlights();
+                    }
+                });
+
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', event => {
+                        const target = event.currentTarget;
+                        document.querySelectorAll('.tab').forEach(button => button.classList.remove('active'));
+                        target.classList.add('active');
+                        const tabId = target.getAttribute('data-tab');
+                        document.querySelectorAll('.tab-panel').forEach(panel => {
+                            panel.classList.toggle('active', panel.id === tabId);
+                        });
+                    });
+                });
+
+                document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
+
+                // Listen for messages from parent
+                window.addEventListener('message', (event) => {
+                    if (event.data.type === 'disableInternalSidebar') {
+                        disableSidebar();
+                    } else if (event.data.type === 'search') {
+                        state.searchTerm = event.data.term || '';
+                        updateHighlights();
+                    } else if (event.data.type === 'focusCluster') {
+                        toggleClusterFocus(event.data.clusterId);
+                    } else if (event.data.type === 'focusPredicate') {
+                        togglePredicateFocus(event.data.predicate);
+                    }
+                });
+
+            }
+
+            renderStats();
+            renderTopLists();
+            renderClusters();
+            // renderRelationsTable();
+            // renderInsights();
+
+            // Delay network creation to ensure proper layout
+            setTimeout(() => {
+                createNetwork();
+                bindInteractions();
+            }, 100);
+        })();
+    </script>
+</body>
+
+</html>

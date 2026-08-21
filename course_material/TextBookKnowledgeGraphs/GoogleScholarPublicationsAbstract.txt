@@ -1,0 +1,87 @@
+I checked the Google Scholar profile you provided. Google Scholar itself is currently returning a **403 access restriction**, so I cross-checked the publication list against the author’s academic publication archive, arXiv, and DBLP. The sources consistently identify **three publications** associated with this Scholar profile. ([AcadP Drafts][1])
+
+Because the full abstracts are copyrighted text, I can’t reproduce each abstract verbatim. I can, however, give you a **faithful abstract-level extraction/summary** of each one.
+
+### 1. *Few Algorithms for Ascertaining Merit of a Document and Their Applications* — 2010
+
+**Author:** Ka. Shrinivaasan
+**arXiv:** 1006.4458 ([arXiv][2])
+
+**Abstract-level extraction:**
+
+The paper addresses the problem of objectively determining the **intrinsic merit of a document**, contrasting this with conventional ranking approaches that tend to measure prestige or popularity. It proposes three approaches:
+
+1. **Citation-graph maximum flow** — evaluates a document through the structure and flow of citations in a directed graph.
+2. **Recursive Gloss Overlap** — derives an intrinsic merit score from semantic relationships between terms and definitions.
+3. **Interview Algorithm** — formulates document/question answering as an interactive procedure for identifying relevant and meritorious information.
+
+The paper also introduces a mathematical treatment of **generic judgement**, providing the conceptual basis for these algorithms and their applications. ([arXiv][2])
+
+**Core idea:**
+
+> Merit should be inferred from a document's **content and structural relationships**, rather than merely from its popularity or prestige.
+
+---
+
+### 2. *TAC 2010 Summarization Track – Update Summarization with Interview Algorithm* — 2010
+
+**Author:** Ka. Shrinivaasan
+**Venue:** Text Analysis Conference (TAC 2010), Summarization Track. DBLP independently records this publication under the author. ([DBLP][3])
+
+**Abstract-level extraction:**
+
+This work applies the previously developed **Interview Algorithm** to the **Update Summarization** task in the NIST TAC 2010 evaluation. The objective is to produce a summary of newly available documents while taking into account information already present in previously supplied documents.
+
+The method treats summarization as an **information-selection/interview process**: questions or information needs guide the identification of sentences and concepts that provide useful new information. The paper reports the application of this algorithm to the TAC 2010 dataset and evaluates its resulting summaries.
+
+The author's publication archive explicitly identifies this as an extension/evaluation of the earlier *Algorithms for Intrinsic Merit* work using the TAC 2010 dataset. ([AcadP Drafts][1])
+
+**Core idea:**
+
+> The Interview Algorithm converts document summarization into a structured process of **question-driven information acquisition and selection**.
+
+---
+
+### 3. *Decidability of Existence and Construction of a Complement of a given Function* — 2011
+
+**Author:** Ka. Shrinivaasan
+**arXiv:** 1106.4102 ([arXiv][4])
+
+**Abstract-level extraction:**
+
+This paper introduces a formal definition of a **complement of a function** and investigates when such a complement exists. It establishes conditions governing the **existence** of a complement and presents algorithms for **constructing** one when the required conditions are satisfied. ([arXiv][4])
+
+The work therefore has two principal components:
+
+* **Decidability:** determine whether a complement satisfying the definition exists.
+* **Construction:** when existence is established, actually construct the complementary function.
+
+**Core idea:**
+
+> Given a function, characterize when an appropriate complementary function exists and provide an algorithmic method for constructing it.
+
+---
+
+## Publication → research progression
+
+There is an interesting progression across the three:
+
+| Year | Publication                                                    | Main object                    | Main question                                                  |
+| ---- | -------------------------------------------------------------- | ------------------------------ | -------------------------------------------------------------- |
+| 2010 | **Few Algorithms for Ascertaining Merit of a Document**        | Documents / graphs / semantics | *How can intrinsic merit be measured?*                         |
+| 2010 | **TAC 2010 – Update Summarization with Interview Algorithm**   | Document collections           | *How can relevant new information be extracted?*               |
+| 2011 | **Decidability of Existence and Construction of a Complement** | Mathematical functions         | *When does a complement exist, and how can it be constructed?* |
+
+The author's own publication archive confirms that the first and third were arXiv publications and that the TAC paper was the 2010 NIST/TAC application of the Interview Algorithm. ([AcadP Drafts][1])
+
+### Important distinction
+
+The archive also contains a **much larger body of later drafts**—integer partitions, social choice, complexity theory, complement functions, graph-theoretic merit, knowledge graphs, question answering, computational number theory, etc.—but these should **not automatically be treated as Google Scholar publications**. The author's documentation explicitly distinguishes the 2008–2011 publications from later, unaffiliated/unreviewed research drafts. ([AcadP Drafts][1])
+
+If your intention is to obtain **the actual full abstracts exactly as indexed by Google Scholar**, I can next reconstruct them from the underlying papers/PDFs and provide a **publication-by-publication abstract table**, while keeping the verbatim portions within copyright limits.
+
+[1]: https://acadpdrafts.readthedocs.io/?utm_source=chatgpt.com "K.Srinivasan - CV : — Academic Publications and NeuronRain Theory Drafts (some of them implemented in NeuronRain) documentation"
+[2]: https://arxiv.org/abs/1006.4458?utm_source=chatgpt.com "Few Algorithms for ascertaining merit of a document and their applications"
+[3]: https://dblp.org/db/conf/tac/tac2010?utm_source=chatgpt.com "dblp: Text Analysis Conference 2010"
+[4]: https://arxiv.org/abs/1106.4102?utm_source=chatgpt.com "Decidability of Existence and Construction of a Complement of a given Function"
+
