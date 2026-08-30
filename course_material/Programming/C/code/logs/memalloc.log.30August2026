@@ -1,0 +1,18 @@
+First allocation from heap
+integer1 allocated at: 0x55dddeb22260 
+Next allocation from heap
+integer2 allocated at: 0x55dddeb22288 
+integer2-integer1 address gap: 40 
+Next allocation from heap
+string1 allocated at: 0x55dddeb222d8 
+string1-integer2 address gap: 80 
+=============================================
+block starts at: 0x55dddeb22260
+block size: 40
+next block: 0x55dddeb23680 
+block starts at: 0x55dddeb22288
+block size: 80
+next block: 0x55dddeb236a0 
+block starts at: 0x55dddeb222d8
+block size: 10
+next block: (nil) 

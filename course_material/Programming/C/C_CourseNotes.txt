@@ -177,3 +177,8 @@ loop(): returning *variable = 1010
 count decremented after coroutine looping : 0
 variable incremented after coroutine looping : 1010
 ----------------------------------------------------
+
+------------------------------------------------------------------------------------------------
+(CODE PUZZLE) Implement a simple memory allocator in C - 30 August 2026
+------------------------------------------------------------------------------------------------
+Code example code/memalloc.c implements a simple memory allocator - (1) It intializes a heap by malloc() for allocator (2) Successive variables of different datatypes are allocated from this heap and allocated blocks are maintained in a linked list of structs. It simulates placement new operator in C++.  Function memalloc() implements the core logic and allocated blocks are printed by function loopthrough(). Logs code/logs/memalloc.log.30August2026 show successive allocations of int, double and char array variables from the predefined void* heap. Memory allocation from heap is the most fundamental design pattern across computer science and origin of buffer overrun issues.
