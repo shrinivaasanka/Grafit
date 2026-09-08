@@ -1,0 +1,33 @@
+Random integer:0
+function1() returning int
+Returned value: 100
+Random integer:1
+function2() returning float
+Returned value: 10.000000
+Random integer:0
+function1() returning int
+Returned value: 100
+Random integer:1
+function2() returning float
+Returned value: 10.000000
+Random integer:1
+function2() returning float
+Returned value: 10.000000
+Random integer:0
+function1() returning int
+Returned value: 100
+Random integer:0
+function1() returning int
+Returned value: 100
+Random integer:0
+function1() returning int
+Returned value: 100
+Random integer:1
+function2() returning float
+Returned value: 10.000000
+Random integer:1
+function2() returning float
+Returned value: 10.000000
+Random integer:1
+function2() returning float
+Returned value: 10.000000
