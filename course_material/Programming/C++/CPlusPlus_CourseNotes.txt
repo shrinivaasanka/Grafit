@@ -803,3 +803,12 @@ References:
 ----------
 4. Iterated addition is in NC1 - https://pages.cs.wisc.edu/~dieter/Courses/2010s-CS710/Scribes/PDF/lecture10.pdf
 5. Parallel Prefix Adders in latest CPUs - https://web.stanford.edu/class/archive/ee/ee371/ee371.1066/handouts/harris03.pdf - Brent-Kung, Sklansky, Kogge-Stone parallel prefix networks 
+
+------------------------------------------------------------------------------------------
+(CODE PUZZLE) C++-23 Multidimensional array [] operator and Explicit deducing this parameter to member functions - 10 September 2026
+------------------------------------------------------------------------------------------
+Code example code/multidimensionalarray.cpp defines a template class for 3 dimensional array implemented internally as flattened single dimensional std::array. Operator [] overloading function takes in 3 subscripts by multidimensional array subscripting feature and accesses the element by "deducing this" feature both of which were introduced in C++-2023 specification. Three dimensional array template class is instantiated for integer type in main() and is populated by nested for loop that iterates over all 3 dimensions of array subscript auto datatype. Earlier example is compiled by commandline: g++-14 -std=c++23 -o multidimensionalarray multidimensionalarray.cpp by enabling C++-23. Logs are at logs/multidimensionalarray.log.10September2026 
+
+References:
+----------
+1. C++ 2023 features - https://cppreference.com/cpp/23 , https://cppreference.com/cpp/language/function#Explicit_object_parameter , https://cppreference.com/cpp/language/operators#Array_subscript_operator 
