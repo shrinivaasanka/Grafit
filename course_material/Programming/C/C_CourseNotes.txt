@@ -203,3 +203,36 @@ function2() returning float
 Returned value: 10.000000
 --------------------------------
 Though modern high-level languages are rigorously typed with runtime-type-identification(RTTI), operating system kernels are still written in C and behaviour similar to earlier dynamic choice of function to execute at runtime is often implemented for choosing scheduling policy,paging policy et al dynamically. 
+
+-------------------------------------------------------------------------------------------
+(CODE PUZZLE) Find least common ancestors between two nodes in a binary tree - 13 September 2026
+--------------------------------------------------------------------------------------------
+Code example code/leastcommonancestor.c creates a binary tree of 6 struct nodes through left,right
+,data and parent fields per tree node as below:
+  			 	root
+				/  \
+                          node1      node2
+			   /		\
+                      node3              node4
+					/
+                                      node5
+Given node3 and node5, least common ancestor is found by naive algorithm: At first loop, ancestors of node3 are stored as 3-1-0(root) and in second loop, ancestors of node5 are lookedup in node3 ancestors list 3-1-0 in the order 5-4-2-0 and match occurs only at the root 0. Logs logs/leastcommonancestor.log.13September2026 show the sequence of mismatches and match:
+going up tree from nodex...level:0
+Creating ancestors for nodex ....
+going up tree from nodex...level:1
+Creating ancestors for nodex ....
+going up tree from nodex...level:2
+Creating ancestors for nodex ....
+going up tree from nodey...level:0
+Looking up nodey ancestor in nodex ancestors....
+Ancestor didnot match between nodex and nodey
+going up tree from nodey...level:1
+Looking up nodey ancestor in nodex ancestors....
+Ancestor didnot match between nodex and nodey
+going up tree from nodey...level:2
+Looking up nodey ancestor in nodex ancestors....
+Ancestor didnot match between nodex and nodey
+going up tree from nodey...level:3
+Looking up nodey ancestor in nodex ancestors....
+Ancestor matched between nodex and nodey
+Found least common ancestor:0
