@@ -812,3 +812,16 @@ Code example code/multidimensionalarray.cpp defines a template class for 3 dimen
 References:
 ----------
 1. C++ 2023 features - https://cppreference.com/cpp/23 , https://cppreference.com/cpp/language/function#Explicit_object_parameter , https://cppreference.com/cpp/language/operators#Array_subscript_operator 
+
+----------------------------------------------------------------------------------------------
+(ALGORITHM) Trie Prefix Tree implementation in C++ - 18 September 2026
+----------------------------------------------------------------------------------------------
+Code example code/triesort.cpp implements a function insert_into_trie() that grows a trie prefix
+tree of binary digit nodes and inserts a new integer as binary string of bits into trie if not present by traversing 0 and 1 subtrees top-down and allocating a new bit node slot. This implementation is generic and can be generalized to arbitrary strings on unicode. Indirectly Trie solves sorting in O(1) time because binary strings inserted into Trie are implicitly sorted from left-to-right or right-to-left depending on labelling of left and right subtrees by bits "0" or "1". Crucial aspects are use of bit shift and logical and operators, vector to store a mapping of integer bits and traversal from root to node in Trie. Above code fragment is complied by g++-9 -g triesort.cpp -o triesort and logs code/logs/triesort.log.18September2026 show the Trie binary nodes growth for list of 5 integers 2,3,4,5,7.
+
+References:
+-----------
+1. Haskell Trie - Data.Trie - https://hackage-content.haskell.org/package/bytestring-trie-0.2.7.6/docs/Data-Trie.html#g:1 - ".... An efficient implementation of finite maps from strings to values. The implementation is based on big-endian patricia trees, like Data.IntMap. We first trie on the elements of Data.ByteString and then trie on the big-endian bit representation of those elements. For further details on the latter, see Chris Okasaki and Andy Gill, "Fast Mergeable Integer Maps", Workshop on ML, September 1998, pages 77-86, http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.37.5452, D.R. Morrison, "PATRICIA -- Practical Algorithm To Retrieve Information Coded In Alphanumeric", Journal of the ACM, 15(4), October 1968, pages 514-534....." - only officially available Trie implementation as part of programming language standard library.
+2.LeetCode Trie Prefix Tree description - https://leetcode.com/problems/implement-trie-prefix-tree/description/
+3.Patricia Trees or Radix Trees - Trie for lexicon - https://en.wikipedia.org/wiki/Radix_tree , https://en.wikipedia.org/wiki/Radix_tree#/media/File:An_example_of_how_to_find_a_string_in_a_Patricia_trie.png
+4.Radix Trees in Linux kernel - https://lwn.net/Articles/175432/

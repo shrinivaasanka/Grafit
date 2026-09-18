@@ -1,0 +1,233 @@
+--------------- Inserting to Trie - integer 5
+depth:0
+presentbit: 1
+presentbit is 1, Inserting a new node to right...
+depth:1
+presentbit: 0
+=========================================
+bit on Trie:1
+bit inserted so far:1
+=========================================
+presentbit is 0, Inserting a new node to left ...
+depth:2
+presentbit: 1
+=========================================
+bit on Trie:1
+bit inserted so far:1
+=========================================
+=========================================
+bit on Trie:0
+bit inserted so far:0
+=========================================
+presentbit is 1, Inserting a new node to right...
+depth:3
+presentbit: 0
+=========================================
+bit on Trie:1
+bit inserted so far:1
+=========================================
+=========================================
+bit on Trie:0
+bit inserted so far:0
+=========================================
+=========================================
+bit on Trie:1
+bit inserted so far:1
+=========================================
+presentbit is 0, Inserting a new node to left ...
+--------------- Inserting to Trie - integer 2
+depth:0
+presentbit: 0
+presentbit is 0, Inserting a new node to left ...
+depth:1
+presentbit: 1
+=========================================
+bit on Trie:0
+bit inserted so far:0
+=========================================
+presentbit is 1, Inserting a new node to right...
+depth:2
+presentbit: 0
+=========================================
+bit on Trie:0
+bit inserted so far:0
+=========================================
+=========================================
+bit on Trie:1
+bit inserted so far:1
+=========================================
+presentbit is 0, Inserting a new node to left ...
+depth:3
+presentbit: 0
+=========================================
+bit on Trie:0
+bit inserted so far:0
+=========================================
+=========================================
+bit on Trie:1
+bit inserted so far:1
+=========================================
+=========================================
+bit on Trie:0
+bit inserted so far:0
+=========================================
+presentbit is 0, Inserting a new node to left ...
+--------------- Inserting to Trie - integer 3
+depth:0
+presentbit: 1
+depth:1
+presentbit: 1
+=========================================
+bit on Trie:1
+bit inserted so far:1
+=========================================
+presentbit is 1, Inserting a new node to right...
+depth:2
+presentbit: 0
+=========================================
+bit on Trie:1
+bit inserted so far:1
+=========================================
+=========================================
+bit on Trie:1
+bit inserted so far:1
+=========================================
+presentbit is 0, Inserting a new node to left ...
+depth:3
+presentbit: 0
+=========================================
+bit on Trie:1
+bit inserted so far:1
+=========================================
+=========================================
+bit on Trie:1
+bit inserted so far:1
+=========================================
+=========================================
+bit on Trie:0
+bit inserted so far:0
+=========================================
+presentbit is 0, Inserting a new node to left ...
+--------------- Inserting to Trie - integer 4
+depth:0
+presentbit: 0
+depth:1
+presentbit: 0
+=========================================
+bit on Trie:0
+bit inserted so far:0
+=========================================
+presentbit is 0, Inserting a new node to left ...
+depth:2
+presentbit: 1
+=========================================
+bit on Trie:0
+bit inserted so far:0
+=========================================
+=========================================
+bit on Trie:0
+bit inserted so far:0
+=========================================
+presentbit is 1, Inserting a new node to right...
+depth:3
+presentbit: 0
+=========================================
+bit on Trie:0
+bit inserted so far:0
+=========================================
+=========================================
+bit on Trie:0
+bit inserted so far:0
+=========================================
+=========================================
+bit on Trie:1
+bit inserted so far:1
+=========================================
+presentbit is 0, Inserting a new node to left ...
+--------------- Inserting to Trie - integer 7
+depth:0
+presentbit: 1
+depth:1
+presentbit: 1
+=========================================
+bit on Trie:1
+bit inserted so far:1
+=========================================
+depth:2
+presentbit: 1
+=========================================
+bit on Trie:1
+bit inserted so far:1
+=========================================
+=========================================
+bit on Trie:1
+bit inserted so far:1
+=========================================
+presentbit is 1, Inserting a new node to right...
+depth:3
+presentbit: 0
+=========================================
+bit on Trie:1
+bit inserted so far:1
+=========================================
+=========================================
+bit on Trie:1
+bit inserted so far:1
+=========================================
+=========================================
+bit on Trie:1
+bit inserted so far:1
+=========================================
+presentbit is 0, Inserting a new node to left ...
+------ printing Trie ---------- 
+Node data: 0
+Traversing left subtree...
+Node data: 0
+Traversing left subtree...
+Node data: 0
+Traversing left subtree...
+Traversing right subtree...
+Node data: 1
+Traversing left subtree...
+Node data: 0
+Traversing left subtree...
+Traversing right subtree...
+Traversing right subtree...
+Traversing right subtree...
+Node data: 1
+Traversing left subtree...
+Node data: 0
+Traversing left subtree...
+Node data: 0
+Traversing left subtree...
+Traversing right subtree...
+Traversing right subtree...
+Traversing right subtree...
+Traversing right subtree...
+Node data: 1
+Traversing left subtree...
+Node data: 0
+Traversing left subtree...
+Traversing right subtree...
+Node data: 1
+Traversing left subtree...
+Node data: 0
+Traversing left subtree...
+Traversing right subtree...
+Traversing right subtree...
+Traversing right subtree...
+Node data: 1
+Traversing left subtree...
+Node data: 0
+Traversing left subtree...
+Node data: 0
+Traversing left subtree...
+Traversing right subtree...
+Traversing right subtree...
+Traversing right subtree...
+Node data: 1
+Traversing left subtree...
+Node data: 0
+Traversing left subtree...
+Traversing right subtree...
+Traversing right subtree...
