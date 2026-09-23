@@ -611,3 +611,8 @@ partition  [[1, 2, 3, 4, 5], [7, 10]]  has partitionbalances: defaultdict(<class
 partition  [[1, 2, 3, 4, 5], [7], [10]]  has partitionbalances: defaultdict(<class 'int'>, {True: 0, False: 6})
 Not a Balanced partition: [[1, 2, 3, 4, 5], [7], [10]]
 ----------------------------------------------------------
+
+------------------------------------------------------------------------------------------------
+(CODE PUZZLE) Array subscripting and slicing operations in python with positive and negative indices - 23 September 2026
+------------------------------------------------------------------------------------------------
+Code example code/Array.py demonstrates various kinds of slicing and array subscripting operations on python arrays with positive and negative indices and their usage in creating a ring buffer that rotates a list. Logs code/logs/Array.log.23September2026 walk through each kind of subscripting variant.

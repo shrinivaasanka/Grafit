@@ -1,0 +1,163 @@
+array[:]: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+array[-0:]: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+array[-1:]: [10]
+array[-2:]: [9, 10]
+array[-3:]: [8, 9, 10]
+array[-4:]: [7, 8, 9, 10]
+array[-5:]: [6, 7, 8, 9, 10]
+array[-6:]: [5, 6, 7, 8, 9, 10]
+array[-7:]: [4, 5, 6, 7, 8, 9, 10]
+array[-8:]: [3, 4, 5, 6, 7, 8, 9, 10]
+array[-9:]: [2, 3, 4, 5, 6, 7, 8, 9, 10]
+array[:-0]: []
+array[:-1]: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+array[:-2]: [1, 2, 3, 4, 5, 6, 7, 8]
+array[:-3]: [1, 2, 3, 4, 5, 6, 7]
+array[:-4]: [1, 2, 3, 4, 5, 6]
+array[:-5]: [1, 2, 3, 4, 5]
+array[:-6]: [1, 2, 3, 4]
+array[:-7]: [1, 2, 3]
+array[:-8]: [1, 2]
+array[:-9]: [1]
+array[-0:-10]: []
+array[-1:-9]: []
+array[-2:-8]: []
+array[-3:-7]: []
+array[-4:-6]: []
+array[-5:-5]: []
+array[-6:-4]: [5, 6]
+array[-7:-3]: [4, 5, 6, 7]
+array[-8:-2]: [3, 4, 5, 6, 7, 8]
+array[-9:-1]: [2, 3, 4, 5, 6, 7, 8, 9]
+array[0:]: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+array[1:]: [2, 3, 4, 5, 6, 7, 8, 9, 10]
+array[2:]: [3, 4, 5, 6, 7, 8, 9, 10]
+array[3:]: [4, 5, 6, 7, 8, 9, 10]
+array[4:]: [5, 6, 7, 8, 9, 10]
+array[5:]: [6, 7, 8, 9, 10]
+array[6:]: [7, 8, 9, 10]
+array[7:]: [8, 9, 10]
+array[8:]: [9, 10]
+array[9:]: [10]
+array[:0]: []
+array[:1]: [1]
+array[:2]: [1, 2]
+array[:3]: [1, 2, 3]
+array[:4]: [1, 2, 3, 4]
+array[:5]: [1, 2, 3, 4, 5]
+array[:6]: [1, 2, 3, 4, 5, 6]
+array[:7]: [1, 2, 3, 4, 5, 6, 7]
+array[:8]: [1, 2, 3, 4, 5, 6, 7, 8]
+array[:9]: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+array[0:10]: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+array[1:9]: [2, 3, 4, 5, 6, 7, 8, 9]
+array[2:8]: [3, 4, 5, 6, 7, 8]
+array[3:7]: [4, 5, 6, 7]
+array[4:6]: [5, 6]
+array[5:5]: []
+array[6:4]: []
+array[7:3]: []
+array[8:2]: []
+array[9:1]: []
+Ring buffer: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+Ring buffer: [10, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Ring buffer: [9, 10, 1, 2, 3, 4, 5, 6, 7, 8]
+Ring buffer: [8, 9, 10, 1, 2, 3, 4, 5, 6, 7]
+Ring buffer: [7, 8, 9, 10, 1, 2, 3, 4, 5, 6]
+Ring buffer: [6, 7, 8, 9, 10, 1, 2, 3, 4, 5]
+Ring buffer: [5, 6, 7, 8, 9, 10, 1, 2, 3, 4]
+Ring buffer: [4, 5, 6, 7, 8, 9, 10, 1, 2, 3]
+Ring buffer: [3, 4, 5, 6, 7, 8, 9, 10, 1, 2]
+Ring buffer: [2, 3, 4, 5, 6, 7, 8, 9, 10, 1]
+array[:]: thisisastring
+array[-0:]: thisisastring
+array[-1:]: g
+array[-2:]: ng
+array[-3:]: ing
+array[-4:]: ring
+array[-5:]: tring
+array[-6:]: string
+array[-7:]: astring
+array[-8:]: sastring
+array[-9:]: isastring
+array[-10:]: sisastring
+array[-11:]: isisastring
+array[-12:]: hisisastring
+array[:-0]: 
+array[:-1]: thisisastrin
+array[:-2]: thisisastri
+array[:-3]: thisisastr
+array[:-4]: thisisast
+array[:-5]: thisisas
+array[:-6]: thisisa
+array[:-7]: thisis
+array[:-8]: thisi
+array[:-9]: this
+array[:-10]: thi
+array[:-11]: th
+array[:-12]: t
+array[-0:-13]: 
+array[-1:-12]: 
+array[-2:-11]: 
+array[-3:-10]: 
+array[-4:-9]: 
+array[-5:-8]: 
+array[-6:-7]: 
+array[-7:-6]: a
+array[-8:-5]: sas
+array[-9:-4]: isast
+array[-10:-3]: sisastr
+array[-11:-2]: isisastri
+array[-12:-1]: hisisastrin
+array[0:]: thisisastring
+array[1:]: hisisastring
+array[2:]: isisastring
+array[3:]: sisastring
+array[4:]: isastring
+array[5:]: sastring
+array[6:]: astring
+array[7:]: string
+array[8:]: tring
+array[9:]: ring
+array[10:]: ing
+array[11:]: ng
+array[12:]: g
+array[:0]: 
+array[:1]: t
+array[:2]: th
+array[:3]: thi
+array[:4]: this
+array[:5]: thisi
+array[:6]: thisis
+array[:7]: thisisa
+array[:8]: thisisas
+array[:9]: thisisast
+array[:10]: thisisastr
+array[:11]: thisisastri
+array[:12]: thisisastrin
+array[0:13]: thisisastring
+array[1:12]: hisisastrin
+array[2:11]: isisastri
+array[3:10]: sisastr
+array[4:9]: isast
+array[5:8]: sas
+array[6:7]: a
+array[7:6]: 
+array[8:5]: 
+array[9:4]: 
+array[10:3]: 
+array[11:2]: 
+array[12:1]: 
+Ring buffer: thisisastring
+Ring buffer: gthisisastrin
+Ring buffer: ngthisisastri
+Ring buffer: ingthisisastr
+Ring buffer: ringthisisast
+Ring buffer: tringthisisas
+Ring buffer: stringthisisa
+Ring buffer: astringthisis
+Ring buffer: sastringthisi
+Ring buffer: isastringthis
+Ring buffer: sisastringthi
+Ring buffer: isisastringth
+Ring buffer: hisisastringt
