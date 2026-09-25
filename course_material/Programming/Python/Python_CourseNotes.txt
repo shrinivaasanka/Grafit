@@ -616,3 +616,11 @@ Not a Balanced partition: [[1, 2, 3, 4, 5], [7], [10]]
 (CODE PUZZLE) Array subscripting and slicing operations in python with positive and negative indices - 23 September 2026
 ------------------------------------------------------------------------------------------------
 Code example code/Array.py demonstrates various kinds of slicing and array subscripting operations on python arrays with positive and negative indices and their usage in creating a ring buffer that rotates a list. Logs code/logs/Array.log.23September2026 walk through each kind of subscripting variant.
+
+-------------------------------------------------------------------------------------------------
+(CODE PUZZLE) List comprehension - 25 September 2026
+-------------------------------------------------------------------------------------------------
+Code example code/ListComprehension.py defines a function list_comprehension() that takes 2 2-dimensional arrays as arguments and perform following list comprehensions on them - Logs code/logs/ListComprehension.log.25September2026 demonstrate the following:
+(1) Create a 3-dimensional array from 2 arrays by 2 nested loops within comprehension
+(2) Create 2 flattened 1-dimensional arrays from two 2-dimensional arrays filtering for even integers alone by comprehension.
+(3) Every string is a 2-dimensional array of binary digits 0 and 1 because each string is an array of char literals which in turn are binary unicode represented. An example string is converted first to 2-dimensional array of binary unicode arrays for each literal by ord() and then flattened to get a single bits sequence by comprehension.  
