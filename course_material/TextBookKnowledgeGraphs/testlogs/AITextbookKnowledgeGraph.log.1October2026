@@ -1,0 +1,274 @@
+## 1. Definite Integral
+
+**Question**  
+Evaluate
+\[
+I=\int_{0}^{\pi/2}x\sin x\cos x\,dx.
+\]
+
+**Textbook concept:** Definite-integral symmetry,
+\[
+\int_0^a f(x)\,dx=\int_0^a f(a-x)\,dx,
+\]
+from NCERT Class XII, *Integrals*.
+
+### Solution
+
+Let
+\[
+f(x)=\sin x\cos x.
+\]
+Since
+\[
+f\left(\frac{\pi}{2}-x\right)
+=\cos x\sin x=f(x),
+\]
+the function is symmetric about \(x=\pi/4\). Therefore,
+\[
+\int_0^{\pi/2}x f(x)\,dx
+=\frac{\pi}{4}\int_0^{\pi/2}f(x)\,dx.
+\]
+
+Thus,
+\[
+I=\frac{\pi}{4}\int_0^{\pi/2}\sin x\cos x\,dx.
+\]
+
+Now,
+\[
+\int_0^{\pi/2}\sin x\cos x\,dx
+=\left[\frac{\sin^2x}{2}\right]_0^{\pi/2}
+=\frac12.
+\]
+
+Hence,
+\[
+\boxed{I=\frac{\pi}{8}}.
+\]
+
+---
+
+## 2. Tangents to a Parabola
+
+**Question**  
+Find the equations of the tangents drawn from the point \(P(-3,0)\) to the parabola
+\[
+y^2=4x.
+\]
+Also find the acute angle between the tangents.
+
+**Textbook concept:** The tangent to \(y^2=4ax\) with slope \(m\) is
+\[
+y=mx+\frac{a}{m},
+\]
+from NCERT Class XI, *Conic Sections*.
+
+### Solution
+
+Here \(a=1\), so a tangent with slope \(m\) is
+\[
+y=mx+\frac1m.
+\]
+
+Since it passes through \(P(-3,0)\),
+\[
+0=-3m+\frac1m.
+\]
+
+Multiplying by \(m\),
+\[
+3m^2=1,
+\]
+so
+\[
+m=\pm\frac1{\sqrt3}.
+\]
+
+Therefore, the two tangents are
+\[
+y=\frac{x}{\sqrt3}+\sqrt3
+\]
+and
+\[
+y=-\frac{x}{\sqrt3}-\sqrt3.
+\]
+
+Equivalently,
+\[
+\boxed{x-\sqrt3y+3=0}
+\]
+and
+\[
+\boxed{x+\sqrt3y+3=0}.
+\]
+
+For slopes \(m_1=1/\sqrt3\) and \(m_2=-1/\sqrt3\), the angle \(\theta\) between the lines satisfies
+\[
+\tan\theta
+=\left|\frac{m_1-m_2}{1+m_1m_2}\right|.
+\]
+
+Hence,
+\[
+\tan\theta
+=\frac{2/\sqrt3}{1-1/3}
+=\sqrt3.
+\]
+
+Thus, the acute angle is
+\[
+\boxed{\theta=60^\circ}.
+\]
+## 5 Random NCERT-Based NEET-Style Questions
+
+### 1. Biology — Sexual Reproduction in Flowering Plants
+
+**Question:** During double fertilisation in an angiosperm, one male gamete fuses with the egg and the other fuses with the two polar nuclei. The resulting structures are respectively:
+
+A. Haploid embryo and diploid endosperm  
+B. Diploid zygote and triploid primary endosperm nucleus  
+C. Triploid zygote and diploid endosperm  
+D. Diploid embryo and tetraploid endosperm  
+
+**Solution:**  
+- Male gamete \((n)\) + egg \((n)\) → zygote \((2n)\): **syngamy**  
+- Male gamete \((n)\) + two polar nuclei \((n+n)\) → primary endosperm nucleus \((3n)\): **triple fusion**
+
+**Answer: B**
+
+**Textbook basis:** NCERT Biology Class 12, Chapter 2 — *Sexual Reproduction in Flowering Plants*
+
+---
+
+### 2. Biology — Excretory Products and Their Elimination
+
+**Question:** Which structures form the counter-current mechanism responsible for maintaining the medullary osmotic gradient in the human kidney?
+
+A. Proximal convoluted tubule and distal convoluted tubule  
+B. Loop of Henle and vasa recta  
+C. Bowman’s capsule and glomerulus  
+D. Collecting duct and proximal convoluted tubule  
+
+**Solution:**  
+The filtrate flows in opposite directions through the two limbs of the **loop of Henle**. Blood also flows in opposite directions through the limbs of the **vasa recta**. This counter-current arrangement maintains a high osmolarity in the renal medulla, helping concentrate urine.
+
+**Answer: B**
+
+**Textbook basis:** NCERT Biology Class 11, Chapter 16 — *Excretory Products and Their Elimination*
+
+---
+
+### 3. Chemistry — Equilibrium
+
+**Question:** Calculate the approximate pH of a \(0.01\,M\) solution of a weak monoprotic acid whose \(K_a=1.0\times10^{-5}\).
+
+A. 2.0  
+B. 3.0  
+C. 3.5  
+D. 5.0  
+
+**Solution:**
+
+For a weak acid:
+
+\[
+[H^+] \approx \sqrt{K_aC}
+\]
+
+\[
+[H^+] = \sqrt{(1.0\times10^{-5})(1.0\times10^{-2})}
+       = \sqrt{10^{-7}}
+       = 3.16\times10^{-4}\,M
+\]
+
+\[
+\text{pH}=-\log(3.16\times10^{-4})\approx3.5
+\]
+
+**Answer: C**
+
+**Textbook basis:** NCERT Chemistry Class 11, Chapter 7 — *Equilibrium*
+
+---
+
+### 4. Chemistry — Coordination Compounds
+
+**Question:** The complex ion \([Fe(CN)_6]^{4-}\) is:
+
+A. Paramagnetic with four unpaired electrons  
+B. Paramagnetic with two unpaired electrons  
+C. Diamagnetic  
+D. Paramagnetic with one unpaired electron  
+
+**Solution:**
+
+Let the oxidation state of Fe be \(x\):
+
+\[
+x+6(-1)=-4 \Rightarrow x=+2
+\]
+
+Thus, \(Fe^{2+}\) has the configuration \(3d^6\). Since \(CN^-\) is a strong-field ligand, it causes pairing:
+
+\[
+t_{2g}^{6}e_g^{0}
+\]
+
+There are **no unpaired electrons**, so the complex is diamagnetic.
+
+**Answer: C**
+
+**Textbook basis:** NCERT Chemistry Class 12, Chapter 5 — *Coordination Compounds*
+
+---
+
+### 5. Physics — Dual Nature of Radiation and Matter
+
+**Question:** Light consisting of photons of energy \(5\,eV\) falls on a metal surface having a work function of \(2\,eV\). What is the stopping potential?
+
+A. \(2\,V\)  
+B. \(3\,V\)  
+C. \(5\,V\)  
+D. \(7\,V\)  
+
+**Solution:**
+
+Einstein’s photoelectric equation gives:
+
+\[
+K_{\max}=E_{\text{photon}}-\phi
+\]
+
+\[
+K_{\max}=5-2=3\,eV
+\]
+
+The stopping potential satisfies:
+
+\[
+eV_s=K_{\max}
+\]
+
+Since \(K_{\max}=3\,eV\),
+
+\[
+V_s=3\,V
+\]
+
+**Answer: B**
+
+**Textbook basis:** NCERT Physics Class 12, Chapter 11 — *Dual Nature of Radiation and Matter*
+
+### Answer Key
+
+| Question | Answer |
+|---|---|
+| 1 | B |
+| 2 | B |
+| 3 | C |
+| 4 | C |
+| 5 | B |
+Graph RAG result for query  theorem :
+Document(id='doc0', metadata={'_depth': 0, '_similarity_score': np.float64(0.34587638293198547)}, page_content='## 1. Definite Integral\n\n**Question**  \nEvaluate\n\\[\nI=\\int_{0}^{\\pi/2}x\\sin x\\cos x\\,dx.\n\\]\n\n**Textbook concept:** Definite-integral symmetry,\n\\[\n\\int_0^a f(x)\\,dx=\\int_0^a f(a-x)\\,dx,\n\\]\nfrom NCERT Class XII, *Integrals*.\n\n### Solution\n\nLet\n\\[\nf(x)=\\sin x\\cos x.\n\\]\nSince\n\\[\nf\\left(\\frac{\\pi}{2}-x\\right)\n=\\cos x\\sin x=f(x),\n\\]\nthe function is symmetric about \\(x=\\pi/4\\). Therefore,\n\\[\n\\int_0^{\\pi/2}x f(x)\\,dx\n=\\frac{\\pi}{4}\\int_0^{\\pi/2}f(x)\\,dx.\n\\]\n\nThus,\n\\[\nI=\\frac{\\pi}{4}\\int_0^{\\pi/2}\\sin x\\cos x\\,dx.\n\\]\n\nNow,\n\\[\n\\int_0^{\\pi/2}\\sin x\\cos x\\,dx\n=\\left[\\frac{\\sin^2x}{2}\\right]_0^{\\pi/2}\n=\\frac12.\n\\]\n\nHence,\n\\[\n\\boxed{I=\\frac{\\pi}{8}}.\n\\]\n\n---\n\n## 2. Tangents to a Parabola\n\n**Question**  \nFind the equations of the tangents drawn from the point \\(P(-3,0)\\) to the parabola\n\\[\ny^2=4x.\n\\]\nAlso find the acute angle between the tangents.\n\n**Textbook concept:** The tangent to \\(y^2=4ax\\) with slope \\(m\\) is\n\\[\ny=mx+\\frac{a}{m},\n\\]\nfrom NCERT Class XI, *Conic Sections*.\n\n### Solution\n\nHere \\(a=1\\), so a tangent with slope \\(m\\) is\n\\[\ny=mx+\\frac1m.\n\\]\n\nSince it passes through \\(P(-3,0)\\),\n\\[\n0=-3m+\\frac1m.\n\\]\n\nMultiplying by \\(m\\),\n\\[\n3m^2=1,\n\\]\nso\n\\[\nm=\\pm\\frac1{\\sqrt3}.\n\\]\n\nTherefore, the two tangents are\n\\[\ny=\\frac{x}{\\sqrt3}+\\sqrt3\n\\]\nand\n\\[\ny=-\\frac{x}{\\sqrt3}-\\sqrt3.\n\\]\n\nEquivalently,\n\\[\n\\boxed{x-\\sqrt3y+3=0}\n\\]\nand\n\\[\n\\boxed{x+\\sqrt3y+3=0}.\n\\]\n\nFor slopes \\(m_1=1/\\sqrt3\\) and \\(m_2=-1/\\sqrt3\\), the angle \\(\\theta\\) between the lines satisfies\n\\[\n\\tan\\theta\n=\\left|\\frac{m_1-m_2}{1+m_1m_2}\\right|.\n\\]\n\nHence,\n\\[\n\\tan\\theta\n=\\frac{2/\\sqrt3}{1-1/3}\n=\\sqrt3.\n\\]\n\nThus, the acute angle is\n\\[\n\\boxed{\\theta=60^\\circ}.\n\\]')
+Graph RAG result for query  theorem :
+Document(id='doc1', metadata={'_depth': 0, '_similarity_score': np.float64(0.07007850629245144)}, page_content='## 5 Random NCERT-Based NEET-Style Questions\n\n### 1. Biology — Sexual Reproduction in Flowering Plants\n\n**Question:** During double fertilisation in an angiosperm, one male gamete fuses with the egg and the other fuses with the two polar nuclei. The resulting structures are respectively:\n\nA. Haploid embryo and diploid endosperm  \nB. Diploid zygote and triploid primary endosperm nucleus  \nC. Triploid zygote and diploid endosperm  \nD. Diploid embryo and tetraploid endosperm  \n\n**Solution:**  \n- Male gamete \\((n)\\) + egg \\((n)\\) → zygote \\((2n)\\): **syngamy**  \n- Male gamete \\((n)\\) + two polar nuclei \\((n+n)\\) → primary endosperm nucleus \\((3n)\\): **triple fusion**\n\n**Answer: B**\n\n**Textbook basis:** NCERT Biology Class 12, Chapter 2 — *Sexual Reproduction in Flowering Plants*\n\n---\n\n### 2. Biology — Excretory Products and Their Elimination\n\n**Question:** Which structures form the counter-current mechanism responsible for maintaining the medullary osmotic gradient in the human kidney?\n\nA. Proximal convoluted tubule and distal convoluted tubule  \nB. Loop of Henle and vasa recta  \nC. Bowman’s capsule and glomerulus  \nD. Collecting duct and proximal convoluted tubule  \n\n**Solution:**  \nThe filtrate flows in opposite directions through the two limbs of the **loop of Henle**. Blood also flows in opposite directions through the limbs of the **vasa recta**. This counter-current arrangement maintains a high osmolarity in the renal medulla, helping concentrate urine.\n\n**Answer: B**\n\n**Textbook basis:** NCERT Biology Class 11, Chapter 16 — *Excretory Products and Their Elimination*\n\n---\n\n### 3. Chemistry — Equilibrium\n\n**Question:** Calculate the approximate pH of a \\(0.01\\,M\\) solution of a weak monoprotic acid whose \\(K_a=1.0\\times10^{-5}\\).\n\nA. 2.0  \nB. 3.0  \nC. 3.5  \nD. 5.0  \n\n**Solution:**\n\nFor a weak acid:\n\n\\[\n[H^+] \\approx \\sqrt{K_aC}\n\\]\n\n\\[\n[H^+] = \\sqrt{(1.0\\times10^{-5})(1.0\\times10^{-2})}\n       = \\sqrt{10^{-7}}\n       = 3.16\\times10^{-4}\\,M\n\\]\n\n\\[\n\\text{pH}=-\\log(3.16\\times10^{-4})\\approx3.5\n\\]\n\n**Answer: C**\n\n**Textbook basis:** NCERT Chemistry Class 11, Chapter 7 — *Equilibrium*\n\n---\n\n### 4. Chemistry — Coordination Compounds\n\n**Question:** The complex ion \\([Fe(CN)_6]^{4-}\\) is:\n\nA. Paramagnetic with four unpaired electrons  \nB. Paramagnetic with two unpaired electrons  \nC. Diamagnetic  \nD. Paramagnetic with one unpaired electron  \n\n**Solution:**\n\nLet the oxidation state of Fe be \\(x\\):\n\n\\[\nx+6(-1)=-4 \\Rightarrow x=+2\n\\]\n\nThus, \\(Fe^{2+}\\) has the configuration \\(3d^6\\). Since \\(CN^-\\) is a strong-field ligand, it causes pairing:\n\n\\[\nt_{2g}^{6}e_g^{0}\n\\]\n\nThere are **no unpaired electrons**, so the complex is diamagnetic.\n\n**Answer: C**\n\n**Textbook basis:** NCERT Chemistry Class 12, Chapter 5 — *Coordination Compounds*\n\n---\n\n### 5. Physics — Dual Nature of Radiation and Matter\n\n**Question:** Light consisting of photons of energy \\(5\\,eV\\) falls on a metal surface having a work function of \\(2\\,eV\\). What is the stopping potential?\n\nA. \\(2\\,V\\)  \nB. \\(3\\,V\\)  \nC. \\(5\\,V\\)  \nD. \\(7\\,V\\)  \n\n**Solution:**\n\nEinstein’s photoelectric equation gives:\n\n\\[\nK_{\\max}=E_{\\text{photon}}-\\phi\n\\]\n\n\\[\nK_{\\max}=5-2=3\\,eV\n\\]\n\nThe stopping potential satisfies:\n\n\\[\neV_s=K_{\\max}\n\\]\n\nSince \\(K_{\\max}=3\\,eV\\),\n\n\\[\nV_s=3\\,V\n\\]\n\n**Answer: B**\n\n**Textbook basis:** NCERT Physics Class 12, Chapter 11 — *Dual Nature of Radiation and Matter*\n\n### Answer Key\n\n| Question | Answer |\n|---|---|\n| 1 | B |\n| 2 | B |\n| 3 | C |\n| 4 | C |\n| 5 | B |')

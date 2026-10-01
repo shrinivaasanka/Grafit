@@ -118,3 +118,13 @@ References:
 	testlogs/QAKnowledgeGraph5.html
 	testlogs/QAKnowledgeGraph6.html
 	testlogs/QAKnowledgeGraph7.html
+
+------------------------------------------------------------------------------------------
+1688. AI Examination coaching - LangChain Graph Retrieval Augmented Generation - GPT-6-Astra + LangChain Graph RAG implementation - Searchable corpus of knowledge graphs  - an AI EduTech usecase that replaces or supplements manual examination coaching of students - Knowledge Graph from Datastax Graph RAG - 1 October 2026
+------------------------------------------------------------------------------------------
+1688.1 course_material/TextBookKnowledgeGraphs/AITextbookKnowledgeGraph.py has been changed to upgrade OpenAI model to gpt-6-astra. 
+1688.2 New function def langchain_graph_rag(concepts=[],query="") implements Graph RAG by (*) installation of Datastax Graph RAG from https://github.com/datastax/graph-rag/tree/main/packages/langchain-graph-retriever by following documentation at https://docs.langchain.com/oss/python/integrations/retrievers/graph_rag (*) importing all necessary paraphernalia from langchain toolkit including InMemoryVectorStore and GraphRetriever that stores and retrieves knowledge graphs in memory (*) taking a list of concepts to be prompted and invoking plain langchain_rag() to get text results which are formatted to LangChain Document() (*) storing the Document objects in InMemoryVectorStore (*) Instantiating GraphRetriever and searching a user defined query on the in-memory vector store of knowledge graphs to return matching results to user.  
+1688.3 Following 3 concepts related to prime numbers are prompted in GPT-6-astra to get documents and are stored as in-memory knowledge graphs. Query "Function" is searched in corpus of knowledge graphs and matches are returned: 
+    langchain_graph_rag(concepts=["Prime Number Theorem","Riemann Hypothesis","Distribution of Primes"],query="Function")
+1688.4 Earlier code has been QA-ed by commandline <VENV>/python3.13 AITextbookKnowledgeGraph.py and logs are written to testlogs/AITextbookKnowledgeGraph.log.1October2026 (two documents from GPT-6-astra on IIT-JEE and NEET questions are stored as KGs and searched for query "theorem" - invocation code commented) and testlogs/AITextbookKnowledgeGraph.log2.1October2026 (3 documents from GPT-6-astra on prime numbers are stored as KGs and searched for query "Function") 
+1688.5 Earlier function implements one more knowledge graph based on LangChain-Datastax Graph RAG installed by "pip install -qU langchain-graph-retriever" in addition to KGGen. 

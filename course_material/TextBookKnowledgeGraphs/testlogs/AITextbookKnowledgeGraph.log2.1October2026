@@ -1,0 +1,137 @@
+## Prime Number Theorem
+
+The **Prime Number Theorem (PNT)** describes how prime numbers are distributed among the positive integers.
+
+Let \(\pi(x)\) denote the number of primes less than or equal to \(x\). Then
+\[
+\boxed{\pi(x)\sim \frac{x}{\ln x}\qquad(x\to\infty)}
+\]
+where \(\ln x\) is the natural logarithm.
+
+Here, \(\sim\) means that the **ratio approaches 1**:
+\[
+\lim_{x\to\infty}\frac{\pi(x)}{x/\ln x}=1.
+\]
+It does **not** mean that the difference approaches zero.
+
+### Intuition
+Near a large number \(x\), roughly **one in every \(\ln x\) integers is prime**. Thus, primes become less frequent as numbers grow.
+
+For example,
+\[
+\pi(10^6)=78{,}498,
+\qquad
+\frac{10^6}{\ln(10^6)}\approx72{,}382.
+\]
+The approximation becomes more accurate in relative terms as \(x\) grows.
+
+### Important consequences
+- **The \(n\)-th prime:** If \(p_n\) is the \(n\)-th prime, then
+  \[
+  \boxed{p_n\sim n\ln n.}
+  \]
+- **Primes in a proportional interval:** For any fixed \(a>1\),
+  \[
+  \pi(ax)-\pi(x)\sim\frac{(a-1)x}{\ln x}.
+  \]
+- **A generally better approximation:**
+  \[
+  \pi(x)\approx\operatorname{Li}(x),
+  \qquad
+  \operatorname{Li}(x)=\int_2^x\frac{dt}{\ln t}.
+  \]
+
+**History:** Hadamard and de la Vallée Poussin independently proved the theorem in **1896**, using properties of the Riemann zeta function.
+The **Riemann Hypothesis** is a famous unsolved conjecture about the Riemann zeta function, closely connected to the distribution of prime numbers.
+
+### The statement
+For a complex number \(s\) with \(\operatorname{Re}(s)>1\), the zeta function is defined by
+\[
+\zeta(s)=\sum_{n=1}^{\infty}\frac{1}{n^s}.
+\]
+It extends by analytic continuation to the rest of the complex plane, except for a pole at \(s=1\).
+
+Its zeros include the **trivial zeros** at \(-2,-4,-6,\ldots\). All other zeros—the **nontrivial zeros**—lie in the strip \(0<\operatorname{Re}(s)<1\).
+
+Proposed by Bernhard Riemann in 1859, the hypothesis states:
+\[
+\boxed{\text{Every nontrivial zero of }\zeta(s)\text{ has real part }\tfrac12.}
+\]
+In other words, they all lie on the **critical line** \(s=\tfrac12+it\).
+
+### Why it matters
+The connection to primes comes from Euler’s product:
+\[
+\zeta(s)=\prod_{p\ \mathrm{prime}}\frac{1}{1-p^{-s}},
+\qquad \operatorname{Re}(s)>1.
+\]
+The locations of the zeros control fluctuations in the distribution of primes. If the hypothesis is true, it gives a very strong bound on the error in estimating how many primes lie below a given number.
+
+### Status
+No accepted proof or disproof is known. Extensive computations have verified many zeros on the critical line, but checking finitely many cannot prove the statement for all zeros. It is one of the Clay Mathematics Institute’s **Millennium Prize Problems**, with a **US$1 million** prize for a qualifying solution.
+
+Would you prefer an intuitive explanation, the connection to prime counting, or a more technical treatment?
+## Distribution of Primes
+
+Prime numbers become less frequent as numbers grow, but their overall distribution follows precise statistical laws.
+
+### 1. Infinitely many primes
+Euclid proved that there are infinitely many primes. Thus, the sequence
+\[
+2,3,5,7,11,13,17,\ldots
+\]
+never ends.
+
+### 2. Prime Number Theorem
+Let \(\pi(x)\) denote the number of primes not exceeding \(x\). The **Prime Number Theorem** states:
+\[
+\boxed{\pi(x)\sim \frac{x}{\ln x}}
+\]
+Here, \(\ln x\) is the natural logarithm, and \(\sim\) means the ratio of the two quantities approaches \(1\) as \(x\to\infty\).
+
+| \(x\) | Actual \(\pi(x)\) | Approximation \(x/\ln x\) |
+|---:|---:|---:|
+| \(100\) | \(25\) | \(21.7\) |
+| \(1{,}000\) | \(168\) | \(144.8\) |
+| \(1{,}000{,}000\) | \(78{,}498\) | \(72{,}382.4\) |
+
+A generally better large-\(x\) estimate is the logarithmic integral:
+\[
+\pi(x)\approx \operatorname{Li}(x)=\int_2^x\frac{dt}{\ln t}.
+\]
+
+### 3. Density and spacing
+- **Local density:** Heuristically, an integer chosen near a large number \(x\) has probability about \(1/\ln x\) of being prime.
+- **Typical average spacing:** Primes near \(x\), averaged over a sufficiently broad range, are roughly \(\ln x\) apart. Individual gaps vary greatly.
+- **The \(n\)th prime:** If \(p_n\) is the \(n\)th prime, then
+  \[
+  \boxed{p_n\sim n\ln n}.
+  \]
+
+### 4. Arbitrarily long gaps
+For any integer \(m\ge2\), the \(m-1\) consecutive integers
+\[
+m!+2,\ m!+3,\ \ldots,\ m!+m
+\]
+are all composite: \(m!+k\) is divisible by \(k\). Therefore, gaps between consecutive primes are unbounded.
+
+### 5. Primes in arithmetic progressions
+**Dirichlet’s theorem:** If \(\gcd(a,d)=1\), then the progression
+\[
+a,\ a+d,\ a+2d,\ldots
+\]
+contains infinitely many primes.
+
+For example, both \(4n+1\) and \(4n+3\) contain infinitely many primes.
+
+**Key takeaway:** Primes are infinite but have density zero:
+\[
+\frac{\pi(x)}{x}\to0.
+\]
+Their individual locations are irregular, while their large-scale frequency is governed by \(1/\ln x\).
+Graph RAG result for query  Function :
+Document(id='doc0', metadata={'_depth': 0, '_similarity_score': np.float64(0.2079817384041277)}, page_content='## Prime Number Theorem\n\nThe **Prime Number Theorem (PNT)** describes how prime numbers are distributed among the positive integers.\n\nLet \\(\\pi(x)\\) denote the number of primes less than or equal to \\(x\\). Then\n\\[\n\\boxed{\\pi(x)\\sim \\frac{x}{\\ln x}\\qquad(x\\to\\infty)}\n\\]\nwhere \\(\\ln x\\) is the natural logarithm.\n\nHere, \\(\\sim\\) means that the **ratio approaches 1**:\n\\[\n\\lim_{x\\to\\infty}\\frac{\\pi(x)}{x/\\ln x}=1.\n\\]\nIt does **not** mean that the difference approaches zero.\n\n### Intuition\nNear a large number \\(x\\), roughly **one in every \\(\\ln x\\) integers is prime**. Thus, primes become less frequent as numbers grow.\n\nFor example,\n\\[\n\\pi(10^6)=78{,}498,\n\\qquad\n\\frac{10^6}{\\ln(10^6)}\\approx72{,}382.\n\\]\nThe approximation becomes more accurate in relative terms as \\(x\\) grows.\n\n### Important consequences\n- **The \\(n\\)-th prime:** If \\(p_n\\) is the \\(n\\)-th prime, then\n  \\[\n  \\boxed{p_n\\sim n\\ln n.}\n  \\]\n- **Primes in a proportional interval:** For any fixed \\(a>1\\),\n  \\[\n  \\pi(ax)-\\pi(x)\\sim\\frac{(a-1)x}{\\ln x}.\n  \\]\n- **A generally better approximation:**\n  \\[\n  \\pi(x)\\approx\\operatorname{Li}(x),\n  \\qquad\n  \\operatorname{Li}(x)=\\int_2^x\\frac{dt}{\\ln t}.\n  \\]\n\n**History:** Hadamard and de la Vallée Poussin independently proved the theorem in **1896**, using properties of the Riemann zeta function.')
+Graph RAG result for query  Function :
+Document(id='doc1', metadata={'_depth': 0, '_similarity_score': np.float64(0.03447802414931312)}, page_content='The **Riemann Hypothesis** is a famous unsolved conjecture about the Riemann zeta function, closely connected to the distribution of prime numbers.\n\n### The statement\nFor a complex number \\(s\\) with \\(\\operatorname{Re}(s)>1\\), the zeta function is defined by\n\\[\n\\zeta(s)=\\sum_{n=1}^{\\infty}\\frac{1}{n^s}.\n\\]\nIt extends by analytic continuation to the rest of the complex plane, except for a pole at \\(s=1\\).\n\nIts zeros include the **trivial zeros** at \\(-2,-4,-6,\\ldots\\). All other zeros—the **nontrivial zeros**—lie in the strip \\(0<\\operatorname{Re}(s)<1\\).\n\nProposed by Bernhard Riemann in 1859, the hypothesis states:\n\\[\n\\boxed{\\text{Every nontrivial zero of }\\zeta(s)\\text{ has real part }\\tfrac12.}\n\\]\nIn other words, they all lie on the **critical line** \\(s=\\tfrac12+it\\).\n\n### Why it matters\nThe connection to primes comes from Euler’s product:\n\\[\n\\zeta(s)=\\prod_{p\\ \\mathrm{prime}}\\frac{1}{1-p^{-s}},\n\\qquad \\operatorname{Re}(s)>1.\n\\]\nThe locations of the zeros control fluctuations in the distribution of primes. If the hypothesis is true, it gives a very strong bound on the error in estimating how many primes lie below a given number.\n\n### Status\nNo accepted proof or disproof is known. Extensive computations have verified many zeros on the critical line, but checking finitely many cannot prove the statement for all zeros. It is one of the Clay Mathematics Institute’s **Millennium Prize Problems**, with a **US$1 million** prize for a qualifying solution.\n\nWould you prefer an intuitive explanation, the connection to prime counting, or a more technical treatment?')
+Graph RAG result for query  Function :
+Document(id='doc2', metadata={'_depth': 0, '_similarity_score': np.float64(-0.107954624433777)}, page_content='## Distribution of Primes\n\nPrime numbers become less frequent as numbers grow, but their overall distribution follows precise statistical laws.\n\n### 1. Infinitely many primes\nEuclid proved that there are infinitely many primes. Thus, the sequence\n\\[\n2,3,5,7,11,13,17,\\ldots\n\\]\nnever ends.\n\n### 2. Prime Number Theorem\nLet \\(\\pi(x)\\) denote the number of primes not exceeding \\(x\\). The **Prime Number Theorem** states:\n\\[\n\\boxed{\\pi(x)\\sim \\frac{x}{\\ln x}}\n\\]\nHere, \\(\\ln x\\) is the natural logarithm, and \\(\\sim\\) means the ratio of the two quantities approaches \\(1\\) as \\(x\\to\\infty\\).\n\n| \\(x\\) | Actual \\(\\pi(x)\\) | Approximation \\(x/\\ln x\\) |\n|---:|---:|---:|\n| \\(100\\) | \\(25\\) | \\(21.7\\) |\n| \\(1{,}000\\) | \\(168\\) | \\(144.8\\) |\n| \\(1{,}000{,}000\\) | \\(78{,}498\\) | \\(72{,}382.4\\) |\n\nA generally better large-\\(x\\) estimate is the logarithmic integral:\n\\[\n\\pi(x)\\approx \\operatorname{Li}(x)=\\int_2^x\\frac{dt}{\\ln t}.\n\\]\n\n### 3. Density and spacing\n- **Local density:** Heuristically, an integer chosen near a large number \\(x\\) has probability about \\(1/\\ln x\\) of being prime.\n- **Typical average spacing:** Primes near \\(x\\), averaged over a sufficiently broad range, are roughly \\(\\ln x\\) apart. Individual gaps vary greatly.\n- **The \\(n\\)th prime:** If \\(p_n\\) is the \\(n\\)th prime, then\n  \\[\n  \\boxed{p_n\\sim n\\ln n}.\n  \\]\n\n### 4. Arbitrarily long gaps\nFor any integer \\(m\\ge2\\), the \\(m-1\\) consecutive integers\n\\[\nm!+2,\\ m!+3,\\ \\ldots,\\ m!+m\n\\]\nare all composite: \\(m!+k\\) is divisible by \\(k\\). Therefore, gaps between consecutive primes are unbounded.\n\n### 5. Primes in arithmetic progressions\n**Dirichlet’s theorem:** If \\(\\gcd(a,d)=1\\), then the progression\n\\[\na,\\ a+d,\\ a+2d,\\ldots\n\\]\ncontains infinitely many primes.\n\nFor example, both \\(4n+1\\) and \\(4n+3\\) contain infinitely many primes.\n\n**Key takeaway:** Primes are infinite but have density zero:\n\\[\n\\frac{\\pi(x)}{x}\\to0.\n\\]\nTheir individual locations are irregular, while their large-scale frequency is governed by \\(1/\\ln x\\).')
