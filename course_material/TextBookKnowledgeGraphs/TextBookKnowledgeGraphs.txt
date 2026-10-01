@@ -128,3 +128,7 @@ References:
     langchain_graph_rag(concepts=["Prime Number Theorem","Riemann Hypothesis","Distribution of Primes"],query="Function")
 1688.4 Earlier code has been QA-ed by commandline <VENV>/python3.13 AITextbookKnowledgeGraph.py and logs are written to testlogs/AITextbookKnowledgeGraph.log.1October2026 (two documents from GPT-6-astra on IIT-JEE and NEET questions are stored as KGs and searched for query "theorem" - invocation code commented) and testlogs/AITextbookKnowledgeGraph.log2.1October2026 (3 documents from GPT-6-astra on prime numbers are stored as KGs and searched for query "Function") 
 1688.5 Earlier function implements one more knowledge graph based on LangChain-Datastax Graph RAG installed by "pip install -qU langchain-graph-retriever" in addition to KGGen. 
+
+References:
+----------
+1688.6 Graph RAG retriever example boilerplate - https://github.com/datastax/graph-rag/blob/main/packages/langchain-graph-retriever/tests/test_graph_retriever.py 
