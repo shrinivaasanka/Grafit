@@ -4,12 +4,11 @@ use std::time::*;
 use rayon::prelude::*;
 use foreach::*;
 use std::collections::HashSet;
-use std::collections::HashMap;
 use std::iter::FromIterator;
 use simple_plot::plot;
 
-static mut factors: Vec<i64> = Vec::new();
-static mut number2factors: Vec<HashSet<i64>> = Vec::new();
+static mut FACTORS: Vec<i64> = Vec::new();
+static mut NUMBER2FACTORS: Vec<HashSet<i64>> = Vec::new();
 
 fn main() {
     let args: Vec<String>=env::args().collect();
@@ -23,7 +22,7 @@ fn main() {
     }
     greatest_common_divisor();
     unsafe {
-        number2factors.clear();
+        NUMBER2FACTORS.clear();
     }
     let number1: i64 = args[5].parse().unwrap();
     let number2: i64 = args[6].parse().unwrap();
@@ -37,45 +36,45 @@ fn main() {
 fn greatest_common_divisor() {
     //println!("------ greatest_common_divisor() of the integer range ------- ");
     unsafe {
-        let mut prev: HashSet<i64> = number2factors[0].clone(); 
+        let mut prev: HashSet<i64> = NUMBER2FACTORS[0].clone(); 
         let mut intersect_sorted;
-        for n in 1..number2factors.len() {
-            let mut next: HashSet<i64> = number2factors[n].clone(); 
-            let mut intersect = prev.intersection(&next);
+        for n in 1..NUMBER2FACTORS.len() {
+            let next: HashSet<i64> = NUMBER2FACTORS[n].clone(); 
+            let intersect = prev.intersection(&next);
             intersect_sorted = intersect.into_iter().collect::<Vec<_>>();
             intersect_sorted.sort();
             //println!("prev: {:#?}",prev);
             //println!("next: {:#?}",next);
             //println!("intersection sorted: {:#?} ", intersect_sorted);
             //println!("Greatest Common Divisor: {:#?} ",intersect_sorted[intersect_sorted.len()-1]);
-            prev = number2factors[n].clone();
+            prev = NUMBER2FACTORS[n].clone();
             //println!("next: {:#?} ",next);
         }
     }
 } 
 
 fn pariter64bits() {
-    let mut len : i64 = 10000;
-    let mut vector = 1 .. len;
-    vector.par_bridge().for_each(|paritem| {
+    let len : i64 = 10000;
+    let vector = 1 .. len;
+    vector.par_bridge().for_each(|_paritem| {
         //println!("item {:#?} :",paritem);
     });
 }
 
 fn factorize_multipleintegers(num_fact:i64,range:i64,rasterization:String,maxfactors:i64) {
-    let mut i = 0;
+    let _i = 0;
     let mut durations: Vec<i128> = Vec::new();
     let mut theoretical: Vec<f64> = Vec::new();
     let constant: f64 = 200.0;
     let k: f64 = 4.0;
     for i in 0..range {
-        let mut systemtimebegin = SystemTime::now();
-        let mut number_to_factorize = num_fact+i;
-        let mut raster = rasterization.clone();
+        let systemtimebegin = SystemTime::now();
+        let number_to_factorize = num_fact+i;
+        let raster = rasterization.clone();
         //println!("Factorization of {number_to_factorize} began in (nanoseconds): {:#?} ",systemtimebegin);
         rasterize_hyperbolic_arc(number_to_factorize,raster,maxfactors);
         unsafe {
-            factors.clear();
+            FACTORS.clear();
         }
         let systemtimeend = SystemTime::now();
         let duration = systemtimeend.duration_since(systemtimebegin).unwrap(); 
@@ -98,18 +97,18 @@ fn factorize_multipleintegers(num_fact:i64,range:i64,rasterization:String,maxfac
 fn rasterize_hyperbolic_arc(num_fact: i64,rasterization: String,maxfactors: i64) -> i64
 {
     let mut y1 = 1..num_fact-1;
-    let mut y2 = 1..num_fact-1;
+    let y2 = 1..num_fact-1;
     if rasterization=="sequential"
     {
         let systemtimebegin = SystemTime::now();
-        y1.foreach(|item,iter| {
-            let mut xtile_start = num_fact/item;
-            let mut xtile_end = num_fact/(item+1);
+        y1.foreach(|item,_iter| {
+            let xtile_start = num_fact/item;
+            let xtile_end = num_fact/(item+1);
             //println!("tile segment {item}: from {xtile_start} to {xtile_end}");
             binary_search(num_fact,xtile_end,item,xtile_start,item,maxfactors);
         });
         let systemtimeend = SystemTime::now();
-        let duration = systemtimeend.duration_since(systemtimebegin).unwrap(); 
+        let _duration = systemtimeend.duration_since(systemtimebegin).unwrap(); 
         //println!("Sequential Rasterization phase of factoring {num_fact} was completed in (nanoseconds): {:#?} ",duration);
         stdout().flush().unwrap();
     }
@@ -117,36 +116,37 @@ fn rasterize_hyperbolic_arc(num_fact: i64,rasterization: String,maxfactors: i64)
     {
         let systemtimebegin = SystemTime::now();
         let numberofbits = num_fact.ilog2();
-        //println!("Size of integer to be factorized (in bits): {numberofbits}");
+        println!("Size of integer to be factorized (in bits): {numberofbits}");
         if numberofbits <= 32 
         {
             y2.into_par_iter().for_each(|paritem| {
-                let mut xtile_start = num_fact/paritem;
-                let mut xtile_end = num_fact/(paritem+1);
+                let xtile_start : f64 = (num_fact/paritem) as f64;
+                let xtile_end : f64 = (num_fact/(paritem+1)) as f64;
                 //println!("tile segment {paritem}: from {xtile_start} to {xtile_end}");
-                binary_search(num_fact,xtile_end,paritem,xtile_start,paritem,maxfactors);
+                binary_search(num_fact,xtile_end as i64,paritem,xtile_start as i64,paritem,maxfactors);
             });
         }
         else
         {
             y2.par_bridge().for_each(|paritem| {
-                let mut xtile_start = num_fact/paritem;
-                let mut xtile_end = num_fact/(paritem+1);
+            //y2.into_par_iter().for_each(|paritem| {
+                let xtile_start : f64 = (num_fact/paritem) as f64;
+                let xtile_end : f64 = (num_fact/(paritem+1)) as f64;
                 //println!("tile segment {paritem}: from {xtile_start} to {xtile_end}");
-                binary_search(num_fact,xtile_end,paritem,xtile_start,paritem,maxfactors);
+                binary_search(num_fact,xtile_end as i64,paritem,xtile_start as i64,paritem,maxfactors);
             });
         }
         let systemtimeend = SystemTime::now();
-        let duration = systemtimeend.duration_since(systemtimebegin).unwrap(); 
+        let _duration = systemtimeend.duration_since(systemtimebegin).unwrap(); 
         //println!("Parallel Rasterization phase of factoring {num_fact} was completed in (nanoseconds): {:#?} ",duration);
         unsafe {
-            let factorsset: HashSet<i64> = HashSet::from_iter(factors.clone());
+            let factorsset: HashSet<i64> = HashSet::from_iter(FACTORS.clone());
             //println!("main():Set of Factors of {num_fact} are {:#?} ",factorsset);
-            println!("main():Set of Factors of {num_fact} are {:#?} ",factors.clone());
-            number2factors.push(factorsset.clone());
+            println!("main():Set of Factors of {num_fact} are {:#?} ",FACTORS.clone());
+            NUMBER2FACTORS.push(factorsset.clone());
         }
         unsafe {
-            factors.clear();
+            FACTORS.clear();
         }
         stdout().flush().unwrap();
     }
@@ -159,15 +159,15 @@ fn binary_search(num_fact:i64,xl:i64,yl:i64,xr:i64,yr:i64,maxfactors:i64)
 {
     //println!("binary seach of rasterized hyperbolic arc bow tilesegment xy = {num_fact}: {xl},{yl},{xr},{yr}");
     let mut xl_clone = xl.clone();
-    let mut yl_clone = yl.clone();
+    let yl_clone = yl.clone();
     let mut xr_clone = xr.clone();
-    let mut yr_clone = yr.clone();
+    let yr_clone = yr.clone();
     //let mut factors = Vec::new();
     while xl_clone <= xr_clone
     {
-        let mut midpoint = (xl_clone + xr_clone) / 2;
+        let midpoint = (xl_clone + xr_clone) / 2;
         //println!("Midpoint = {midpoint}");
-        let mut factorcandidate = midpoint*yl_clone;
+        let factorcandidate = midpoint*yl_clone;
         //println!("Factor candidate point : {factorcandidate}");
         //println!("===============================================================");
         if xl_clone==xr_clone
@@ -180,25 +180,25 @@ fn binary_search(num_fact:i64,xl:i64,yl:i64,xr:i64,yr:i64,maxfactors:i64)
         }
         if factorcandidate==num_fact
         {
-             let systemtimenow = SystemTime::now();
+             let _systemtimenow = SystemTime::now();
              //println!("Factor point located : {midpoint} , {yl_clone} at {:#?} nanoseconds",systemtimenow);
              unsafe {
-		if factors.len() < maxfactors.try_into().unwrap()
+		if FACTORS.len() < maxfactors.try_into().unwrap()
 		{
-                	factors.push(factorcandidate);
+                	FACTORS.push(factorcandidate);
                 	//println!("2.Factors of {num_fact} are {:#?} ",factors);
 		}
              }
         }
         if xl_clone*yl_clone==num_fact
         {
-             let systemtimenow = SystemTime::now();
+             let _systemtimenow = SystemTime::now();
              //println!("Factor point located : {xl_clone} , {yl_clone} at {:#?} nanoseconds",systemtimenow);
              unsafe {
-		if factors.len() < maxfactors.try_into().unwrap()
+		if FACTORS.len() < maxfactors.try_into().unwrap()
 		{
-                	factors.push(xl_clone);
-                	factors.push(yl_clone);
+                	FACTORS.push(xl_clone);
+                	FACTORS.push(yl_clone);
                 	//println!("3.Factors of {num_fact} are {:#?} ",factors);
 		}
              }
@@ -206,13 +206,13 @@ fn binary_search(num_fact:i64,xl:i64,yl:i64,xr:i64,yr:i64,maxfactors:i64)
         if xr_clone*yr_clone==num_fact
         {
 
-             let systemtimenow = SystemTime::now();
+             let _systemtimenow = SystemTime::now();
              //println!("Factor point located : {xr_clone} , {yr_clone} at {:#?} nanoseconds",systemtimenow);
              unsafe {
-		if factors.len() < maxfactors.try_into().unwrap()
+		if FACTORS.len() < maxfactors.try_into().unwrap()
 		{
-                	factors.push(xr_clone);
-                	factors.push(yr_clone);
+                	FACTORS.push(xr_clone);
+                	FACTORS.push(yr_clone);
                 	//println!("4.Factors of {num_fact} are {:#?} ",factors);
 		}
              }
