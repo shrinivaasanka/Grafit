@@ -657,6 +657,8 @@ Code fragment code/Plane.py implements a function compute_plane_equation() that 
 	Dataset2 = set of all userid(s) buying product Y 
 	Dataset3 = set of all userid(s) buying product Z 
 	Problem: Find all userid(s) (1) buying X,Y or Z (X | Y | Z), (2) buying X,Y and Z (X & Y & Z), (3) buying X,Z and not Y (X & ~Y & Z), (4) buying Y,Z and not X (~X & Y & Z), (5) not buying X,Y and Z (~X & ~Y & ~Z) - Disjunctive or Conjunctive clauses for buyer behaviours can be constructed as shown in parentheses. 
+
 References:
 -----------
 1692.5 RoaringBitmap implementations in various languages - https://github.com/RoaringBitmap
+1692.6 Roaring Bitmap - paper - https://arxiv.org/pdf/1402.6407v10
