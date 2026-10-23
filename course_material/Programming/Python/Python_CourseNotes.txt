@@ -652,13 +652,22 @@ Code fragment code/Plane.py implements a function compute_plane_equation() that 
 1692.3 Logs at code/logs/RoaringBitmapStore.log.21October2026 demonstrate the 3CNF on following 9 roaring bitsets:
 	#datasets is a 3CNF conjunctive formula with 3 bitmaps per disjunctive clause 
 	datasets=[[dataset1,~dataset2,dataset3],[~dataset4,dataset5,dataset6],[dataset7,dataset8,~dataset9]]
-1692.4 A Marketing analytics-Recommender systems usecase example for roaring bitmaps: 
+1692.4 A Marketing analytics usecase example for roaring bitmaps: 
 	Dataset1 = set of all userid(s) buying product X 
 	Dataset2 = set of all userid(s) buying product Y 
 	Dataset3 = set of all userid(s) buying product Z 
 	Problem: Find all userid(s) (1) buying X,Y or Z (X | Y | Z), (2) buying X,Y and Z (X & Y & Z), (3) buying X,Z and not Y (X & ~Y & Z), (4) buying Y,Z and not X (~X & Y & Z), (5) not buying X,Y and Z (~X & ~Y & ~Z) - Disjunctive or Conjunctive clauses for buyer behaviours can be constructed as shown in parentheses. 
+1692.5 A Recommendation Systems usecase example for roaring bitmaps - movies or videos recommendations to users (e.g OTT platforms):
+	Dataset1 = set of all userid(s) watching movie or video X (Genre: Action) 
+	Dataset2 = set of all userid(s) watching movie or video Y (Genre: Comedy) 
+	Dataset3 = set of all userid(s) watching movie or video Z (Genre: Romance) 
+	Dataset4 = set of all userid(s) watching movie or video W (Genre: Horror) 
+	Dataset5 = set of all userid(s) watching movie or video Q (Genre: Thriller) 
+	Dataset6 = set of all userid(s) watching movie or video S (Genre: News & Current affairs) 
+	Dataset7 = set of all userid(s) watching movie or video T (Genre: Music) 
+	Problem: Find all userid(s) (1) watching X,Y and not Z (X & Y & ~Z) (2) watching X,Y or Z (X | Y | Z) (3) watching Z,W and Q (Z & W & Q) (4) watching W,Q and not S (W & Q & ~S) (5) watching neither Z,W,Q (~Z & ~W & ~Q) - Each of these clauses can be written as their conjunctive or disjunctive duals by De Morgan laws (https://en.wikipedia.org/wiki/De_Morgan%27s_laws). Earlier clauses indirectly cluster the users by their viewership behaviour and similar movies might be recommended to all members of same cluster in accordance with genre preferences in earlier clauses. 
 
 References:
 -----------
-1692.5 RoaringBitmap implementations in various languages - https://github.com/RoaringBitmap
-1692.6 Roaring Bitmap - paper - https://arxiv.org/pdf/1402.6407v10
+1692.6 RoaringBitmap implementations in various languages - https://github.com/RoaringBitmap
+1692.7 Roaring Bitmap - paper - https://arxiv.org/pdf/1402.6407v10
