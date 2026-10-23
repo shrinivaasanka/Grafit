@@ -1,0 +1,49 @@
+size of mphf:20
+Before update:mphf contains:-1
+Before update:mphf contains:-1
+Before update:mphf contains:-1
+Before update:mphf contains:-1
+Before update:mphf contains:-1
+Before update:mphf contains:-1
+Before update:mphf contains:-1
+Before update:mphf contains:-1
+Before update:mphf contains:-1
+Before update:mphf contains:-1
+Before update:mphf contains:-1
+Before update:mphf contains:-1
+Before update:mphf contains:-1
+Before update:mphf contains:-1
+Before update:mphf contains:-1
+Before update:mphf contains:-1
+Before update:mphf contains:-1
+Before update:mphf contains:-1
+Before update:mphf contains:-1
+Before update:mphf contains:-1
+After update:mphf contains:0
+After update:mphf contains:1
+After update:mphf contains:2
+After update:mphf contains:3
+After update:mphf contains:4
+After update:mphf contains:5
+After update:mphf contains:6
+After update:mphf contains:7
+After update:mphf contains:8
+After update:mphf contains:9
+After update:mphf contains:10
+After update:mphf contains:11
+After update:mphf contains:12
+After update:mphf contains:13
+After update:mphf contains:14
+After update:mphf contains:15
+After update:mphf contains:16
+After update:mphf contains:17
+After update:mphf contains:18
+After update:mphf contains:19
+mphf[3] == 3
+Element 3 exists in mphf
+mphf[25] == 0
+Element 25 does not exist in mphf
+mphf[105] == 0
+Element 105 does not exist in mphf
+mphf[15] == 15
+Element 15 exists in mphf

@@ -825,3 +825,28 @@ References:
 2.LeetCode Trie Prefix Tree description - https://leetcode.com/problems/implement-trie-prefix-tree/description/
 3.Patricia Trees or Radix Trees - Trie for lexicon - https://en.wikipedia.org/wiki/Radix_tree , https://en.wikipedia.org/wiki/Radix_tree#/media/File:An_example_of_how_to_find_a_string_in_a_Patricia_trie.png
 4.Radix Trees in Linux kernel - https://lwn.net/Articles/175432/
+
+-----------------------------------------------------------------------------------------
+(ALGORITHM) Minimal Perfect Hash Functions - 23 OCtober 2026
+-----------------------------------------------------------------------------------------
+Minimal Perfect Hash Functions pigeonhole m keys to n slots (m=n) in a hashtable. Code example code/minimalperfecthash.cpp implements a minimal perfect hash function for proof of existence of Minimal Perfect Hash Functions from book - Information Retrieval - [William Frakes-Ricardo Baeza Yates] - page 305. Logs code/logs/minimalperfecthash.log.23October2026 show how the hash function is populated. Earlier code fragment uses std:array which is typesafe container compared to plain C-style arrays. It populates an std:array of size 20 with 20 unsorted integers in range 0 to 19 without collisions. Probability of perfectly hashing n strings to m slots without collisions is derived as:
+	Probability of First collision-free insertion: m/m = 1
+	Probability of Second collision-free insertion (excluding one slot occupied): 1 - 1/m = (m-1)/m 
+	Probability of Third collision-free insertion(excluding two slots occupied):  1 - 2/m = (m-2)/m
+	Probability of Fourth collision-free insertion(excluding three slots occupied):  1 - 3/m = (m-3)/m
+	...
+	Probability of n-th collision-free insertion(excluding n-1 slots occupied):  1 - (n-1)/m = (m-n+1)/m
+	=> Probability of collision-free perfect hash function (product probability of above independent events) = [m(m-1)(m-2) ... (m-n+1)]/m^n 
+
+Earlier code is compiled in g++-14 and run by following commandlines:
+g++-14 -g minimalperfecthash.cpp -o minimalperfecthash
+./minimalperfecthash 2>&1 > logs/minimalperfecthash.log.23October2026
+
+References:
+----------
+1.GNU gperf - GNU Perfect Hash Function Generator - https://www.gnu.org/software/gperf/ - Given a list of strings outputs a perfect hash function 
+2.The Art of Computer Programming - Volume 3 - Sorting and Searching - [Don Knuth] - Chapter 6.4 - Probability of inserting n=31 common English words to m=41 slots is 9.3 * 10^-8 by earlier derivation or 10.7 million random trials (Inverse of probability=Expected value of random variable) are required to find a perfect hash function even for storing 31 words. Probability of minimum perfect hash function can be derived by setting m=n in earlier expression which is n!/n^n which is always non-zero though it tends to 0 asymptotically, proving its existence. 
+3. Modern Minimal Perfect Hashing - https://arxiv.org/html/2506.06536v3
+4. Perfect Hashing - https://staff.itee.uq.edu.au/havas/chm.pdf
+5. GNU perf documentation - https://www.gnu.org/software/gperf/manual/gperf.html
+6. Modern Bloom Filter-based Minimal Perfect Hash Function generator - BBHash - https://github.com/rizkg/BBHash
