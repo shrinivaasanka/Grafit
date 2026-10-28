@@ -1,0 +1,20 @@
+datafit <- function(modelfn,filename,initialvalues,degree,xlabel,ylabel)
+{
+	dataset <- read.table(filename, header=TRUE)
+	x <- 1:length(dataset[[1]])
+	y <- as.numeric(dataset[[2]])
+	dataframe <- data.frame(x,y)
+	print(dataframe$x)
+	print(dataframe$y)
+	print("============ Linear Model (LM) ======")
+	lmmodel <- lm(y=poly(x,degree,raw=TRUE),data = dataframe)
+	print(summary(lmmodel))
+	print("============ Non Linear Least Squares (NLS) ======")
+	nlsmodel <- nls(modelfn,data = dataframe, start=initialvalues)
+	print(summary(nlsmodel))
+	plot(dataframe$x,rev(dataframe$y),xlab=xlabel,ylab=ylabel)
+	lines(dataframe$x,predict(lmmodel,x=data.frame(x)),col="red")
+	lines(dataframe$x,predict(nlsmodel,x=data.frame(x)),col="blue")
+}
+
+datafit(y ~ a*sin(x)+b*cos(x) , "sensex_historical_data.txt",list(a=9,b=7),5,"Trading day","S&P BSE Sensex")

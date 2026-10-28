@@ -215,3 +215,15 @@ related to 487,572,770,831,1150,1231,1235 and all sections on People Analytics, 
 References:
 ----------
 1642.5 Incorporating global dynamics to improve the accuracy of disease models: Example of a COVID-19 SIR model - https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0265815 - extended SIR model differential equations for COVID-19 - ".... (1) dS/dt(t)=−βS(t)*I(t)+f(t) (2) dI/dt(t)=βS(t)*I(t)−γI(t)+g(t) (3) dR/dt(t)=γI(t)+h(t) ....."
+
+----------------------------------------------------------------------
+1693. (THEORY and FEATURE) Multipurpose R script to fit arbitrary dataset to a function by Non-Linear Least Squares(NLS) and to a polynomial by Linear model (LM) poly() - 28 October 2026 - implemented for BSE Sensex (Bhav) historic dataset for the past 1 year sampled at 1 month intervals - related to section 1557 and all sections on Stock market analytics and mining of massive datasets
+----------------------------------------------------------------------
+1693.1 BSE S&P sensex indices for the past 1 year have been downloaded  to code/sensex_historical_data.txt
+1693.2 New R script code/FitData.R implements a function datafit <- function(modelfn,filename,initialvalues,degree,xlabel,ylabel) that (*) reads code/sensex_historical_data.txt and fits the dataset from it to (*) lm() Linear Model Polynomial of degree argument (*) nls() Non-Linear Least Squares with initialvalues and modelfn arguments (*) plots the graphics to code/FitData_Rplots.pdf 
+1693.3 Logs code/testlogs/FitData.log.28October2026 show the LM polynomial and NLS fits along with model summary and R-squared statistics.
+1693.4 Earlier stock market dataset is fit to an example sinusoid function as below with initial values of a and b for NLS and degree 5 for LM: datafit(y ~ a*sin(x)+b*cos(x) , "sensex_historical_data.txt",list(a=9,b=7),5,"Trading day","S&P BSE Sensex")
+
+References:
+----------
+1693.5 Non-Linear Least Squares in R - https://journal.r-project.org/articles/RJ-2023-091/

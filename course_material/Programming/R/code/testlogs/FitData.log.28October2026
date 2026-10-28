@@ -1,0 +1,37 @@
+ [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
+ [1] 73253.44 73484.38 72990.04 72441.15 73120.00 74800.00 76200.00 77800.00
+ [9] 79500.00 81200.00 82900.00 84500.00 85100.00 83400.00 84800.00
+[1] "============ Linear Model (LM) ======"
+
+Call:
+lm(data = dataframe, y = poly(x, degree, raw = TRUE))
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-2.55541 -0.89803  0.01409  1.12542  1.62359 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -6.013e+01  5.788e+00  -10.39 1.15e-07 ***
+y            8.694e-04  7.372e-05   11.79 2.57e-08 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 1.357 on 13 degrees of freedom
+Multiple R-squared:  0.9145,	Adjusted R-squared:  0.9079 
+F-statistic: 139.1 on 1 and 13 DF,  p-value: 2.574e-08
+
+[1] "============ Non Linear Least Squares (NLS) ======"
+
+Formula: y ~ a * sin(x) + b * cos(x)
+
+Parameters:
+  Estimate Std. Error t value Pr(>|t|)
+a    19516      29567   0.660    0.521
+b    -2025      31064  -0.065    0.949
+
+Residual standard error: 82940 on 13 degrees of freedom
+
+Number of iterations to convergence: 1 
+Achieved convergence tolerance: 8.43e-09
+
