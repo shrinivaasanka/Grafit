@@ -814,7 +814,8 @@ References:
 1. C++ 2023 features - https://cppreference.com/cpp/23 , https://cppreference.com/cpp/language/function#Explicit_object_parameter , https://cppreference.com/cpp/language/operators#Array_subscript_operator 
 
 ----------------------------------------------------------------------------------------------
-(ALGORITHM) Trie Prefix Tree implementation in C++ - 18 September 2026
+1694. (THEORY and FEATURE) Trie Prefix Tree implementation in C++ - 18 September 2026 - related to
+all sections on sorting and searching, unsorted search, hashing
 ----------------------------------------------------------------------------------------------
 Code example code/triesort.cpp implements a function insert_into_trie() that grows a trie prefix
 tree of binary digit nodes and inserts a new integer as binary string of bits into trie if not present by traversing 0 and 1 subtrees top-down and allocating a new bit node slot. This implementation is generic and can be generalized to arbitrary strings on unicode. Indirectly Trie solves sorting in O(1) time because binary strings inserted into Trie are implicitly sorted from left-to-right or right-to-left depending on labelling of left and right subtrees by bits "0" or "1". Crucial aspects are use of bit shift and logical and operators, vector to store a mapping of integer bits and traversal from root to node in Trie. Above code fragment is complied by g++-9 -g triesort.cpp -o triesort and logs code/logs/triesort.log.18September2026 show the Trie binary nodes growth for list of 5 integers 2,3,4,5,7.
@@ -827,7 +828,8 @@ References:
 4.Radix Trees in Linux kernel - https://lwn.net/Articles/175432/
 
 -----------------------------------------------------------------------------------------
-(ALGORITHM) Minimal Perfect Hash Functions - 23 OCtober 2026
+1695. (THEORY and FEATURE) Minimal Perfect Hash Functions - 23 OCtober 2026 - related to all sections on
+sorting and searching, unsorted search, perfect hashing
 -----------------------------------------------------------------------------------------
 Minimal Perfect Hash Functions pigeonhole m keys to n slots (m=n) in a hashtable. Code example code/minimalperfecthash.cpp implements a minimal perfect hash function for proof of existence of Minimal Perfect Hash Functions from book - Information Retrieval - [William Frakes-Ricardo Baeza Yates] - page 305. Logs code/logs/minimalperfecthash.log.23October2026 show how the hash function is populated. Earlier code fragment uses std:array which is typesafe container compared to plain C-style arrays. It populates an std:array of size 20 with 20 unsorted integers in range 0 to 19 without collisions. Though the theoretical sorting lower bound is NlogN, minimal perfect hashing over unsorted integers in range 0 to N onto N slots is able to sort in O(N) time - resulting hashtable is implicitly sorted from 0 to N (parallel can be drawn between TrieSort implementation earlier) - as a special case requiring O(1) update time per element. Probability of perfectly hashing n strings to m slots without collisions is derived as:
 	Probability of First collision-free insertion: m/m = 1
