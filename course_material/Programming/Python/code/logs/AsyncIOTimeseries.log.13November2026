@@ -1,0 +1,22 @@
+Template(strings=('loop1 count at ', ' ... random partition: ', ' with largest part ', ' '), interpolations=(Interpolation(9, 'x', None, ''), Interpolation([1, 1, 7], 'randompartition', None, ''), Interpolation([7], 'randompartition[-1:]', None, '')))
+loop2 count at 10 ... random partition: [1, 3, 3, 3] with largest part [3] 
+Template(strings=('loop1 count at ', ' ... random partition: ', ' with largest part ', ' '), interpolations=(Interpolation(9, 'x', None, ''), Interpolation([9], 'randompartition', None, ''), Interpolation([9], 'randompartition[-1:]', None, '')))
+Template(strings=('loop1 count at ', ' ... random partition: ', ' with largest part ', ' '), interpolations=(Interpolation(9, 'x', None, ''), Interpolation([1, 8], 'randompartition', None, ''), Interpolation([8], 'randompartition[-1:]', None, '')))
+Template(strings=('loop1 count at ', ' ... random partition: ', ' with largest part ', ' '), interpolations=(Interpolation(8, 'x', None, ''), Interpolation([1, 1, 6], 'randompartition', None, ''), Interpolation([6], 'randompartition[-1:]', None, '')))
+loop2 count at 10 ... random partition: [10] with largest part [10] 
+loop2 count at 8 ... random partition: [1, 1, 1, 1, 2, 2] with largest part [2] 
+loop2 count at 9 ... random partition: [1, 3, 5] with largest part [5] 
+loop2 count at 10 ... random partition: [1, 9] with largest part [9] 
+Template(strings=('loop1 count at ', ' ... random partition: ', ' with largest part ', ' '), interpolations=(Interpolation(7, 'x', None, ''), Interpolation([1, 1, 1, 1, 1, 1, 1], 'randompartition', None, ''), Interpolation([1], 'randompartition[-1:]', None, '')))
+Template(strings=('loop1 count at ', ' ... random partition: ', ' with largest part ', ' '), interpolations=(Interpolation(9, 'x', None, ''), Interpolation([3, 3, 3], 'randompartition', None, ''), Interpolation([3], 'randompartition[-1:]', None, '')))
+Template(strings=('loop1 count at ', ' ... random partition: ', ' with largest part ', ' '), interpolations=(Interpolation(8, 'x', None, ''), Interpolation([8], 'randompartition', None, ''), Interpolation([8], 'randompartition[-1:]', None, '')))
+Template(strings=('loop1 count at ', ' ... random partition: ', ' with largest part ', ' '), interpolations=(Interpolation(7, 'x', None, ''), Interpolation([1, 1, 1, 4], 'randompartition', None, ''), Interpolation([4], 'randompartition[-1:]', None, '')))
+Template(strings=('loop1 count at ', ' ... random partition: ', ' with largest part ', ' '), interpolations=(Interpolation(6, 'x', None, ''), Interpolation([2, 2, 2], 'randompartition', None, ''), Interpolation([2], 'randompartition[-1:]', None, '')))
+Template(strings=('loop1 count at ', ' ... random partition: ', ' with largest part ', ' '), interpolations=(Interpolation(5, 'x', None, ''), Interpolation([1, 1, 1, 1, 1], 'randompartition', None, ''), Interpolation([1], 'randompartition[-1:]', None, '')))
+Template(strings=('loop1 count at ', ' ... random partition: ', ' with largest part ', ' '), interpolations=(Interpolation(4, 'x', None, ''), Interpolation([1, 3], 'randompartition', None, ''), Interpolation([3], 'randompartition[-1:]', None, '')))
+Template(strings=('loop1 count at ', ' ... random partition: ', ' with largest part ', ' '), interpolations=(Interpolation(3, 'x', None, ''), Interpolation([1, 1, 1], 'randompartition', None, ''), Interpolation([1], 'randompartition[-1:]', None, '')))
+Template(strings=('loop1 count at ', ' ... random partition: ', ' with largest part ', ' '), interpolations=(Interpolation(2, 'x', None, ''), Interpolation([2], 'randompartition', None, ''), Interpolation([2], 'randompartition[-1:]', None, '')))
+Template(strings=('loop1 count at ', ' ... random partition: ', ' with largest part ', ' '), interpolations=(Interpolation(1, 'x', None, ''), Interpolation([1], 'randompartition', None, ''), Interpolation([1], 'randompartition[-1:]', None, '')))
+Template(strings=('loop1 count at ', ' ... random partition: ', ' with largest part ', ' '), interpolations=(Interpolation(0, 'x', None, ''), Interpolation([1], 'randompartition', None, ''), Interpolation([1], 'randompartition[-1:]', None, '')))
+Timeseries: [9, 10, 9, 10, 9, 8, 7, 8, 9, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+Constituency Vote Partitions: [[1, 1, 7], [1, 3, 3, 3], [9], [10], [1, 8], [1, 1, 6], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 2, 2], [1, 3, 5], [1, 9], [3, 3, 3], [8], [1, 1, 1, 4], [2, 2, 2], [1, 1, 1, 1, 1], [1, 3], [1, 1, 1], [2], [1]]

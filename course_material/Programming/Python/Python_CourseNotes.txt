@@ -671,3 +671,8 @@ References:
 -----------
 1692.6 RoaringBitmap implementations in various languages - https://github.com/RoaringBitmap
 1692.7 Roaring Bitmap - paper - https://arxiv.org/pdf/1402.6407v10
+
+-----------------------------------------------------------------------------------------
+(CODE EXAMPLE) Template Strings in Python 3.14, Simulation of a random timeseries by Python asynchronous I/O task groups, Voting patterns as random integer partitions - 13 November 2026
+----------------------------------------------------------------------------------------- 
+Contrived example code fragment code/TemplateStrings.py implements an asynchronous I/O Python code that invokes 2 loop functions loop1() and loop2() within a task group which respectively decrement and increment a global counter as async tasks simulating a randomly fluctuating timeseries (e.g stock quote timeseries which fluctuate due to bear-bull markets). Both loops also compute random integer partition (e.g a votes partition in a hypothetical pluralistic majority voting) for the present counter value and sort them. These values are printed by (*) formatted string with f prefix and (*) template strings with t prefix. Logs code/logs/TemplateStrings.log.13November2026 demonstrate the above.
